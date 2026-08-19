@@ -1,0 +1,23 @@
+version: 2
+updates:
+  # Gradle dependencies (root build.gradle.kts, app/build.gradle.kts) and the
+  # Gradle wrapper version in gradle/wrapper/gradle-wrapper.properties — both
+  # are handled by the "gradle" ecosystem scanning from the repo root.
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # GitHub Actions workflow dependencies (actions/checkout, setup-node, etc. pinned in
+  # .github/workflows/*.yml).
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # npm dependencies in package.json — semantic-release and its plugins, used only for
+  # release tooling (see AGENTS.md), not shipped in the app.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"

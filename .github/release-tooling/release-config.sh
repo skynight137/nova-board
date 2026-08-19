@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+release_tooling_android_module() {
+  local module="${ANDROID_MODULE:-app}"
+
+  if [[ ! "${module}" =~ ^[A-Za-z0-9_.-]+$ ]]; then
+    echo "ERROR: ANDROID_MODULE must be a simple Gradle module directory name" >&2
+    return 1
+  fi
+
+  printf '%s\n' "${module}"
+}
+
+release_tooling_release_json() {
+  local path="${RELEASE_JSON:-app-release.json}"
+  local segment
+  local segments
+
+  if [[ ! "${path}" =~ ^[A-Za-z0-9._/-]+$ || "${path}" == /* || "${path}" == *"//"* ]]; then
+    echo "ERROR: RELEASE_JSON must be a repository-relative file path" >&2
+    return 1
+  fi
+
+  IFS='/' read -r -a segments <<<"${path}"
+  for segment in "${segments[@]}"; do
+    if [[ "${segment}" == "." || "${segment}" == ".." || -z "${segment}" ]]; then
+      echo "ERROR: RELEASE_JSON must not contain empty or traversal path segments" >&2
+      return 1
+    fi
+  done
+
+  printf '%s\n' "${path}"
+}
+
+release_tooling_root_project_name() {
+  local settings_file="${1:-settings.gradle.kts}"
+  local project_name
+
+  if [[ ! -f "${settings_file}" ]]; then
+    echo "ERROR: settings file not found: ${settings_file}" >&2
+    return 1
+  fi
+
+  project_name="$(
+    sed -nE \
+      's/^[[:space:]]*rootProject\.name[[:space:]]*=[[:space:]]*"([^"]+)"[[:space:]]*(\/\/.*)?$/\1/p' \
+      "${settings_file}" |
+      head -1
+  )"
+
+  if [[ -z "${project_name}" ]]; then
+    echo "ERROR: Could not determine root project name from ${settings_file}" >&2
+    return 1
+  fi
+
+  if [[ ! "${project_name}" =~ ^[A-Za-z0-9][A-Za-z0-9\ ._-]*$ ]]; then
+    echo "ERROR: rootProject.name contains unsupported APK filename characters" >&2
+    return 1
+  fi
+
+  printf '%s\n' "${project_name}"
+}
+
+release_tooling_version_file() {
+  local module
+  module="$(release_tooling_android_module)" || return 1
+  printf '%s/gradle.properties\n' "${module}"
+}
+
+release_tooling_release_dir() {
+  local module
+  module="$(release_tooling_android_module)" || return 1
+  printf '%s/build/outputs/apk/release\n' "${module}"
+}
+
+release_tooling_keystore_path() {
+  local module
+  module="$(release_tooling_android_module)" || return 1
+  printf '%s/keystore.jks\n' "${module}"
+}
