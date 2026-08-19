@@ -20,19 +20,19 @@
             android:paddingStart="8dp"
             android:paddingEnd="8dp">
 
-            <ImageButton android:id="@+id/btnToggleStrip" style="@style/NovaBoard.ToolIcon"
+            <ImageButton android:id="@+id/btnToggleStrip" style="@style/NovaBoardToolIcon"
                 android:src="@drawable/ic_chevron_down" android:contentDescription="@string/cd_tools" />
-            <ImageButton android:id="@+id/btnClipboard" style="@style/NovaBoard.ToolIcon"
+            <ImageButton android:id="@+id/btnClipboard" style="@style/NovaBoardToolIcon"
                 android:src="@drawable/ic_clipboard" android:contentDescription="@string/cd_clipboard" />
-            <ImageButton android:id="@+id/btnHotkeys" style="@style/NovaBoard.ToolIcon"
+            <ImageButton android:id="@+id/btnHotkeys" style="@style/NovaBoardToolIcon"
                 android:src="@drawable/ic_hotkeys" android:contentDescription="@string/cd_hotkeys" />
-            <ImageButton android:id="@+id/btnTranslate" style="@style/NovaBoard.ToolIcon"
+            <ImageButton android:id="@+id/btnTranslate" style="@style/NovaBoardToolIcon"
                 android:src="@drawable/ic_translate" android:contentDescription="@string/cd_tools" />
-            <ImageButton android:id="@+id/btnVoice" style="@style/NovaBoard.ToolIcon"
+            <ImageButton android:id="@+id/btnVoice" style="@style/NovaBoardToolIcon"
                 android:src="@drawable/ic_mic" android:contentDescription="@string/cd_voice" />
-            <ImageButton android:id="@+id/btnSearch" style="@style/NovaBoard.ToolIcon"
+            <ImageButton android:id="@+id/btnSearch" style="@style/NovaBoardToolIcon"
                 android:src="@drawable/ic_search" android:contentDescription="@string/cd_tools" />
-            <ImageButton android:id="@+id/btnMore" style="@style/NovaBoard.ToolIcon"
+            <ImageButton android:id="@+id/btnMore" style="@style/NovaBoardToolIcon"
                 android:src="@drawable/ic_more" android:contentDescription="@string/cd_tools" />
         </LinearLayout>
 
@@ -43,13 +43,13 @@
             android:orientation="horizontal"
             android:visibility="gone">
 
-            <ImageButton android:id="@+id/btnToggleStripFromSuggestions" style="@style/NovaBoard.ToolIcon"
+            <ImageButton android:id="@+id/btnToggleStripFromSuggestions" style="@style/NovaBoardToolIcon"
                 android:layout_width="40dp"
                 android:src="@drawable/ic_chevron_down" android:contentDescription="@string/cd_tools" />
 
-            <TextView android:id="@+id/suggestion1" style="@style/NovaBoard.Suggestion" />
-            <TextView android:id="@+id/suggestion2" style="@style/NovaBoard.Suggestion.Highlighted" />
-            <TextView android:id="@+id/suggestion3" style="@style/NovaBoard.Suggestion" />
+            <TextView android:id="@+id/suggestion1" style="@style/NovaBoardSuggestion" />
+            <TextView android:id="@+id/suggestion2" style="@style/NovaBoardSuggestionHighlighted" />
+            <TextView android:id="@+id/suggestion3" style="@style/NovaBoardSuggestion" />
         </LinearLayout>
     </FrameLayout>
 
@@ -85,10 +85,10 @@
         android:orientation="horizontal"
         android:gravity="center">
 
-        <ImageButton android:id="@+id/btnCursorLeft" style="@style/NovaBoard.CursorArrow" android:src="@drawable/ic_arrow_left" />
-        <ImageButton android:id="@+id/btnCursorUp" style="@style/NovaBoard.CursorArrow" android:src="@drawable/ic_arrow_up" />
-        <ImageButton android:id="@+id/btnCursorDown" style="@style/NovaBoard.CursorArrow" android:src="@drawable/ic_arrow_down" />
-        <ImageButton android:id="@+id/btnCursorRight" style="@style/NovaBoard.CursorArrow" android:src="@drawable/ic_arrow_right" />
+        <ImageButton android:id="@+id/btnCursorLeft" style="@style/NovaBoardCursorArrow" android:src="@drawable/ic_arrow_left" />
+        <ImageButton android:id="@+id/btnCursorUp" style="@style/NovaBoardCursorArrow" android:src="@drawable/ic_arrow_up" />
+        <ImageButton android:id="@+id/btnCursorDown" style="@style/NovaBoardCursorArrow" android:src="@drawable/ic_arrow_down" />
+        <ImageButton android:id="@+id/btnCursorRight" style="@style/NovaBoardCursorArrow" android:src="@drawable/ic_arrow_right" />
     </LinearLayout>
 
 </LinearLayout>

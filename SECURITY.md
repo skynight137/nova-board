@@ -17,7 +17,7 @@ reporting an issue when possible.
 ## Reporting a vulnerability
 
 Please report security vulnerabilities privately through
-[GitHub's private vulnerability reporting](https://github.com/skynight137/aurora-eq/security/advisories/new).
+[GitHub's private vulnerability reporting](https://github.com/skynight137/nova-board/security/advisories/new).
 Do not open a public issue, pull request, or discussion for an undisclosed
 vulnerability.
 
@@ -56,7 +56,6 @@ without authorization.
 
 ## Local data security boundary
 
-Aurora EQ stores audio-stage configuration and presets locally on the device.
-JSON exports are intentionally user-selected plaintext backups because they
-support recovery and portability. Treat exported files as sensitive listening
-configuration and do not attach them to public bug reports.
+NovaBoard stores keyboard preferences and clipboard history locally on the
+device. Clipboard content is sensitive user data; do not attach it to public
+bug reports.

@@ -4,10 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import android.view.inputmethod.InputMethodManager
-import androidx.appcompat.app.AppCompatActivity
 import android.widget.Button
 import android.widget.RadioButton
 import android.widget.RadioGroup
+import androidx.appcompat.app.AppCompatActivity
 import com.novaboard.ime.R
 import com.novaboard.ime.theme.ThemeManager
 import com.novaboard.ime.theme.ThemeMode
@@ -34,11 +34,12 @@ class MainActivity : AppCompatActivity() {
             ThemeMode.DARK -> findViewById<RadioButton>(R.id.radioDark).isChecked = true
         }
         group.setOnCheckedChangeListener { _, checkedId ->
-            val mode = when (checkedId) {
-                R.id.radioLight -> ThemeMode.LIGHT
-                R.id.radioDark -> ThemeMode.DARK
-                else -> ThemeMode.SYSTEM
-            }
+            val mode =
+                when (checkedId) {
+                    R.id.radioLight -> ThemeMode.LIGHT
+                    R.id.radioDark -> ThemeMode.DARK
+                    else -> ThemeMode.SYSTEM
+                }
             ThemeManager.set(this, mode)
             recreate()
         }

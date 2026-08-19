@@ -13,7 +13,7 @@ import com.novaboard.ime.R
 class ClipboardAdapter(
     private var items: List<ClipboardItem>,
     private val onClick: (ClipboardItem) -> Unit,
-    private val onTogglePin: (ClipboardItem) -> Unit
+    private val onTogglePin: (ClipboardItem) -> Unit,
 ) : RecyclerView.Adapter<ClipboardAdapter.VH>() {
 
     class VH(view: View) : RecyclerView.ViewHolder(view) {
@@ -23,7 +23,8 @@ class ClipboardAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.clipboard_item, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.clipboard_item, parent, false)
         return VH(view)
     }
 

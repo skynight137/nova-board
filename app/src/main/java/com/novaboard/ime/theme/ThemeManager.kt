@@ -3,12 +3,16 @@ package com.novaboard.ime.theme
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 
-enum class ThemeMode { SYSTEM, LIGHT, DARK }
+enum class ThemeMode {
+    SYSTEM,
+    LIGHT,
+    DARK,
+}
 
 /**
  * Persists the user's chosen theme and applies it via AppCompatDelegate's night-mode override.
- * Because `values-night/colors.xml` supplies the dark palette, forcing night mode on/off here
- * is enough to make every color resource (used by both the settings screen and the keyboard's
+ * Because `values-night/colors.xml` supplies the dark palette, forcing night mode on/off here is
+ * enough to make every color resource (used by both the settings screen and the keyboard's
  * custom-drawn view) resolve correctly, independent of the actual system setting.
  */
 object ThemeManager {
@@ -16,14 +20,20 @@ object ThemeManager {
     private const val KEY_THEME = "theme_mode"
 
     fun get(context: Context): ThemeMode {
-        val raw = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .getString(KEY_THEME, ThemeMode.SYSTEM.name)
-        return runCatching { ThemeMode.valueOf(raw ?: ThemeMode.SYSTEM.name) }.getOrDefault(ThemeMode.SYSTEM)
+        val raw =
+            context
+                .getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .getString(KEY_THEME, ThemeMode.SYSTEM.name)
+        return runCatching { ThemeMode.valueOf(raw ?: ThemeMode.SYSTEM.name) }
+            .getOrDefault(ThemeMode.SYSTEM)
     }
 
     fun set(context: Context, mode: ThemeMode) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .edit().putString(KEY_THEME, mode.name).apply()
+        context
+            .getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putString(KEY_THEME, mode.name)
+            .apply()
         apply(mode)
     }
 

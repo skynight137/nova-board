@@ -7,7 +7,7 @@ embedding this application's identity. The APK name, keystore subject, and
 release description are derived from `rootProject.name`, so each clone keeps
 its own identity without changing the shared tooling.
 
-Aurora EQ remains the owner of its app-specific result: the default published
+NovaBoard remains the owner of its app-specific result: the default published
 manifest is `app-release.json`, its Android package IDs live in the Android
 module, and the app's **Check for updates** action opens its configured GitHub
 Releases page rather than fetching that manifest.
@@ -76,7 +76,7 @@ metadata for release tooling and distribution records.
 
 The main screen also provides an explicit **Export app log…** action. The
 resulting plain-text file contains bounded app-owned events and device/APK
-metadata only. It excludes preset contents and system-wide logcat, is not
+metadata only. It excludes clipboard contents and system-wide logcat, is not
 persisted between launches, and is written through Android's Storage Access
 Framework after the user chooses a destination.
 
@@ -196,8 +196,8 @@ unzip -lv "${ANDROID_MODULE:-app}/build/outputs/apk/release/<ProjectName>-releas
   | grep -E 'lib/.+\\.so|classes\\.dex|resources\\.arsc'
 ```
 
-Do not remove the accessibility-service or overlay dependencies merely to
-reduce the APK. Those components provide the app's core automation behavior.
+Do not remove the input-method service or keyboard view dependencies merely to
+reduce the APK. Those components provide NovaBoard's core keyboard behavior.
 
 ## Release process
 

@@ -16,10 +16,10 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import com.novaboard.ime.clipboard.ClipType
 import com.novaboard.ime.clipboard.ClipboardHistoryManager
 import com.novaboard.ime.clipboard.ClipboardItem
 import com.novaboard.ime.clipboard.ClipboardPanel
-import com.novaboard.ime.clipboard.ClipType
 import com.novaboard.ime.emoji.EmojiPanel
 import com.novaboard.ime.hotkeys.HotkeyController
 import com.novaboard.ime.model.Key
@@ -82,7 +82,9 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         keyboardView.listener = this
         keyboardView.setPage(KeyboardLayouts.letters)
 
-        hotkeyController.build(this, hotkeysRow) { /* modifier armed/disarmed, nothing extra to redraw */ }
+        hotkeyController.build(this, hotkeysRow) {
+            /* modifier armed/disarmed, nothing extra to redraw */
+        }
 
         wireToggleChevrons(root)
         wireToolsBar(root)
@@ -124,14 +126,20 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         root.findViewById<ImageButton>(R.id.btnClipboard).setOnClickListener { openClipboard(root) }
         root.findViewById<ImageButton>(R.id.btnHotkeys).setOnClickListener { toggleHotkeys() }
         root.findViewById<ImageButton>(R.id.btnTranslate).setOnClickListener {
-            Toast.makeText(this, "Language switching: hook up additional locales here", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                    this,
+                    "Language switching: hook up additional locales here",
+                    Toast.LENGTH_SHORT,
+                )
+                .show()
         }
         root.findViewById<ImageButton>(R.id.btnVoice).setOnClickListener { toggleVoiceInput() }
         root.findViewById<ImageButton>(R.id.btnSearch).setOnClickListener {
             currentInputConnection?.performEditorAction(EditorInfo.IME_ACTION_SEARCH)
         }
         root.findViewById<ImageButton>(R.id.btnMore).setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            val intent =
+                Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
         }
     }
@@ -145,21 +153,36 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         val ic = currentInputConnection ?: return
         when (item.type) {
             ClipType.TEXT -> ic.commitText(item.text ?: "", 1)
-            ClipType.IMAGE -> Toast.makeText(this, "Image paste requires app support for InputContentInfo", Toast.LENGTH_SHORT).show()
+            ClipType.IMAGE ->
+                Toast.makeText(
+                        this,
+                        "Image paste requires app support for InputContentInfo",
+                        Toast.LENGTH_SHORT,
+                    )
+                    .show()
         }
     }
 
     private fun toggleHotkeys() {
-        hotkeysScroller.visibility = if (hotkeysScroller.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+        hotkeysScroller.visibility =
+            if (hotkeysScroller.visibility == View.VISIBLE) View.GONE else View.VISIBLE
     }
 
     // ---- cursor row ----
 
     private fun wireCursorRow(root: View) {
-        root.findViewById<ImageButton>(R.id.btnCursorLeft).setOnClickListener { sendDpad(KeyEvent.KEYCODE_DPAD_LEFT) }
-        root.findViewById<ImageButton>(R.id.btnCursorRight).setOnClickListener { sendDpad(KeyEvent.KEYCODE_DPAD_RIGHT) }
-        root.findViewById<ImageButton>(R.id.btnCursorUp).setOnClickListener { sendDpad(KeyEvent.KEYCODE_DPAD_UP) }
-        root.findViewById<ImageButton>(R.id.btnCursorDown).setOnClickListener { sendDpad(KeyEvent.KEYCODE_DPAD_DOWN) }
+        root.findViewById<ImageButton>(R.id.btnCursorLeft).setOnClickListener {
+            sendDpad(KeyEvent.KEYCODE_DPAD_LEFT)
+        }
+        root.findViewById<ImageButton>(R.id.btnCursorRight).setOnClickListener {
+            sendDpad(KeyEvent.KEYCODE_DPAD_RIGHT)
+        }
+        root.findViewById<ImageButton>(R.id.btnCursorUp).setOnClickListener {
+            sendDpad(KeyEvent.KEYCODE_DPAD_UP)
+        }
+        root.findViewById<ImageButton>(R.id.btnCursorDown).setOnClickListener {
+            sendDpad(KeyEvent.KEYCODE_DPAD_DOWN)
+        }
     }
 
     private fun sendDpad(code: Int) {
@@ -201,7 +224,11 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     override fun onKey(key: Key, outputChar: String) {
         val ic = currentInputConnection ?: return
 
-        if ((hotkeyController.isCtrlArmed() || hotkeyController.isAltArmed()) && outputChar.length == 1 && outputChar[0].isLetter()) {
+        if (
+            (hotkeyController.isCtrlArmed() || hotkeyController.isAltArmed()) &&
+                outputChar.length == 1 &&
+                outputChar[0].isLetter()
+        ) {
             hotkeyController.sendCharWithModifiers(outputChar[0])
             return
         }
@@ -213,7 +240,9 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 currentWord.append(outputChar)
                 maybeAutocorrectLastChar(ic)
             }
-            KeyType.SPACE, KeyType.COMMA, KeyType.PERIOD -> {
+            KeyType.SPACE,
+            KeyType.COMMA,
+            KeyType.PERIOD -> {
                 if (currentWord.isNotEmpty()) {
                     suggestionEngine.learn(currentWord.toString())
                     previousWord = currentWord.toString()
@@ -229,9 +258,11 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         refreshSuggestions()
     }
 
-    /** Word-level autocorrect fires once a boundary is typed elsewhere; here we just keep it simple
-     *  and rely on the suggestion strip + explicit tap-to-accept, which is the safer default for
-     *  a first pass (silently rewriting characters as you type is jarring without a real model). */
+    /**
+     * Word-level autocorrect fires once a boundary is typed elsewhere; here we just keep it simple
+     * and rely on the suggestion strip + explicit tap-to-accept, which is the safer default for a
+     * first pass (silently rewriting characters as you type is jarring without a real model).
+     */
     private fun maybeAutocorrectLastChar(ic: InputConnection) = Unit
 
     override fun onBackspace() {
@@ -244,7 +275,11 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     override fun onEnter() {
         val ic = currentInputConnection ?: return
         val action = currentInputEditorInfo?.imeOptions?.and(EditorInfo.IME_MASK_ACTION)
-        if (action != null && action != EditorInfo.IME_ACTION_NONE && action != EditorInfo.IME_ACTION_UNSPECIFIED) {
+        if (
+            action != null &&
+                action != EditorInfo.IME_ACTION_NONE &&
+                action != EditorInfo.IME_ACTION_UNSPECIFIED
+        ) {
             ic.performEditorAction(action)
         } else {
             ic.commitText("\n", 1)
@@ -256,12 +291,14 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     }
 
     override fun onSwitchToSymbols() = Unit
+
     override fun onSwitchToLetters() = Unit
 
     override fun onEmoji() {
-        emojiPanel = EmojiPanel(this) { emoji ->
-            currentInputConnection?.commitText(emoji, 1)
-        }
+        emojiPanel =
+            EmojiPanel(this) { emoji ->
+                currentInputConnection?.commitText(emoji, 1)
+            }
         emojiPanel?.show(keyboardView)
     }
 
@@ -273,32 +310,54 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
 
     private fun startVoiceInput() {
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
-            Toast.makeText(this, "Speech recognition isn't available on this device", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                    this,
+                    "Speech recognition isn't available on this device",
+                    Toast.LENGTH_SHORT,
+                )
+                .show()
             return
         }
         val recognizer = SpeechRecognizer.createSpeechRecognizer(this)
         speechRecognizer = recognizer
-        recognizer.setRecognitionListener(object : RecognitionListener {
-            override fun onReadyForSpeech(params: Bundle?) {}
-            override fun onBeginningOfSpeech() {}
-            override fun onRmsChanged(rmsdB: Float) {}
-            override fun onBufferReceived(buffer: ByteArray?) {}
-            override fun onEndOfSpeech() {}
-            override fun onError(error: Int) {
-                listening = false
+        recognizer.setRecognitionListener(
+            object : RecognitionListener {
+                override fun onReadyForSpeech(params: Bundle?) {}
+
+                override fun onBeginningOfSpeech() {}
+
+                override fun onRmsChanged(rmsdB: Float) {}
+
+                override fun onBufferReceived(buffer: ByteArray?) {}
+
+                override fun onEndOfSpeech() {}
+
+                override fun onError(error: Int) {
+                    listening = false
+                }
+
+                override fun onResults(results: Bundle?) {
+                    val text =
+                        results
+                            ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                            ?.firstOrNull()
+                    if (!text.isNullOrBlank()) currentInputConnection?.commitText("$text ", 1)
+                    listening = false
+                }
+
+                override fun onPartialResults(partialResults: Bundle?) {}
+
+                override fun onEvent(eventType: Int, params: Bundle?) {}
             }
-            override fun onResults(results: Bundle?) {
-                val text = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
-                if (!text.isNullOrBlank()) currentInputConnection?.commitText("$text ", 1)
-                listening = false
+        )
+        val intent =
+            Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(
+                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM,
+                )
+                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
             }
-            override fun onPartialResults(partialResults: Bundle?) {}
-            override fun onEvent(eventType: Int, params: Bundle?) {}
-        })
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
-        }
         recognizer.startListening(intent)
         listening = true
     }

@@ -2,26 +2,29 @@ package com.novaboard.ime.clipboard
 
 import android.content.ClipData
 import android.content.ClipDescription
-import android.content.Context
 import android.content.ClipboardManager as SystemClipboardManager
+import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 
-enum class ClipType { TEXT, IMAGE }
+enum class ClipType {
+    TEXT,
+    IMAGE,
+}
 
 data class ClipboardItem(
     val id: Long,
     val type: ClipType,
     val text: String? = null,
     val imageUri: String? = null,
-    val pinned: Boolean = false
+    val pinned: Boolean = false,
 )
 
 /**
- * Listens to the system clipboard and keeps a capped, persisted history. Text and images are
- * both supported (an image clip is stored by its content URI, which is what the platform
- * clipboard hands back for images). Pinned items survive the cap trim; everything else is
- * subject to a max size so storage doesn't grow unbounded.
+ * Listens to the system clipboard and keeps a capped, persisted history. Text and images are both
+ * supported (an image clip is stored by its content URI, which is what the platform clipboard hands
+ * back for images). Pinned items survive the cap trim; everything else is subject to a max size so
+ * storage doesn't grow unbounded.
  */
 class ClipboardHistoryManager(private val context: Context) {
 
@@ -57,23 +60,32 @@ class ClipboardHistoryManager(private val context: Context) {
     }
 
     fun getItems(): List<ClipboardItem> =
-        items.sortedWith(compareByDescending<ClipboardItem> { it.pinned }.thenByDescending { it.id })
+        items.sortedWith(
+            compareByDescending<ClipboardItem> { it.pinned }.thenByDescending { it.id }
+        )
 
     private fun addFromClipData(clip: ClipData) {
         if (clip.itemCount == 0) return
         val item = clip.getItemAt(0)
         val desc = clip.description
 
-        val newEntry = when {
-            desc.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN) && !item.text.isNullOrBlank() ->
-                ClipboardItem(nextId++, ClipType.TEXT, text = item.text.toString())
-            item.uri != null && (desc.hasMimeType("image/*")) ->
-                ClipboardItem(nextId++, ClipType.IMAGE, imageUri = item.uri.toString())
-            else -> null
-        } ?: return
+        val newEntry =
+            when {
+                desc.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN) &&
+                    !item.text.isNullOrBlank() ->
+                    ClipboardItem(nextId++, ClipType.TEXT, text = item.text.toString())
+                item.uri != null && (desc.hasMimeType("image/*")) ->
+                    ClipboardItem(nextId++, ClipType.IMAGE, imageUri = item.uri.toString())
+                else -> null
+            } ?: return
 
         // avoid duplicate consecutive entries
-        if (items.firstOrNull()?.let { it.text == newEntry.text && it.imageUri == newEntry.imageUri } == true) return
+        if (
+            items.firstOrNull()?.let {
+                it.text == newEntry.text && it.imageUri == newEntry.imageUri
+            } == true
+        )
+            return
 
         items.add(0, newEntry)
         trim()
@@ -106,20 +118,27 @@ class ClipboardHistoryManager(private val context: Context) {
     private fun save() {
         val arr = JSONArray()
         items.forEach { item ->
-            arr.put(JSONObject().apply {
-                put("id", item.id)
-                put("type", item.type.name)
-                put("text", item.text ?: JSONObject.NULL)
-                put("imageUri", item.imageUri ?: JSONObject.NULL)
-                put("pinned", item.pinned)
-            })
+            arr.put(
+                JSONObject().apply {
+                    put("id", item.id)
+                    put("type", item.type.name)
+                    put("text", item.text ?: JSONObject.NULL)
+                    put("imageUri", item.imageUri ?: JSONObject.NULL)
+                    put("pinned", item.pinned)
+                }
+            )
         }
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .edit().putString(KEY_ITEMS, arr.toString()).apply()
+        context
+            .getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putString(KEY_ITEMS, arr.toString())
+            .apply()
     }
 
     private fun load() {
-        val raw = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_ITEMS, null) ?: return
+        val raw =
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_ITEMS, null)
+                ?: return
         val arr = runCatching { JSONArray(raw) }.getOrNull() ?: return
         items.clear()
         for (i in 0 until arr.length()) {
@@ -130,8 +149,11 @@ class ClipboardHistoryManager(private val context: Context) {
                     id = id,
                     type = ClipType.valueOf(o.getString("type")),
                     text = o.optString("text").takeIf { o.has("text") && !o.isNull("text") },
-                    imageUri = o.optString("imageUri").takeIf { o.has("imageUri") && !o.isNull("imageUri") },
-                    pinned = o.optBoolean("pinned", false)
+                    imageUri =
+                        o.optString("imageUri").takeIf {
+                            o.has("imageUri") && !o.isNull("imageUri")
+                        },
+                    pinned = o.optBoolean("pinned", false),
                 )
             )
             if (id >= nextId) nextId = id + 1

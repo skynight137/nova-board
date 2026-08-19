@@ -10,3 +10,4 @@
 - [Overlay state boundary](overlay-state-boundary.md) — service gesture state is authoritative; marker count can be zero for a runnable loaded setup.
 - [Android migration verification](android-migration-verification.md) — archived app Gradle overrides can conflict with current Java targets and debug signing.
 - [History rewrite safety](history-rewrite.md) — preview and verify full-history message rewrites; filter-branch uses HEAD to include the root commit.
+- [NovaBoard archive migration](novaboard-migration.md) — native IME archives need current template build/plugin adaptation and APK identity verification.
