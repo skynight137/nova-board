@@ -16,5 +16,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AuroraEQ"
+rootProject.name = "NovaBoard"
 include(":app")

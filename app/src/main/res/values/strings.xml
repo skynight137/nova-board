@@ -1,4 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Aurora EQ</string>
+    <string name="app_name">NovaBoard</string>
+    <string name="enable_keyboard">Enable NovaBoard</string>
+    <string name="switch_keyboard">Switch input method</string>
+    <string name="theme_label">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="clipboard_empty">No clipboard items yet</string>
+    <string name="cd_tools">Tools</string>
+    <string name="cd_clipboard">Clipboard</string>
+    <string name="cd_hotkeys">Hotkeys</string>
+    <string name="cd_voice">Voice typing</string>
+    <string name="cd_emoji">Emoji</string>
+    <string name="cd_pin">Pin</string>
+    <string name="cd_unpin">Unpin</string>
 </resources>

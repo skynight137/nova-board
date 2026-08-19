@@ -1,0 +1,13 @@
+<resources>
+    <!-- Dark theme (matches the attached screenshot) -->
+    <color name="kb_background">#101114</color>
+    <color name="kb_key_bg">#3A3C42</color>
+    <color name="kb_key_bg_special">#26282C</color>
+    <color name="kb_key_text">#F2F2F3</color>
+    <color name="kb_key_pressed">#4E5158</color>
+    <color name="kb_accent">#8AB4FF</color>
+    <color name="kb_suggestion_text">#B5B7BC</color>
+    <color name="kb_suggestion_text_highlight">#FFFFFF</color>
+    <color name="kb_divider">#2B2D31</color>
+    <color name="kb_toolbar_icon">#E4E4E6</color>
+</resources>

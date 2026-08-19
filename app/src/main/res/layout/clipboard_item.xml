@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:background="@color/kb_key_bg"
+    android:padding="14dp"
+    android:layout_marginBottom="1dp">
+
+    <ImageView
+        android:id="@+id/clipImage"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="10dp"
+        android:visibility="gone"
+        android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/clipText"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:textColor="@color/kb_key_text"
+        android:textSize="14sp"
+        android:maxLines="3"
+        android:ellipsize="end" />
+
+    <ImageButton
+        android:id="@+id/btnPin"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_pin"
+        android:tint="@color/kb_toolbar_icon"
+        android:contentDescription="@string/cd_pin" />
+</LinearLayout>

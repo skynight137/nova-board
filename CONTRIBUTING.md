@@ -1,6 +1,6 @@
 # Contribution guidelines
 
-This document describes how to contribute to Aurora EQ.
+This document describes how to contribute to NovaBoard.
 
 ## How to contribute
 
@@ -11,4 +11,4 @@ This document describes how to contribute to Aurora EQ.
 4. Submit a pull request to the `dev` branch with tests and verification details.
 5. Maintainers will review the change before it is merged.
 
-Thank you for contributing to Aurora EQ.
+Thank you for contributing to NovaBoard.
