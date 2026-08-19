@@ -14,4 +14,7 @@
     <string name="cd_emoji">Emoji</string>
     <string name="cd_pin">Pin</string>
     <string name="cd_unpin">Unpin</string>
+    <string name="export_app_log">Export diagnostic report</string>
+    <string name="app_log_exported">Diagnostic report exported</string>
+    <string name="app_log_export_failed">Unable to export diagnostic report</string>
 </resources>

@@ -29,6 +29,13 @@
         android:layout_marginBottom="24dp"
         android:text="@string/switch_keyboard" />
 
+    <Button
+        android:id="@+id/btnExportLog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:text="@string/export_app_log" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
