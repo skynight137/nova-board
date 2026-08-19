@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
+     android:layout_height="wrap_content"
     android:background="@color/kb_background">
+
+    <LinearLayout
+        android:id="@+id/keyboardRoot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
     <!-- Row 1/2: toggles between the tools icon strip and the suggestion strip,
          exactly like the "v" chevron behavior in SwiftKey -->
@@ -91,4 +96,11 @@
         <ImageButton android:id="@+id/btnCursorRight" style="@style/NovaBoardCursorArrow" android:src="@drawable/ic_arrow_right" />
     </LinearLayout>
 
-</LinearLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/emojiPanelContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+</FrameLayout>

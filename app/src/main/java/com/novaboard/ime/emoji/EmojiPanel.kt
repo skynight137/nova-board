@@ -1,10 +1,11 @@
 package com.novaboard.ime.emoji
 
 import android.content.Context
-import android.view.Gravity
+import android.graphics.Color
+import android.view.View
 import android.view.ViewGroup
 import android.widget.GridLayout
-import android.widget.PopupWindow
+import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 
@@ -71,39 +72,74 @@ object EmojiData {
 }
 
 class EmojiPanel(private val context: Context, private val onPick: (String) -> Unit) {
-    private var popup: PopupWindow? = null
+    private var container: ViewGroup? = null
+    private var panel: View? = null
 
-    fun show(anchor: android.view.View) {
+    fun show(target: ViewGroup) {
         val scroll = ScrollView(context)
         val grid =
             GridLayout(context).apply {
                 columnCount = 8
-                setPadding(16, 16, 16, 16)
+                setPadding(8, 8, 8, 8)
             }
         EmojiData.all.forEach { emoji ->
             grid.addView(
                 TextView(context).apply {
                     text = emoji
-                    textSize = 24f
-                    setPadding(16, 16, 16, 16)
-                    setOnClickListener { onPick(emoji) }
+                    textSize = 26f
+                    gravity = android.view.Gravity.CENTER
+                    setPadding(8, 8, 8, 8)
+                    layoutParams =
+                        GridLayout.LayoutParams().apply {
+                            width = 0
+                            height = ViewGroup.LayoutParams.WRAP_CONTENT
+                            columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                        }
+                    setOnClickListener {
+                        onPick(emoji)
+                        dismiss()
+                    }
                 }
             )
         }
         scroll.addView(grid)
-        val pw =
-            PopupWindow(
-                scroll,
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                (320 * context.resources.displayMetrics.density).toInt(),
-                true,
-            )
-        pw.showAtLocation(anchor, Gravity.BOTTOM, 0, anchor.height)
-        popup = pw
+        val close =
+            TextView(context).apply {
+                text = "⌄"
+                textSize = 24f
+                gravity = android.view.Gravity.CENTER
+                setTextColor(Color.WHITE)
+                setOnClickListener { dismiss() }
+                layoutParams = LinearLayout.LayoutParams(56, 48)
+            }
+        val root =
+            LinearLayout(context).apply {
+                orientation = LinearLayout.VERTICAL
+                setBackgroundColor(Color.rgb(25, 26, 32))
+                addView(
+                    scroll,
+                    LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        0,
+                    ).apply { weight = 1f },
+                )
+                addView(close)
+            }
+        target.removeAllViews()
+        target.addView(
+            root,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+        )
+        target.visibility = View.VISIBLE
+        container = target
+        panel = root
     }
 
     fun dismiss() {
-        popup?.dismiss()
-        popup = null
+        panel?.let { container?.removeView(it) }
+        container?.visibility = View.GONE
+        panel = null
+        container = null
     }
 }

@@ -55,8 +55,10 @@ constructor(
     private var shiftOn = false
     private var capsLock = false
 
+    private var measuredRowHeight = 58 * resources.displayMetrics.density
+
     private val rowHeight
-        get() = (58 * resources.displayMetrics.density)
+        get() = measuredRowHeight
 
     private val keyMargin = 3 * resources.displayMetrics.density
 
@@ -94,6 +96,14 @@ constructor(
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val width = MeasureSpec.getSize(widthMeasureSpec)
+        val availableHeight = MeasureSpec.getSize(heightMeasureSpec)
+        if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.EXACTLY && availableHeight > 0) {
+            measuredRowHeight =
+                (availableHeight / page.rows.size.toFloat()).coerceIn(
+                    48 * resources.displayMetrics.density,
+                    64 * resources.displayMetrics.density,
+                )
+        }
         val height = (rowHeight * page.rows.size).toInt()
         setMeasuredDimension(width, height)
     }

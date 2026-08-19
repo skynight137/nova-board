@@ -28,6 +28,7 @@ import com.novaboard.ime.model.KeyboardLayouts
 import com.novaboard.ime.settings.MainActivity
 import com.novaboard.ime.suggestion.SuggestionEngine
 import com.novaboard.ime.theme.ThemeManager
+import com.novaboard.ime.util.AppLog
 import com.novaboard.ime.view.KeyboardView
 
 class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
@@ -41,6 +42,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private lateinit var hotkeysScroller: HorizontalScrollView
     private lateinit var hotkeysRow: LinearLayout
     private lateinit var cursorRow: LinearLayout
+    private lateinit var emojiPanelContainer: android.widget.FrameLayout
 
     private lateinit var clipboardHistory: ClipboardHistoryManager
     private val suggestionEngine = SuggestionEngine()
@@ -55,14 +57,18 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
 
     override fun onCreate() {
         super.onCreate()
+        AppLog.init(this)
+        AppLog.i("NovaBoardService", "Input method service created")
         ThemeManager.applyStored(this)
         clipboardHistory = ClipboardHistoryManager(this)
         clipboardHistory.start()
     }
 
     override fun onDestroy() {
+        emojiPanel?.dismiss()
         clipboardHistory.stop()
         speechRecognizer?.destroy()
+        AppLog.i("NovaBoardService", "Input method service destroyed")
         super.onDestroy()
     }
 
@@ -78,6 +84,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         hotkeysScroller = root.findViewById(R.id.hotkeysScroller)
         hotkeysRow = root.findViewById(R.id.hotkeysRow)
         cursorRow = root.findViewById(R.id.cursorRow)
+        emojiPanelContainer = root.findViewById(R.id.emojiPanelContainer)
 
         keyboardView.listener = this
         keyboardView.setPage(KeyboardLayouts.letters)
@@ -295,11 +302,16 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     override fun onSwitchToLetters() = Unit
 
     override fun onEmoji() {
+        if (emojiPanelContainer.visibility == View.VISIBLE) {
+            emojiPanel?.dismiss()
+            return
+        }
         emojiPanel =
             EmojiPanel(this) { emoji ->
                 currentInputConnection?.commitText(emoji, 1)
             }
-        emojiPanel?.show(keyboardView)
+        AppLog.i("NovaBoardService", "Emoji panel opened")
+        emojiPanel?.show(emojiPanelContainer)
     }
 
     // ---- voice typing ----
