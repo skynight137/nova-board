@@ -20,7 +20,7 @@
         <item name="android:background">@android:color/transparent</item>
     </style>
 
-    <style name="NovaBoardSuggestionHighlighted">
+    <style name="NovaBoardSuggestionHighlighted" parent="NovaBoardSuggestion">
         <item name="android:textColor">@color/kb_suggestion_text_highlight</item>
         <item name="android:textStyle">bold</item>
     </style>
