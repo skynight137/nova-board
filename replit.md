@@ -71,6 +71,7 @@ NovaBoard/
 - **Keyboard service:** [[app/src/main/java/com/novaboard/ime/NovaBoardService.kt]]
 - **Keyboard rendering:** [[app/src/main/java/com/novaboard/ime/view/KeyboardView.kt]]
 - **Keyboard layout:** [[app/src/main/res/layout/keyboard_container.xml]]
+- **Diagnostic logging:** [[app/src/main/java/com/novaboard/ime/util/AppLog.kt]]
 - **Release automation:** [[.releaserc.cjs]], [[.github/workflows/release.yml]],
   and [[.github/release-tooling/prepare-release.sh]]
 

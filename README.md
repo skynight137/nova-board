@@ -15,6 +15,8 @@ input without a third-party keyboard SDK.
 - System, light, and dark themes
 - Voice typing through Android's on-device `SpeechRecognizer`
 - Settings actions to enable NovaBoard and switch the active input method
+- Exportable diagnostic report with bounded device, app, and application-log
+  information for development support
 
 ## Try it
 
