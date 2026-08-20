@@ -34,9 +34,10 @@ class ClipboardPanel(
             TextView(context).apply {
                 text = "‹  Keyboard"
                 textSize = 16f
-                gravity = Gravity.CENTER_VERTICAL
+                gravity = Gravity.CENTER
                 setTextColor(context.getColor(R.color.kb_key_text))
-                setPadding(16, 0, 16, 0)
+                minHeight = dp(56)
+                setPadding(dp(16), 0, dp(16), 0)
                 contentDescription = context.getString(R.string.clipboard_back_to_keyboard)
                 setOnClickListener { onClose() }
             }
@@ -61,11 +62,11 @@ class ClipboardPanel(
             backButton,
             FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                48,
+                dp(56),
             ),
         )
         (recycler.layoutParams as FrameLayout.LayoutParams).apply {
-            topMargin = 48
+            topMargin = dp(56)
         }.also { recycler.layoutParams = it }
         root.addView(
             emptyLabel,
@@ -75,7 +76,7 @@ class ClipboardPanel(
             ),
         )
         (emptyLabel.layoutParams as FrameLayout.LayoutParams).apply {
-            topMargin = 48
+            topMargin = dp(56)
         }.also { emptyLabel.layoutParams = it }
 
         adapter =
@@ -143,4 +144,7 @@ class ClipboardPanel(
         }
         target = null
     }
+
+    private fun dp(value: Int): Int =
+        (value * context.resources.displayMetrics.density).toInt()
 }

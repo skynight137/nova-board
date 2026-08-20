@@ -1035,12 +1035,16 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                         speechRecognizer = null
                         recognizer.destroy()
                     }
-                    Toast.makeText(
-                            this@NovaBoardService,
-                            "Voice typing stopped (${voiceErrorMessage(error)})",
-                            Toast.LENGTH_SHORT,
-                        )
-                        .show()
+                    val message =
+                        if (
+                            error == SpeechRecognizer.ERROR_NO_MATCH ||
+                                error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT
+                        ) {
+                            "No speech detected — tap the microphone and speak"
+                        } else {
+                            "Voice typing stopped (${voiceErrorMessage(error)})"
+                        }
+                    Toast.makeText(this@NovaBoardService, message, Toast.LENGTH_SHORT).show()
                 }
 
                 override fun onResults(results: Bundle?) {

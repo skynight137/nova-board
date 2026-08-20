@@ -10,6 +10,7 @@ import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.ImageButton
 import com.novaboard.ime.R
 import com.novaboard.ime.settings.KeyboardPreferences
 
@@ -154,17 +155,17 @@ class EmojiPanel(private val context: Context, private val onPick: (String) -> U
             gravity = Gravity.CENTER_VERTICAL
             setPadding(12, 0, 12, 0)
             addView(
-                TextView(context).apply {
-                    text = "<"
+                ImageButton(context).apply {
+                    setImageResource(R.drawable.ic_arrow_back)
                     contentDescription = context.getString(R.string.emoji_panel_close)
-                    textSize = 24f
                     gravity = Gravity.CENTER
-                    setTextColor(Color.WHITE)
-                    minWidth = 56
-                    minHeight = 56
+                    setBackgroundColor(Color.TRANSPARENT)
+                    setColorFilter(Color.WHITE)
+                    minimumWidth = dp(56)
+                    minimumHeight = dp(56)
                     setOnClickListener { dismiss() }
                 },
-                LinearLayout.LayoutParams(56, 56),
+                LinearLayout.LayoutParams(dp(56), dp(56)),
             )
             addView(
                 TextView(context).apply {
@@ -172,7 +173,7 @@ class EmojiPanel(private val context: Context, private val onPick: (String) -> U
                     textSize = 18f
                     setTextColor(Color.WHITE)
                 },
-                    LinearLayout.LayoutParams(0, 56, 1f),
+                LinearLayout.LayoutParams(0, dp(56), 1f),
             )
         }
 
@@ -213,4 +214,7 @@ class EmojiPanel(private val context: Context, private val onPick: (String) -> U
         panel = null
         container = null
     }
+
+    private fun dp(value: Int): Int =
+        (value * context.resources.displayMetrics.density).toInt()
 }

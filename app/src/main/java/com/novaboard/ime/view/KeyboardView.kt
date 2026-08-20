@@ -304,6 +304,9 @@ constructor(
                 schedulePopup(hit)
             }
             MotionEvent.ACTION_POINTER_DOWN -> {
+                // Key previews are useful for a single tap, but a preview for only the
+                // first finger is misleading during multi-touch entry.
+                cancelPopup()
                 val index = event.actionIndex
                 val hit = hitAt(event.getX(index), event.getY(index))
                 if (hit != null) {
