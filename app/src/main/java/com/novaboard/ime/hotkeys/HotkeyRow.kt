@@ -34,7 +34,7 @@ class HotkeyController(private val getInputConnection: () -> InputConnection?) {
     fun build(context: Context, row: LinearLayout, onModifierChanged: () -> Unit) {
         row.removeAllViews()
         row.addView(hotkeyButton(context, "ESC") { sendKey(KeyEvent.KEYCODE_ESCAPE) })
-        row.addView(hotkeyButton(context, "TAB") { sendKey(KeyEvent.KEYCODE_TAB) })
+        row.addView(hotkeyButton(context, "TAB") { sendTab() })
         ctrlView = toggleButton(context, "CTRL", { ctrlArmed }) {
                 ctrlArmed = it
                 onModifierChanged()
@@ -91,6 +91,10 @@ class HotkeyController(private val getInputConnection: () -> InputConnection?) {
         val ic = getInputConnection() ?: return
         ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, code))
         ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, code))
+    }
+
+    private fun sendTab() {
+        getInputConnection()?.commitText("\t", 1)
     }
 
     private fun hotkeyButton(context: Context, label: String, onClick: () -> Unit) =

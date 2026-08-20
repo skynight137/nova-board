@@ -366,18 +366,9 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                     ToolMenuItem("hotkeys", getString(R.string.cd_hotkeys)),
                     ToolMenuItem("translate", getString(R.string.tool_translate)),
                     ToolMenuItem("voice", getString(R.string.cd_voice)),
-                    ToolMenuItem("search", getString(R.string.tool_search)),
                     ToolMenuItem("emoji", getString(R.string.cd_emoji)),
                     ToolMenuItem("settings", getString(R.string.tool_settings)),
-                    ToolMenuItem("languages", getString(R.string.tool_languages)),
-                    ToolMenuItem("layouts", getString(R.string.tool_layouts)),
-                    ToolMenuItem("themes", getString(R.string.tool_themes)),
-                    ToolMenuItem("modes", getString(R.string.tool_modes)),
-                    ToolMenuItem("resize", getString(R.string.tool_resize)),
                     ToolMenuItem("incognito", getString(R.string.tool_incognito)),
-                    ToolMenuItem("stickers", getString(R.string.tool_stickers)),
-                    ToolMenuItem("gif", getString(R.string.tool_gif)),
-                    ToolMenuItem("tips", getString(R.string.tool_tips)),
                 ),
             )
         items.forEach { item ->
@@ -425,8 +416,8 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                     "voice" -> toggleVoiceInput()
                     "search" ->
                         currentInputConnection?.performEditorAction(EditorInfo.IME_ACTION_SEARCH)
-                    "emoji", "stickers", "gif" -> onEmoji()
-                    "settings", "languages", "layouts", "themes", "modes", "resize", "tips" ->
+                    "emoji" -> onEmoji()
+                    "settings" ->
                         startActivity(
                             Intent(this@NovaBoardService, MainActivity::class.java)
                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
@@ -1045,6 +1036,16 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
 
                 override fun onError(error: Int) {
                     listening = false
+                    if (recognizer === speechRecognizer) {
+                        speechRecognizer = null
+                        recognizer.destroy()
+                    }
+                    Toast.makeText(
+                            this@NovaBoardService,
+                            "Voice typing stopped (${voiceErrorMessage(error)})",
+                            Toast.LENGTH_SHORT,
+                        )
+                        .show()
                 }
 
                 override fun onResults(results: Bundle?) {
@@ -1098,6 +1099,20 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         speechRecognizer = null
         listening = false
     }
+
+    private fun voiceErrorMessage(error: Int): String =
+        when (error) {
+            SpeechRecognizer.ERROR_AUDIO -> "audio error"
+            SpeechRecognizer.ERROR_CLIENT -> "client error"
+            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "microphone permission required"
+            SpeechRecognizer.ERROR_NETWORK,
+            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "network unavailable"
+            SpeechRecognizer.ERROR_NO_MATCH -> "no speech detected"
+            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "recognizer busy"
+            SpeechRecognizer.ERROR_SERVER -> "recognition server error"
+            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "speech timeout"
+            else -> "error $error"
+        }
 
     private fun isConversationEditor(info: EditorInfo?): Boolean {
         return info?.inputType?.let(::isConversationEditorInputType) == true

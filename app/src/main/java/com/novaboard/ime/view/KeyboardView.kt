@@ -244,7 +244,7 @@ constructor(
                     hit.key.type != KeyType.PERIOD
             val paint =
                 when {
-                    hit == pressedHit -> pressedPaint
+                    hit == pressedHit || pointerHits.values.any { it === hit } -> pressedPaint
                     isSpecial -> specialKeyPaint
                     else -> keyPaint
                 }
@@ -353,6 +353,9 @@ constructor(
                 if (hit != null && hit != pressedHit) {
                     cancelPopup()
                     pressedHit = hit
+                    if (primaryPointerId != MotionEvent.INVALID_POINTER_ID) {
+                        pointerHits[primaryPointerId] = hit
+                    }
                     invalidate()
                 }
             }

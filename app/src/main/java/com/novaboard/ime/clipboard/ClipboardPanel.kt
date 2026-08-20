@@ -64,8 +64,9 @@ class ClipboardPanel(
                 48,
             ),
         )
-        (recycler.layoutParams as FrameLayout.LayoutParams).topMargin = 48
-        (emptyLabel.layoutParams as FrameLayout.LayoutParams).topMargin = 48
+        (recycler.layoutParams as FrameLayout.LayoutParams).apply {
+            topMargin = 48
+        }.also { recycler.layoutParams = it }
         root.addView(
             emptyLabel,
             FrameLayout.LayoutParams(
@@ -73,6 +74,9 @@ class ClipboardPanel(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
             ),
         )
+        (emptyLabel.layoutParams as FrameLayout.LayoutParams).apply {
+            topMargin = 48
+        }.also { emptyLabel.layoutParams = it }
 
         adapter =
             ClipboardAdapter(

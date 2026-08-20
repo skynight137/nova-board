@@ -155,9 +155,9 @@ class EmojiPanel(private val context: Context, private val onPick: (String) -> U
             setPadding(12, 0, 12, 0)
             addView(
                 TextView(context).apply {
-                    text = "‹"
+                    text = "ABC"
                     contentDescription = context.getString(R.string.emoji_panel_close)
-                    textSize = 34f
+                    textSize = 16f
                     gravity = Gravity.CENTER
                     setTextColor(Color.WHITE)
                     setOnClickListener { dismiss() }
