@@ -128,6 +128,15 @@ and are deferred until a Robolectric or instrumentation test dependency is
 intentionally introduced. This is a verification limitation, not an
 implementation claim.
 
+## Replanned follow-up scope
+
+The task-panel suggestion for image clipboard verification is folded into this
+existing plan. It is intentionally a test-only follow-up: add an Android
+context test dependency or instrumentation workflow before marking provider
+migration, restart loading, orphan cleanup, cap trimming, deletion, and
+startup-listener checks complete. Do not replace these checks with claims based
+only on the existing JVM seams.
+
 Verification:
 
 - [ ] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`

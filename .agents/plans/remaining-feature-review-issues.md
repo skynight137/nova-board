@@ -26,8 +26,12 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
 
 ### Open
 
-- Translation does not return a result to replace the original selected range.
-- Clipboard image URIs are still persisted without durable app-private storage or a durable grant strategy.
+- Translation's pure composer contract is complete; the in-keyboard panel and
+  provider boundary remain open, and the reachable external-app launch still
+  needs removal.
+- Durable app-private image storage, preference gating, and cleanup semantics
+  are complete; Android-context restart, migration, and filesystem verification
+  remain open.
 - Quick-delete behavior now has an accurate “delete the previous word” summary and pure boundary coverage; Android lifecycle/persistence regression coverage is still pending.
 - Focused regression coverage is partially complete; remaining work is tracked in `prevent-keyboard-review-regressions-lifecycle-preference.md`.
 
@@ -40,6 +44,9 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
   capture gate, cleanup semantics, and deterministic JVM contracts complete;
   Android-context verification remains explicitly deferred):
   `.agents/plans/durable-image-clipboard.md`
+- [~] Replace the external translation launch with the in-keyboard panel and
+  provider boundary; the pure composer contract is complete:
+  `.agents/plans/translation-and-editor-replacement.md`
 - [~] Resolve remaining emoji controls/media policy and refine emoji-on-enter policy.
 - [~] Add focused lifecycle, persistence, layout, and preference regression tests; pure editing/editor-policy/preference contracts are covered, while Android lifecycle, clipboard, and layout seams remain.
 - [~] Execute the next keyboard interaction and polish plan; bounded gesture word entry, cursor repeat, incognito visuals, tools overflow, and bounded geometry are complete, while smart delete and final visual tuning remain:
@@ -54,10 +61,12 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
 
 ## Recommended next-round order
 
-1. Build the in-keyboard translation composer contract and normal mode. Remove
-   the reachable external-app translation launch.
+1. Build the in-keyboard translation panel and normal mode. Remove the
+   reachable external-app translation launch.
 2. Add the translation provider boundary and honest loading/error states.
 3. Add opt-in live-write translation only after normal translation is stable.
+4. Add Android-context verification for image clipboard restart, migration,
+   orphan cleanup, trimming, deletion, and startup listener behavior.
 
 The rewritten feature plans are intentionally separate so each round can pass
 compile, verification, diff, and Conventional Commit gates independently.

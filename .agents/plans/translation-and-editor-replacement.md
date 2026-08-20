@@ -79,6 +79,14 @@ service-owned input-session invalidation is intentionally left for the panel
 integration stage, where editor lifecycle events can be wired to the model
 without inventing a second session owner.
 
+## Replanned follow-up scope
+
+The task-panel suggestions were reconciled into this existing plan rather than
+creating duplicate plan files. The next implementation round is Phase 2:
+replace the reachable `TranslationResultActivity` path with a native,
+session-owned keyboard panel. Phase 3 follows with the provider interface and
+honest loading/error handling. Phase 4 remains gated on those two rounds.
+
 ## Phase 2: Native in-keyboard normal translation
 
 ### Task 2: Replace the external launch with a keyboard panel `[ ]`
