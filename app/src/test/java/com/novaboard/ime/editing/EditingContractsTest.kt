@@ -9,7 +9,7 @@ class EditingContractsTest {
     @Test
     fun previousWordDeletionIncludesWhitespaceAndWord() {
         assertEquals(6, previousWordDeletionCount("hello "))
-        assertEquals(11, previousWordDeletionCount("hello world"))
+        assertEquals(5, previousWordDeletionCount("hello world"))
         assertEquals(0, previousWordDeletionCount(""))
     }
 

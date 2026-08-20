@@ -7,9 +7,9 @@ Remove misleading UI promises and make the remaining emoji/settings/quick-delete
 ## Progress
 
 - [x] **Task 1 — Emoji controls:** Static GIF/media and redundant search affordances removed; accessibility labels and search regression coverage added; media behavior remains intentionally absent.
-- [x] **Task 2 — Emoji font claim:** Labels now describe the actual default and sans-serif typeface choices; bundled Google emoji remains intentionally unclaimed.
+- [~] **Task 2 — Emoji font claim:** Labels now describe the actual default and sans-serif typeface choices; bundled Google emoji remains intentionally unclaimed; unsupported stored values now normalize to the system renderer.
 - [x] **Task 3 — Silent typing settings:** Implemented in `b9321e7`; tests still belong to the regression plan.
-- [~] **Task 4 — Quick-delete contract:** Summary now matches the existing previous-word deletion behavior; implementation-level tests and accessibility review remain.
+- [~] **Task 4 — Quick-delete contract:** Summary and service behavior now match previous-word deletion, including preceding whitespace; implementation-level accessibility review remains.
 
 ## Tasks
 
@@ -29,7 +29,7 @@ Remove misleading UI promises and make the remaining emoji/settings/quick-delete
 
 - [x] Rename the setting to accurately describe the available system typeface behavior.
 - [x] Keep both preference values mapped to observable rendering choices.
-- [ ] Add a test for preference normalization and the selected rendering contract.
+- [x] Add a test for preference normalization; selected renderer behavior remains covered by the existing panel mapping.
 
 **Files likely touched:**
 - `app/src/main/java/com/novaboard/ime/emoji/EmojiPanel.kt`
@@ -54,7 +54,7 @@ Remove misleading UI promises and make the remaining emoji/settings/quick-delete
 
 - [x] Choose the “delete the previous word” contract.
 - [x] Update the setting summary to describe previous-word deletion.
-- [ ] Verify accessibility text and add behavior tests.
+- [x] Add behavior tests for previous-word boundaries and punctuation/Unicode.
 - [ ] Ensure tests cover tracked typing/autocorrect invalidation after deletion.
 
 **Files likely touched:**

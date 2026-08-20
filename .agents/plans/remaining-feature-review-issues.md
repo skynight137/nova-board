@@ -28,8 +28,8 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
 
 - Translation does not return a result to replace the original selected range.
 - Clipboard image URIs are still persisted without durable app-private storage or a durable grant strategy.
-- Quick-delete behavior now has an accurate “delete the previous word” summary; behavioral regression coverage is still pending.
-- Focused regression coverage is still missing; see `prevent-keyboard-review-regressions-lifecycle-preference.md`.
+- Quick-delete behavior now has an accurate “delete the previous word” summary and pure boundary coverage; Android lifecycle/persistence regression coverage is still pending.
+- Focused regression coverage is partially complete; remaining work is tracked in `prevent-keyboard-review-regressions-lifecycle-preference.md`.
 
 ## Progress
 
@@ -38,7 +38,7 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
 - [x] Complete translation result replacement.
 - [~] Make image clipboard storage durable (implementation complete; dedicated persistence tests remain).
 - [~] Resolve remaining emoji controls/media policy and refine emoji-on-enter policy.
-- [ ] Add focused lifecycle, persistence, layout, and preference regression tests.
+- [~] Add focused lifecycle, persistence, layout, and preference regression tests; pure editing/editor-policy/preference contracts are covered, while Android lifecycle, clipboard, and layout seams remain.
 - [ ] Execute the next keyboard interaction and polish plan:
   `.agents/plans/next-keyboard-interaction-and-polish.md`
 

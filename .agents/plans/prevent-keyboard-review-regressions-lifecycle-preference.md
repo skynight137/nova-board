@@ -17,12 +17,12 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 
 ## Progress
 
-**Status: `[ ] Test coverage not started`**
+**Status: `[~] Pure editing, editor-policy, and preference contracts covered; Android lifecycle and persistence seams remain**
 
 - [x] Production prerequisites for session cleanup, number-row preference, clipboard listener cleanup, and inactive-setting removal exist.
 - [~] Quick-delete summary and emoji-on-enter policy are partially aligned; focused tests are missing.
 - [ ] Add deterministic lifecycle/session seams and tests.
-- [ ] Add layout, clipboard, editing-state, and preference regression tests.
+- [~] Add layout, clipboard, editing-state, and preference regression tests; pure editing, editor-policy, and emoji-font normalization coverage now exists.
 - [ ] Run the final verification gate and commit the test coverage.
 
 ## Architecture decisions
@@ -147,14 +147,14 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 
 **Acceptance criteria:**
 - [ ] Retained number-row, long-press-symbol, key-popup, emoji-on-enter, and typing toggles have behavior assertions.
-- [ ] Emoji-on-enter is not triggered for email, URI, password, or other unsupported editor variations.
+- [x] Emoji-on-enter is not triggered for email, URI, password, or other unsupported editor variations.
 - [x] No settings dialog exposes the removed inactive typing toggles.
 - [ ] No retained settings dialog toggle lacks an observable behavior contract.
 - [ ] Preference reset restores the same defaults used by the behavior tests.
 
 **Verification:**
 - [ ] `KeyboardPreferences` default/reset tests pass.
-- [ ] Editor-type policy tests cover supported and excluded variations.
+- [x] Editor-type policy tests cover supported and excluded variations.
 - [ ] The settings resource compiles in the debug APK build.
 
 **Dependencies:** Task 2
