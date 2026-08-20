@@ -323,9 +323,6 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             openTranslation()
         }
         root.findViewById<ImageButton>(R.id.btnVoice).setOnClickListener { toggleVoiceInput() }
-        root.findViewById<ImageButton>(R.id.btnSearch).setOnClickListener {
-            currentInputConnection?.performEditorAction(EditorInfo.IME_ACTION_SEARCH)
-        }
         root.findViewById<ImageButton>(R.id.btnMore).setOnClickListener {
             showToolsMenu(root)
         }
@@ -379,6 +376,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                     isFocusable = true
                     isClickable = true
                     contentDescription = item.label
+                    minimumHeight = (72 * resources.displayMetrics.density).toInt()
                     setPadding(4, 10, 4, 10)
                 }
             cell.addView(
@@ -414,8 +412,6 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                     "hotkeys" -> toggleHotkeys()
                     "translate" -> openTranslation()
                     "voice" -> toggleVoiceInput()
-                    "search" ->
-                        currentInputConnection?.performEditorAction(EditorInfo.IME_ACTION_SEARCH)
                     "emoji" -> onEmoji()
                     "settings" ->
                         startActivity(
@@ -472,7 +468,6 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             "hotkeys" -> "⌨"
             "translate" -> "文"
             "voice" -> "♩"
-            "search" -> "⌕"
             "emoji", "stickers", "gif" -> "☺"
             "settings" -> "⚙"
             "languages" -> "◎"

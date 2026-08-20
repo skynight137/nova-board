@@ -298,8 +298,9 @@ constructor(
                         HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
                     )
                 }
-                // Do not create a PopupWindow for every tap. That work happens on the IME main
-                // thread and was enough to make rapid consecutive letters feel intermittent.
+                if (keyPopups) {
+                    showKeyPreview(hit)
+                }
                 schedulePopup(hit)
             }
             MotionEvent.ACTION_POINTER_DOWN -> {
@@ -484,7 +485,7 @@ constructor(
             this,
             android.view.Gravity.NO_GRAVITY,
             loc[0] + hit.rect.centerX().toInt() - preview.measuredWidth / 2,
-            loc[1] + hit.rect.top.toInt() - 96,
+            popupTop(loc[1], hit.rect.top, preview.measuredHeight),
         )
         popup = window
     }
@@ -533,10 +534,14 @@ constructor(
             this,
             android.view.Gravity.NO_GRAVITY,
             loc[0] + hit.rect.left.toInt(),
-            loc[1] + hit.rect.top.toInt() - 100,
+            popupTop(loc[1], hit.rect.top, row.measuredHeight),
         )
         popup = pw
     }
+
+    private fun popupTop(windowTop: Int, keyTop: Float, popupHeight: Int): Int =
+        (windowTop + keyTop.toInt() - popupHeight - (8 * resources.displayMetrics.density).toInt())
+            .coerceAtLeast(windowTop)
 
     private fun handleKeyUp(key: Key) {
         if (keypressSound) {

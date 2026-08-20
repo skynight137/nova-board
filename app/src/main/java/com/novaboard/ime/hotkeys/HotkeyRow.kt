@@ -155,7 +155,7 @@ class HotkeyController(private val getInputConnection: () -> InputConnection?) {
         val lp =
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.MATCH_PARENT,
+                (48 * density).toInt(),
             )
         lp.setMargins(
             (3 * density).toInt(),
@@ -166,5 +166,6 @@ class HotkeyController(private val getInputConnection: () -> InputConnection?) {
         view.layoutParams = lp
         view.gravity = android.view.Gravity.CENTER
         view.textSize = 12f
+        view.minHeight = (48 * density).toInt()
     }
 }
