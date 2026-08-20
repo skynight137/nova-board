@@ -90,6 +90,15 @@ normalize_subject() {
     "Implement infrastructure for editing and preference contracts and policies")
       printf '%s\n' "feat: add editing and preference contracts"
       ;;
+    "Extract clipboard persistence logic to a dedicated class and add tests")
+      printf '%s\n' "test: cover clipboard persistence contracts"
+      ;;
+    "Implement durable image clipboard persistence and settings support")
+      printf '%s\n' "feat: persist image clipboard history and settings"
+      ;;
+    "Remove deprecated translation and editor replacement plan")
+      printf '%s\n' "docs: remove deprecated translation plan"
+      ;;
     *)
       echo "ERROR: no Conventional Commit mapping for '$subject'" >&2
       return 1
@@ -133,6 +142,9 @@ case "$subject" in
   "Refactor emoji panel and add tests for emoji data") echo "test: cover emoji search behavior" ;;
   "Implement initial translation feature architecture and result activity") echo "feat: add translation result flow" ;;
   "Implement infrastructure for editing and preference contracts and policies") echo "feat: add editing and preference contracts" ;;
+  "Extract clipboard persistence logic to a dedicated class and add tests") echo "test: cover clipboard persistence contracts" ;;
+  "Implement durable image clipboard persistence and settings support") echo "feat: persist image clipboard history and settings" ;;
+  "Remove deprecated translation and editor replacement plan") echo "docs: remove deprecated translation plan" ;;
   *) echo "ERROR: unmapped commit $GIT_COMMIT ($subject)" >&2; exit 1 ;;
 esac
 ' HEAD
