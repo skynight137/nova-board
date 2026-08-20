@@ -68,8 +68,7 @@ class HotkeyController(private val getInputConnection: () -> InputConnection?) {
                     else -> false
                 }
             if (handled) {
-                ctrlArmed = false
-                altArmed = false
+                disarm()
                 return
             }
         }
@@ -85,8 +84,7 @@ class HotkeyController(private val getInputConnection: () -> InputConnection?) {
         } else {
             ic?.commitText(char.toString(), 1)
         }
-        ctrlArmed = false
-        altArmed = false
+        disarm()
     }
 
     private fun sendKey(code: Int) {

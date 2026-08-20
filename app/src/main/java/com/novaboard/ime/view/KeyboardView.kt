@@ -99,6 +99,7 @@ constructor(
 
     private var hitRects: List<Hit> = emptyList()
     private var pressedHit: Hit? = null
+    private val secondaryPressedHits = mutableMapOf<Int, Hit>()
 
     private val longPressHandler = Handler(Looper.getMainLooper())
     private var longPressRunnable: Runnable? = null
@@ -202,6 +203,7 @@ constructor(
         cancelDeleteRepeat()
         clearGestureState()
         pressedHit = null
+        secondaryPressedHits.clear()
         quickDeleteTriggered = false
         deleteRepeatTriggered = false
         invalidate()
@@ -296,6 +298,14 @@ constructor(
                 // thread and was enough to make rapid consecutive letters feel intermittent.
                 schedulePopup(hit)
             }
+            MotionEvent.ACTION_POINTER_DOWN -> {
+                val index = event.actionIndex
+                val hit = hitAt(event.getX(index), event.getY(index))
+                if (hit != null) {
+                    secondaryPressedHits[event.getPointerId(index)] = hit
+                    invalidate()
+                }
+            }
             MotionEvent.ACTION_MOVE -> {
                 val hit = hitAt(event.x, event.y)
                 if (gestureActive) {
@@ -342,6 +352,15 @@ constructor(
                     invalidate()
                 }
             }
+            MotionEvent.ACTION_POINTER_UP -> {
+                val index = event.actionIndex
+                val pointerId = event.getPointerId(index)
+                secondaryPressedHits.remove(pointerId)?.let { hit ->
+                    if (hit.key.type != KeyType.BACKSPACE) {
+                        handleKeyUp(hit.key)
+                    }
+                }
+            }
             MotionEvent.ACTION_UP -> {
                 cancelPopup()
                 cancelDeleteRepeat()
@@ -362,6 +381,7 @@ constructor(
                     pressedHit?.let { handleKeyUp(it.key) }
                 }
                 pressedHit = null
+                secondaryPressedHits.clear()
                 invalidate()
             }
             MotionEvent.ACTION_CANCEL -> {
@@ -369,6 +389,7 @@ constructor(
                 cancelDeleteRepeat()
                 clearGestureState()
                 pressedHit = null
+                secondaryPressedHits.clear()
                 invalidate()
             }
         }

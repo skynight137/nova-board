@@ -22,6 +22,7 @@ class ClipboardPanel(
     private val onPick: (ClipboardItem) -> Unit,
 ) {
     private var panel: View? = null
+    private var target: ViewGroup? = null
     private lateinit var adapter: ClipboardAdapter
     private lateinit var emptyLabel: TextView
 
@@ -58,7 +59,6 @@ class ClipboardPanel(
                 history.getItems(),
                 onClick = {
                     onPick(it)
-                    dismiss()
                 },
                 onTogglePin = {
                     history.togglePin(it.id)
@@ -80,7 +80,7 @@ class ClipboardPanel(
                     ) = false
 
                     override fun onSwiped(vh: RecyclerView.ViewHolder, direction: Int) {
-                        val item = adapter.itemAt(vh.bindingAdapterPosition)
+                        val item = adapter.itemAt(vh.bindingAdapterPosition) ?: return
                         history.delete(item.id)
                         refresh()
                     }
@@ -99,6 +99,7 @@ class ClipboardPanel(
         )
         target.visibility = View.VISIBLE
         panel = root
+        this.target = target
     }
 
     private fun refresh() {
@@ -113,5 +114,9 @@ class ClipboardPanel(
             (view.parent as? ViewGroup)?.removeView(view)
         }
         panel = null
+        if (target?.childCount == 0) {
+            target?.visibility = View.GONE
+        }
+        target = null
     }
 }

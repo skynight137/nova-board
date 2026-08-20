@@ -40,6 +40,12 @@ class ClipboardAdapter(
             holder.text.text = item.text
         }
         holder.pin.alpha = if (item.pinned) 1f else 0.45f
+        holder.pin.contentDescription =
+            if (item.pinned) {
+                holder.itemView.context.getString(R.string.cd_unpin)
+            } else {
+                holder.itemView.context.getString(R.string.cd_pin)
+            }
         holder.itemView.setOnClickListener { onClick(item) }
         holder.pin.setOnClickListener { onTogglePin(item) }
     }
@@ -51,5 +57,5 @@ class ClipboardAdapter(
         notifyDataSetChanged()
     }
 
-    fun itemAt(position: Int) = items[position]
+    fun itemAt(position: Int) = items.getOrNull(position)
 }
