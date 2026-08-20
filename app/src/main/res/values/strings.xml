@@ -91,4 +91,5 @@
     <string name="incognito_on">Incognito mode is on</string>
     <string name="incognito_off">Incognito mode is off</string>
     <string name="incognito_summary">Do not learn new words while typing privately</string>
+    <string name="incognito_exit">Exit incognito mode</string>
 </resources>

@@ -10,4 +10,6 @@
     <color name="kb_suggestion_text_highlight">#1B1C1E</color>
     <color name="kb_divider">#C7CBD1</color>
     <color name="kb_toolbar_icon">#5A5D63</color>
+    <color name="kb_incognito_background">#DCE8FF</color>
+    <color name="kb_incognito_text">#183A75</color>
 </resources>

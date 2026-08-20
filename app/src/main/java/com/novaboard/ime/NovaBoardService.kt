@@ -60,6 +60,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private lateinit var hotkeysRow: LinearLayout
     private lateinit var cursorRow: LinearLayout
     private lateinit var emojiPanelContainer: android.widget.FrameLayout
+    private lateinit var incognitoBanner: TextView
 
     private lateinit var clipboardHistory: ClipboardHistoryManager
     private val suggestionEngine = SuggestionEngine()
@@ -135,6 +136,11 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         hotkeysRow = root.findViewById(R.id.hotkeysRow)
         cursorRow = root.findViewById(R.id.cursorRow)
         emojiPanelContainer = root.findViewById(R.id.emojiPanelContainer)
+        incognitoBanner = root.findViewById(R.id.incognitoBanner)
+        incognitoBanner.setOnClickListener {
+            KeyboardPreferences.setIncognitoMode(this, false)
+            updateIncognitoBanner()
+        }
 
         keyboardView.listener = this
         applyKeyboardPreferences()
@@ -244,6 +250,17 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             } else {
                 View.GONE
             }
+        updateIncognitoBanner()
+    }
+
+    private fun updateIncognitoBanner() {
+        if (!::incognitoBanner.isInitialized) return
+        val enabled = KeyboardPreferences.isIncognitoMode(this)
+        incognitoBanner.visibility = if (enabled) View.VISIBLE else View.GONE
+        if (enabled) {
+            incognitoBanner.text = getString(R.string.incognito_on)
+            incognitoBanner.contentDescription = getString(R.string.incognito_exit)
+        }
     }
 
     // ---- tools/suggestion strip toggle (the chevron in the reference screenshot) ----

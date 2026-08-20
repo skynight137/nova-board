@@ -10,6 +10,21 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+    <TextView
+        android:id="@+id/incognitoBanner"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:background="@color/kb_incognito_background"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:text="@string/incognito_on"
+        android:textColor="@color/kb_incognito_text"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
     <!-- Row 1/2: toggles between the tools icon strip and the suggestion strip,
          exactly like the "v" chevron behavior in SwiftKey -->
     <FrameLayout

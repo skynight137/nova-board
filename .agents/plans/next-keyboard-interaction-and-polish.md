@@ -201,8 +201,8 @@ reference. Incognito should be obvious but should not make the keyboard unusable
 **Acceptance criteria:**
 - [x] New words and autocorrect learning are not persisted while incognito is active.
 - [ ] Existing suggestions remain available unless the user explicitly disables predictions.
-- [ ] The keyboard shows an incognito indicator/background treatment in light and dark themes.
-- [ ] Exiting incognito returns to the prior visual state without losing normal preferences.
+- [x] The keyboard shows an incognito indicator/background treatment in light and dark themes.
+- [x] Exiting incognito returns to the prior visual state without losing normal preferences.
 - [ ] Input-session reset and service recreation preserve or clear incognito according to the documented
   preference policy.
 
