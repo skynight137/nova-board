@@ -129,16 +129,29 @@ constructor(
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val width = MeasureSpec.getSize(widthMeasureSpec)
+        val heightMode = MeasureSpec.getMode(heightMeasureSpec)
         val availableHeight = MeasureSpec.getSize(heightMeasureSpec)
-        if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.EXACTLY && availableHeight > 0) {
+        if (heightMode != MeasureSpec.UNSPECIFIED && availableHeight > 0) {
+            val density = resources.displayMetrics.density
+            val preferredMinimum = 48 * density
+            val compactMinimum = 36 * density
+            val maximum = 64 * density
+            val availablePerRow = availableHeight / page.rows.size.toFloat()
             measuredRowHeight =
-                (availableHeight / page.rows.size.toFloat()).coerceIn(
-                    48 * resources.displayMetrics.density,
-                    64 * resources.displayMetrics.density,
-                )
+                if (availablePerRow >= preferredMinimum) {
+                    availablePerRow.coerceAtMost(maximum)
+                } else {
+                    availablePerRow.coerceAtLeast(compactMinimum.coerceAtMost(availablePerRow))
+                }
         }
-        val height = (rowHeight * page.rows.size).toInt()
-        setMeasuredDimension(width, height)
+        val desiredHeight = (rowHeight * page.rows.size).toInt()
+        val measuredHeight =
+            if (heightMode == MeasureSpec.AT_MOST && availableHeight > 0) {
+                desiredHeight.coerceAtMost(availableHeight)
+            } else {
+                desiredHeight
+            }
+        setMeasuredDimension(resolveSize(width, widthMeasureSpec), measuredHeight)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {

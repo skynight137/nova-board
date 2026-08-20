@@ -260,7 +260,7 @@ reference. Incognito should be obvious but should not make the keyboard unusable
   and subtle transitions without sacrificing touch targets or reduced-motion behavior.
 
 **Acceptance criteria:**
-- [ ] Key rows scale from available width/height and never clip the bottom controls.
+- [x] Key rows scale from available width/height and never clip the bottom controls.
 - [ ] Pressed, long-press, menu, incognito, and gesture states have clear visual feedback.
 - [ ] Key-preview and menu transitions are short, cancellable, and disabled/reduced under the
   accessibility reduced-motion preference where applicable.

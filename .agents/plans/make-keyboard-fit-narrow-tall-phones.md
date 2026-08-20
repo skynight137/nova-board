@@ -27,9 +27,9 @@ keyboard view receives only the height it can safely use.
 
 **Acceptance criteria:**
 
-- [ ] Key rows scale from available width and height without clipping.
+- [x] Key rows scale from available width and height without clipping.
 - [ ] The number-row preference does not push bottom controls off-screen.
-- [ ] Narrow widths preserve usable key hit rectangles and minimum touch sizes.
+- [x] Narrow widths preserve usable key hit rectangles and minimum touch sizes.
 - [ ] Tall layouts do not create excessive empty gaps between controls.
 - [ ] Overflow and emoji overlays remain inside the keyboard window.
 
