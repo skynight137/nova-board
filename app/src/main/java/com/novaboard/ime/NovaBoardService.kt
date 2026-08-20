@@ -149,6 +149,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
+        if (::keyboardView.isInitialized) keyboardView.cancelInteractions()
         inputSession++
         selectionStart = -1
         selectionEnd = -1
@@ -209,6 +210,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
 
     private fun resetInputSession() {
         inputSession++
+        if (::keyboardView.isInitialized) keyboardView.cancelInteractions()
         stopVoiceInput()
         clipboardPanel?.dismiss()
         clipboardPanel = null

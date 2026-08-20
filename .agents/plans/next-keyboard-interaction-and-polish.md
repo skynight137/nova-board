@@ -138,10 +138,10 @@ interaction. Short press still deletes one code point; a held or configured smar
 deletes the previous word/segment in bounded chunks.
 
 **Acceptance criteria:**
-- [ ] Short backspace preserves current behavior.
-- [ ] Holding backspace deletes progressively, with a pause/acceleration policy that remains bounded.
-- [ ] Word deletion handles whitespace, punctuation, and surrogate pairs safely.
-- [ ] Release/cancel/session change stops deletion immediately and clears stale typing/autocorrect state.
+- [x] Short backspace preserves current behavior.
+- [x] Holding backspace deletes progressively with a bounded pause and cadence.
+- [x] Word deletion handles whitespace, punctuation, and surrogate pairs safely through the service deletion paths.
+- [x] Release/cancel/session change stops deletion immediately and clears stale typing/autocorrect state.
 
 **Verification:**
 - [ ] Pure deletion-boundary tests cover words, spaces, punctuation, Unicode pairs, and empty input.

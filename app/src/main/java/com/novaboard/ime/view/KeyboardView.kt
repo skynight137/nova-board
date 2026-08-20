@@ -120,6 +120,8 @@ constructor(
     private var gestureLastX = 0f
     private var gestureLastY = 0f
     private val gestureLabels = mutableListOf<String>()
+    private var deleteRepeatRunnable: Runnable? = null
+    private var deleteRepeatTriggered = false
     private val audioManager by lazy {
         context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     }
@@ -182,6 +184,16 @@ constructor(
         invalidate()
     }
 
+    fun cancelInteractions() {
+        cancelPopup()
+        cancelDeleteRepeat()
+        clearGestureState()
+        pressedHit = null
+        quickDeleteTriggered = false
+        deleteRepeatTriggered = false
+        invalidate()
+    }
+
     private fun rebuildHitRects(width: Int) {
         val hits = mutableListOf<Hit>()
         page.rows.forEachIndexed { rowIndex, row: KeyRow ->
@@ -241,6 +253,10 @@ constructor(
             MotionEvent.ACTION_DOWN -> {
                 val hit = hitAt(event.x, event.y) ?: return true
                 pressedHit = hit
+                deleteRepeatTriggered = false
+                if (hit.key.type == KeyType.BACKSPACE) {
+                    scheduleDeleteRepeat()
+                }
                 if (
                     KeyboardPreferences.getGestureMode(context) == GestureMode.GESTURES &&
                         hit.key.type == KeyType.CHAR &&
@@ -314,6 +330,7 @@ constructor(
             }
             MotionEvent.ACTION_UP -> {
                 cancelPopup()
+                cancelDeleteRepeat()
                 if (gestureActive) {
                     val word =
                         recognizeGestureWord(
@@ -327,7 +344,7 @@ constructor(
                         pressedHit?.let { handleKeyUp(it.key) }
                     }
                     clearGestureState()
-                } else if (!quickDeleteTriggered) {
+                } else if (!quickDeleteTriggered && !deleteRepeatTriggered) {
                     pressedHit?.let { handleKeyUp(it.key) }
                 }
                 pressedHit = null
@@ -335,6 +352,7 @@ constructor(
             }
             MotionEvent.ACTION_CANCEL -> {
                 cancelPopup()
+                cancelDeleteRepeat()
                 clearGestureState()
                 pressedHit = null
                 invalidate()
@@ -348,6 +366,27 @@ constructor(
         gestureCancelled = false
         gestureDistance = 0f
         gestureLabels.clear()
+    }
+
+    private fun scheduleDeleteRepeat() {
+        cancelDeleteRepeat()
+        deleteRepeatTriggered = false
+        val runnable =
+            object : Runnable {
+                override fun run() {
+                    if (pressedHit?.key?.type != KeyType.BACKSPACE) return
+                    deleteRepeatTriggered = true
+                    listener?.onBackspace()
+                    longPressHandler.postDelayed(this, 90L)
+                }
+            }
+        deleteRepeatRunnable = runnable
+        longPressHandler.postDelayed(runnable, 450L)
+    }
+
+    private fun cancelDeleteRepeat() {
+        deleteRepeatRunnable?.let(longPressHandler::removeCallbacks)
+        deleteRepeatRunnable = null
     }
 
     private fun hitAt(x: Float, y: Float): Hit? = hitRects.firstOrNull { it.rect.contains(x, y) }
@@ -521,6 +560,7 @@ constructor(
 
     override fun onDetachedFromWindow() {
         cancelPopup()
+        cancelDeleteRepeat()
         toneGenerator?.release()
         toneGenerator = null
         super.onDetachedFromWindow()
