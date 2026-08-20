@@ -31,6 +31,8 @@ import com.novaboard.ime.clipboard.ClipType
 import com.novaboard.ime.clipboard.ClipboardHistoryManager
 import com.novaboard.ime.clipboard.ClipboardItem
 import com.novaboard.ime.clipboard.ClipboardPanel
+import com.novaboard.ime.editing.RepeatController
+import com.novaboard.ime.editing.RepeatToken
 import com.novaboard.ime.editing.canUndoAutocorrect
 import com.novaboard.ime.editing.previousWordDeletionCount
 import com.novaboard.ime.editor.isConversationEditorInputType
@@ -85,6 +87,11 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private var selectionEnd = -1
     private val cursorRepeatHandler = Handler(Looper.getMainLooper())
     private var cursorRepeatRunnable: Runnable? = null
+    private val cursorRepeatController =
+        RepeatController(
+            initialDelayMs = CURSOR_REPEAT_INITIAL_DELAY_MS,
+            intervalMs = CURSOR_REPEAT_INTERVAL_MS,
+        )
 
     private val currentWord = StringBuilder()
     private var previousWord: String? = null
@@ -529,25 +536,36 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private fun startCursorRepeat(code: Int) {
         stopCursorRepeat()
         val session = inputSession
+        val token = cursorRepeatController.start(session, code)
         sendDpad(code)
         val runnable =
             object : Runnable {
+                private var scheduledToken: RepeatToken = token
+
                 override fun run() {
-                    if (session != inputSession || currentInputConnection == null) {
+                    if (currentInputConnection == null) {
+                        cursorRepeatController.stop()
                         cursorRepeatRunnable = null
                         return
                     }
-                    sendDpad(code)
-                    cursorRepeatHandler.postDelayed(this, CURSOR_REPEAT_INTERVAL_MS)
+                    val next = cursorRepeatController.next(scheduledToken, inputSession)
+                    if (next == null) {
+                        cursorRepeatRunnable = null
+                        return
+                    }
+                    scheduledToken = next
+                    sendDpad(next.action)
+                    cursorRepeatHandler.postDelayed(this, next.delayMs)
                 }
             }
         cursorRepeatRunnable = runnable
-        cursorRepeatHandler.postDelayed(runnable, CURSOR_REPEAT_INITIAL_DELAY_MS)
+        cursorRepeatHandler.postDelayed(runnable, token.delayMs)
     }
 
     private fun stopCursorRepeat() {
         cursorRepeatRunnable?.let(cursorRepeatHandler::removeCallbacks)
         cursorRepeatRunnable = null
+        cursorRepeatController.stop()
     }
 
     private fun sendDpad(code: Int) {

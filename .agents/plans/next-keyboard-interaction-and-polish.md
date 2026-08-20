@@ -169,7 +169,7 @@ deletes the previous word/segment in bounded chunks.
 - [x] Cursor movement never commits text or invalidates unrelated typing state.
 
 **Verification:**
-- [ ] Repeat-controller tests cover start, stop, direction change, and session invalidation.
+- [x] Repeat-controller tests cover start, stop, direction change, and session invalidation.
 - [ ] Manual check: cursor movement feels continuous without runaway acceleration.
 
 **Dependencies:** Task 1

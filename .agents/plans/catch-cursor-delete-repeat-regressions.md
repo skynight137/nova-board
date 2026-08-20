@@ -20,7 +20,7 @@ tests unless the timing and editor seams are isolated.
 
 ## Ordered task list
 
-### Task 1: Extract repeat-controller behavior into a pure contract
+### Task 1: Extract repeat-controller behavior into a pure contract `[x]`
 
 **Description:** Define a small JVM-testable repeat state contract for start,
 stop, direction changes, cadence, and session invalidation. Keep Android
@@ -28,11 +28,11 @@ stop, direction changes, cadence, and session invalidation. Keep Android
 
 **Acceptance criteria:**
 
-- [ ] A repeat start emits one immediate action and schedules bounded repeats.
-- [ ] Stop prevents all future actions.
-- [ ] Starting a new direction removes the previous direction's pending work.
-- [ ] Session invalidation prevents callbacks from acting on a later editor.
-- [ ] Missing input connection stops safely without throwing.
+- [x] A repeat start emits one immediate action and schedules bounded repeats.
+- [x] Stop prevents all future actions.
+- [x] Starting a new direction removes the previous direction's pending work.
+- [x] Session invalidation prevents callbacks from acting on a later editor.
+- [x] Missing input connection stops safely without throwing.
 
 **Files likely touched:**
 
