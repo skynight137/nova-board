@@ -163,10 +163,10 @@ deletes the previous word/segment in bounded chunks.
   preserving the existing spacebar horizontal cursor gesture as a compatible fallback.
 
 **Acceptance criteria:**
-- [ ] Holding an arrow control repeats movement at a bounded cadence.
-- [ ] Movement stops on release, cancel, editor/session change, or missing input connection.
-- [ ] Direction changes do not leave a previous repeat runnable active.
-- [ ] Cursor movement never commits text or invalidates unrelated typing state.
+- [x] Holding an arrow control repeats movement at a bounded cadence.
+- [x] Movement stops on release, cancel, editor/session change, or missing input connection.
+- [x] Direction changes do not leave a previous repeat runnable active.
+- [x] Cursor movement never commits text or invalidates unrelated typing state.
 
 **Verification:**
 - [ ] Repeat-controller tests cover start, stop, direction change, and session invalidation.

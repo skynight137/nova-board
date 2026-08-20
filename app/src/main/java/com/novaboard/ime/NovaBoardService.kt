@@ -8,6 +8,8 @@ import android.content.SharedPreferences
 import android.inputmethodservice.InputMethodService
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -74,6 +76,8 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private var pendingTranslation: TranslationRequest? = null
     private var selectionStart = -1
     private var selectionEnd = -1
+    private val cursorRepeatHandler = Handler(Looper.getMainLooper())
+    private var cursorRepeatRunnable: Runnable? = null
 
     private val currentWord = StringBuilder()
     private var previousWord: String? = null
@@ -149,6 +153,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
+        stopCursorRepeat()
         if (::keyboardView.isInitialized) keyboardView.cancelInteractions()
         inputSession++
         selectionStart = -1
@@ -209,6 +214,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     }
 
     private fun resetInputSession() {
+        stopCursorRepeat()
         inputSession++
         if (::keyboardView.isInitialized) keyboardView.cancelInteractions()
         stopVoiceInput()
@@ -403,24 +409,62 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     // ---- cursor row ----
 
     private fun wireCursorRow(root: View) {
-        root.findViewById<ImageButton>(R.id.btnCursorLeft).setOnClickListener {
-            sendDpad(KeyEvent.KEYCODE_DPAD_LEFT)
+        wireCursorButton(root.findViewById(R.id.btnCursorLeft), KeyEvent.KEYCODE_DPAD_LEFT)
+        wireCursorButton(root.findViewById(R.id.btnCursorRight), KeyEvent.KEYCODE_DPAD_RIGHT)
+        wireCursorButton(root.findViewById(R.id.btnCursorUp), KeyEvent.KEYCODE_DPAD_UP)
+        wireCursorButton(root.findViewById(R.id.btnCursorDown), KeyEvent.KEYCODE_DPAD_DOWN)
+    }
+
+    private fun wireCursorButton(button: ImageButton, code: Int) {
+        button.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                android.view.MotionEvent.ACTION_DOWN -> {
+                    startCursorRepeat(code)
+                    true
+                }
+                android.view.MotionEvent.ACTION_UP,
+                android.view.MotionEvent.ACTION_CANCEL -> {
+                    stopCursorRepeat()
+                    true
+                }
+                else -> true
+            }
         }
-        root.findViewById<ImageButton>(R.id.btnCursorRight).setOnClickListener {
-            sendDpad(KeyEvent.KEYCODE_DPAD_RIGHT)
-        }
-        root.findViewById<ImageButton>(R.id.btnCursorUp).setOnClickListener {
-            sendDpad(KeyEvent.KEYCODE_DPAD_UP)
-        }
-        root.findViewById<ImageButton>(R.id.btnCursorDown).setOnClickListener {
-            sendDpad(KeyEvent.KEYCODE_DPAD_DOWN)
-        }
+    }
+
+    private fun startCursorRepeat(code: Int) {
+        stopCursorRepeat()
+        val session = inputSession
+        sendDpad(code)
+        val runnable =
+            object : Runnable {
+                override fun run() {
+                    if (session != inputSession || currentInputConnection == null) {
+                        cursorRepeatRunnable = null
+                        return
+                    }
+                    sendDpad(code)
+                    cursorRepeatHandler.postDelayed(this, CURSOR_REPEAT_INTERVAL_MS)
+                }
+            }
+        cursorRepeatRunnable = runnable
+        cursorRepeatHandler.postDelayed(runnable, CURSOR_REPEAT_INITIAL_DELAY_MS)
+    }
+
+    private fun stopCursorRepeat() {
+        cursorRepeatRunnable?.let(cursorRepeatHandler::removeCallbacks)
+        cursorRepeatRunnable = null
     }
 
     private fun sendDpad(code: Int) {
         val ic = currentInputConnection ?: return
         ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, code))
         ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, code))
+    }
+
+    private companion object {
+        const val CURSOR_REPEAT_INITIAL_DELAY_MS = 350L
+        const val CURSOR_REPEAT_INTERVAL_MS = 70L
     }
 
     // ---- suggestions ----
