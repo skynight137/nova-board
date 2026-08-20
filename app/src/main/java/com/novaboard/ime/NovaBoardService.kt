@@ -671,6 +671,22 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         }
     }
 
+    override fun onGestureWord(path: String) {
+        val ic = currentInputConnection ?: return
+        val word =
+            suggestionEngine.suggest(path, previousWord)
+                .firstOrNull()
+                ?.takeIf { it.isNotBlank() }
+                ?: path
+        val suffix =
+            if (KeyboardPreferences.getBoolean(this, KeyboardPreferences.AUTO_SPACE)) " " else ""
+        ic.commitText(word + suffix, 1)
+        learnWordIfAllowed(word)
+        previousWord = word
+        currentWord.clear()
+        refreshSuggestionsIfReady()
+    }
+
     // ---- voice typing ----
 
     private fun toggleVoiceInput() {

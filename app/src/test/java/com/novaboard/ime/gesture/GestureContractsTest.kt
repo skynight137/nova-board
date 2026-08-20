@@ -1,6 +1,7 @@
 package com.novaboard.ime.gesture
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class GestureContractsTest {
@@ -24,5 +25,20 @@ class GestureContractsTest {
     fun repeatTimingHasStableDefaults() {
         assertEquals(350L, RepeatTiming().initialDelayMs)
         assertEquals(70L, RepeatTiming().intervalMs)
+    }
+
+    @Test
+    fun gestureLettersNormalizeJitterAndRejectNonLetters() {
+        assertEquals("cat", normalizeGestureLetters(listOf("c", "c", "a", "a", "t")))
+        assertNull(normalizeGestureLetters(listOf("c", "123", "t")))
+    }
+
+    @Test
+    fun gestureWordRequiresACommittedPath() {
+        assertEquals(
+            "cat",
+            recognizeGestureWord(listOf("c", "a", "t"), 40f, cancelled = false),
+        )
+        assertNull(recognizeGestureWord(listOf("c", "a"), 40f, cancelled = true))
     }
 }

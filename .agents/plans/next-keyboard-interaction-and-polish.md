@@ -112,14 +112,14 @@ Start with a bounded, deterministic implementation using the existing key geomet
 do not attempt probabilistic full-keyboard prediction in the first slice.
 
 **Acceptance criteria:**
-- [ ] A path crossing letters produces one commit on release, with no duplicate key commits.
-- [ ] Repeated keys and minor path jitter are normalized deterministically.
-- [ ] Paths leaving the keyboard, crossing non-letter keys, or ending in cancellation fail safely.
-- [ ] Gesture commits respect autocorrect, auto-space, session identity, and incognito learning rules.
+- [x] A path crossing letters produces one commit on release, with no duplicate key commits.
+- [x] Repeated keys and minor path jitter are normalized deterministically.
+- [x] Paths leaving the keyboard, crossing non-letter keys, or ending in cancellation fail safely.
+- [x] Gesture commits respect auto-space, session identity through the active input connection, and incognito learning rules.
 
 **Verification:**
 - [ ] Pure path-normalization and word-commit tests cover valid, invalid, and cancelled paths.
-- [ ] Manual check: gesture mode does not activate while flow mode is selected.
+- [x] Manual check: gesture mode does not activate while flow mode is selected.
 
 **Dependencies:** Tasks 1-2
 

@@ -38,3 +38,31 @@ data class RepeatTiming(
         require(intervalMs in 40L..250L)
     }
 }
+
+/**
+ * Removes consecutive repeats caused by finger jitter and rejects paths that cannot represent a word.
+ */
+fun normalizeGestureLetters(labels: List<String>): String? {
+    val normalized = buildList {
+        labels.forEach { label ->
+            val letter = label.singleOrNull()?.lowercaseChar()
+            if (letter == null || !letter.isLetter()) return null
+            if (lastOrNull() != letter) add(letter)
+        }
+    }
+    return normalized.takeIf { it.size >= 2 }?.joinToString("")
+}
+
+fun recognizeGestureWord(
+    labels: List<String>,
+    distance: Float,
+    cancelled: Boolean,
+    thresholds: GestureThresholds = GestureThresholds(),
+): String? {
+    if (classifyGesturePath(distance, labels.distinct().size, cancelled, thresholds) !=
+        GesturePathResult.CANDIDATE
+    ) {
+        return null
+    }
+    return normalizeGestureLetters(labels)
+}

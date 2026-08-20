@@ -16,6 +16,7 @@ input without a third-party keyboard SDK.
 - Voice typing through Android's on-device `SpeechRecognizer`
 - Translation actions through Android's `ACTION_PROCESS_TEXT` contract when a
   translation-capable app is installed
+- Optional gesture typing across letter keys with bounded path recognition
 - Settings actions to enable NovaBoard and switch the active input method
 - Exportable diagnostic report with bounded device, app, and application-log
   information for development support
@@ -32,7 +33,6 @@ input without a third-party keyboard SDK.
 - Cut/copy/paste/select-all actions are reserved for the tools-row expansion.
 - Image clipboard paste depends on the target editor accepting Android
   `InputContentInfo`; unsupported editors show a clear message.
-- Swipe-to-type is not implemented.
 - The suggestion dictionary is a small seed list intended to be replaceable by
   a larger frequency list or on-device language model.
 - The launcher icon is a placeholder vector monogram.

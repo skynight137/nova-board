@@ -17,12 +17,14 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
 import com.novaboard.ime.R
+import com.novaboard.ime.gesture.recognizeGestureWord
 import com.novaboard.ime.model.Key
 import com.novaboard.ime.model.KeyRow
 import com.novaboard.ime.model.KeyType
 import com.novaboard.ime.model.KeyboardLayouts
 import com.novaboard.ime.model.KeyboardPage
 import com.novaboard.ime.settings.KeyboardPreferences
+import com.novaboard.ime.settings.GestureMode
 
 /**
  * Renders the number row, QWERTY letters and the bottom row (matches sections 3-4 of the requested
@@ -54,6 +56,8 @@ constructor(
         fun onCursorMove(direction: Int)
 
         fun onQuickDelete()
+
+        fun onGestureWord(path: String)
     }
 
     var listener: OnKeyListener? = null
@@ -110,6 +114,12 @@ constructor(
     private var quickDelete = true
     private var quickDeleteTriggered = false
     private var cursorDragLastX = 0f
+    private var gestureActive = false
+    private var gestureCancelled = false
+    private var gestureDistance = 0f
+    private var gestureLastX = 0f
+    private var gestureLastY = 0f
+    private val gestureLabels = mutableListOf<String>()
     private val audioManager by lazy {
         context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     }
@@ -231,6 +241,19 @@ constructor(
             MotionEvent.ACTION_DOWN -> {
                 val hit = hitAt(event.x, event.y) ?: return true
                 pressedHit = hit
+                if (
+                    KeyboardPreferences.getGestureMode(context) == GestureMode.GESTURES &&
+                        hit.key.type == KeyType.CHAR &&
+                        hit.key.label.singleOrNull()?.isLetter() == true
+                ) {
+                    gestureActive = true
+                    gestureCancelled = false
+                    gestureDistance = 0f
+                    gestureLastX = event.x
+                    gestureLastY = event.y
+                    gestureLabels.clear()
+                    gestureLabels += hit.key.label
+                }
                 invalidate()
                 cursorDragLastX = event.x
                 quickDeleteTriggered = false
@@ -247,7 +270,24 @@ constructor(
             }
             MotionEvent.ACTION_MOVE -> {
                 val hit = hitAt(event.x, event.y)
+                if (gestureActive) {
+                    gestureDistance +=
+                        kotlin.math.hypot(
+                            (event.x - gestureLastX).toDouble(),
+                            (event.y - gestureLastY).toDouble(),
+                        ).toFloat()
+                    gestureLastX = event.x
+                    gestureLastY = event.y
+                    val key = hit?.key
+                    if (key?.type == KeyType.CHAR && key.label.singleOrNull()?.isLetter() == true) {
+                        gestureLabels += key.label
+                    } else {
+                        gestureCancelled = true
+                    }
+                    cancelPopup()
+                }
                 if (
+                    !gestureActive &&
                     quickDelete &&
                         !quickDeleteTriggered &&
                         pressedHit?.key?.type == KeyType.BACKSPACE &&
@@ -258,6 +298,7 @@ constructor(
                     cancelPopup()
                 }
                 if (
+                    !gestureActive &&
                     cursorControl &&
                         pressedHit?.key?.type == KeyType.SPACE &&
                         kotlin.math.abs(event.x - cursorDragLastX) >= 18
@@ -273,7 +314,20 @@ constructor(
             }
             MotionEvent.ACTION_UP -> {
                 cancelPopup()
-                if (!quickDeleteTriggered) {
+                if (gestureActive) {
+                    val word =
+                        recognizeGestureWord(
+                            labels = gestureLabels,
+                            distance = gestureDistance,
+                            cancelled = gestureCancelled,
+                        )
+                    if (word != null) {
+                        listener?.onGestureWord(word)
+                    } else if (!gestureCancelled && gestureLabels.size == 1) {
+                        pressedHit?.let { handleKeyUp(it.key) }
+                    }
+                    clearGestureState()
+                } else if (!quickDeleteTriggered) {
                     pressedHit?.let { handleKeyUp(it.key) }
                 }
                 pressedHit = null
@@ -281,11 +335,19 @@ constructor(
             }
             MotionEvent.ACTION_CANCEL -> {
                 cancelPopup()
+                clearGestureState()
                 pressedHit = null
                 invalidate()
             }
         }
         return true
+    }
+
+    private fun clearGestureState() {
+        gestureActive = false
+        gestureCancelled = false
+        gestureDistance = 0f
+        gestureLabels.clear()
     }
 
     private fun hitAt(x: Float, y: Float): Hit? = hitRects.firstOrNull { it.rect.contains(x, y) }
