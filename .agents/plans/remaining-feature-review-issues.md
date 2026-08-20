@@ -49,7 +49,8 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
   and Android-only verification remain:
   `.agents/plans/translation-and-editor-replacement.md`
 - [~] Resolve remaining emoji controls/media policy and refine emoji-on-enter policy.
-- [~] Add focused lifecycle, persistence, layout, and preference regression tests; pure editing/editor-policy/preference contracts are covered, while Android lifecycle, clipboard, and layout seams remain.
+- [~] Add focused lifecycle, persistence, layout, and preference regression tests; pure session/layout/editing/clipboard parsing contracts are covered, while Android lifecycle, clipboard listener, and preference-reset seams remain deferred:
+  `.agents/plans/prevent-keyboard-review-regressions-lifecycle-preference.md`
 - [~] Execute the next keyboard interaction and polish plan; bounded gesture word entry, cursor repeat, incognito visuals, tools overflow, and bounded geometry are complete, while smart delete and final visual tuning remain:
   `.agents/plans/next-keyboard-interaction-and-polish.md`
 

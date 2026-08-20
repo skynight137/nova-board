@@ -52,6 +52,29 @@ class KeyboardModelTest {
     }
 
     @Test
+    fun numberRowPreferenceChangesLettersAndPrimarySymbolsOnly() {
+        assertEquals(5, KeyboardLayouts.letters.rows.size)
+        assertEquals(4, KeyboardLayouts.lettersWithoutNumberRow.rows.size)
+        assertEquals(4, KeyboardLayouts.symbols(showNumberRow = true).rows.size)
+        assertEquals(3, KeyboardLayouts.symbols(showNumberRow = false).rows.size)
+        assertEquals(
+            KeyType.CHAR,
+            KeyboardLayouts.symbols(showNumberRow = true).rows.first().keys.first().type,
+        )
+        assertEquals(
+            "@",
+            KeyboardLayouts.symbols(showNumberRow = false).rows.first().keys.first().label,
+        )
+    }
+
+    @Test
+    fun secondarySymbolsKeepTheirNavigationShapeRegardlessOfNumberRow() {
+        assertEquals(4, KeyboardLayouts.symbolsSecondary.rows.size)
+        assertEquals(KeyType.SYMBOLS, KeyboardLayouts.symbolsSecondary.rows[1].keys.first().type)
+        assertEquals(KeyType.LETTERS, KeyboardLayouts.symbolsSecondary.rows.last().keys.first().type)
+    }
+
+    @Test
     fun punctuationKeysOfferMissingSymbolsOnLongPress() {
         val bottomRow = KeyboardLayouts.letters.rows.last().keys
 

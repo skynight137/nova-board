@@ -30,4 +30,18 @@ class EditingContractsTest {
         assertFalse(canUndoAutocorrect("teh ", "write that "))
         assertFalse(canUndoAutocorrect(null, "write teh "))
     }
+
+    @Test
+    fun staleSessionOrRecognizerResultsAreRejected() {
+        assertTrue(acceptsInputSessionResult(4L, 4L, 9L, 9L))
+        assertFalse(acceptsInputSessionResult(3L, 4L, 9L, 9L))
+        assertFalse(acceptsInputSessionResult(4L, 4L, 8L, 9L))
+    }
+
+    @Test
+    fun selectionChangeOnlyResetsTrackedTypingWhenItNoLongerOwnsTheCursor() {
+        assertFalse(shouldResetTrackedTyping(2, 2, 3, 3, "hello", "say hello"))
+        assertTrue(shouldResetTrackedTyping(2, 2, 3, 3, "hello", "say world"))
+        assertFalse(shouldResetTrackedTyping(2, 2, 2, 2, "hello", "say world"))
+    }
 }

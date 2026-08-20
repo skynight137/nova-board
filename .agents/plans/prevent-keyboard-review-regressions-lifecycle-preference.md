@@ -21,8 +21,14 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 
 - [x] Production prerequisites for session cleanup, number-row preference, clipboard listener cleanup, and inactive-setting removal exist.
 - [~] Quick-delete summary and emoji-on-enter policy are partially aligned; focused tests are missing.
-- [ ] Add deterministic lifecycle/session seams and tests.
-- [~] Add layout, clipboard, editing-state, and preference regression tests; pure editing, editor-policy, and emoji-font normalization coverage now exists.
+- [✓] Add deterministic lifecycle/session seams and tests for stale
+  recognizer results and selection ownership.
+- [~] Add layout, clipboard, editing-state, and preference regression tests;
+  pure layout, editing-state, editor-policy, clipboard parsing, and emoji-font
+  normalization coverage exists. Android clipboard listener/provider,
+  preference reset, and framework lifecycle seams remain deferred because this
+  project has no JVM-safe Android context or instrumentation boundary in the
+  available environment.
 - [ ] Run the final verification gate and commit the test coverage.
 
 ## Architecture decisions
@@ -37,19 +43,19 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 
 ### Phase 1: Test seams and state contracts
 
-## Task 1: Define deterministic input-session acceptance rules `[ ]`
+## Task 1: Define deterministic input-session acceptance rules `[✓]`
 
 **Description:** Extract or expose a small package-visible state contract for accepting editor mutations and asynchronous recognition results. The contract should make the active-session identity and tracked-word invalidation behavior testable without constructing `InputMethodService` or `SpeechRecognizer`.
 
 **Acceptance criteria:**
-- [ ] A result from an older session is rejected even if recognition is still delivering callbacks.
-- [ ] A result from the current session is accepted only for the current recognizer/input target.
-- [ ] Selection/editor transitions clear tracked word, previous word, and undo-autocorrect state.
-- [ ] A keyboard-owned commit does not immediately invalidate a word that is still directly before the cursor.
+- [✓] A result from an older session is rejected even if recognition is still delivering callbacks.
+- [✓] A result from the current session is accepted only for the current recognizer/input target.
+- [✓] Selection/editor transitions clear tracked word, previous word, and undo-autocorrect state.
+- [✓] A keyboard-owned commit does not immediately invalidate a word that is still directly before the cursor.
 
 **Verification:**
-- [ ] Focused JVM tests cover accepted, stale, and changed-editor cases.
-- [ ] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest` passes.
+- [✓] Focused JVM tests cover accepted, stale, and changed-editor cases.
+- [✓] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest` passes.
 
 **Dependencies:** None
 
@@ -59,19 +65,20 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 
 **Estimated scope:** Medium: 3-5 files
 
-## Task 2: Cover preference-aware keyboard layout contracts `[ ]`
+## Task 2: Cover preference-aware keyboard layout contracts `[✓]`
 
 **Description:** Add model-level tests for the number-row preference across letters, primary symbols, secondary symbols, and return-to-letters behavior. Keep the preference decision in the existing keyboard model/view boundary rather than duplicating layout definitions in tests.
 
 **Acceptance criteria:**
-- [ ] Enabled number-row preference produces a number row on letters and primary symbols pages.
-- [ ] Disabled number-row preference omits the number row on both pages.
-- [ ] Secondary symbols behavior remains unchanged and returns to the correct preference-aware letters page.
-- [ ] Long-press-symbol enablement is independent from key-preview enablement at the interaction contract level.
+- [✓] Enabled number-row preference produces a number row on letters and primary symbols pages.
+- [✓] Disabled number-row preference omits the number row on both pages.
+- [✓] Secondary symbols behavior remains unchanged and returns to the correct preference-aware letters page.
+- [~] Long-press-symbol enablement remains independently implemented, but its
+  Android view interaction is deferred without an instrumentation boundary.
 
 **Verification:**
-- [ ] Tests assert row counts and key types rather than pixel positions.
-- [ ] Existing `KeyboardModelTest` remains green.
+- [✓] Tests assert row counts and key types rather than pixel positions.
+- [✓] Existing `KeyboardModelTest` remains green.
 
 **Dependencies:** None
 
@@ -83,29 +90,29 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 
 **Estimated scope:** Medium: 3-5 files
 
-### Checkpoint: State and layout foundation
+### Checkpoint: State and layout foundation `[✓]`
 
-- [ ] Focused tests for Tasks 1-2 pass.
-- [ ] No Android-only test dependency is introduced unnecessarily.
-- [ ] `:app:compileDebugKotlin` succeeds.
+- [✓] Focused tests for Tasks 1-2 pass.
+- [✓] No Android-only test dependency is introduced unnecessarily.
+- [✓] `:app:compileDebugKotlin` succeeds.
 
 ### Phase 2: Persistence and panel lifecycle regression coverage
 
-## Task 3: Prevent clipboard startup and panel lifecycle regressions `[ ]`
+## Task 3: Prevent clipboard startup and panel lifecycle regressions `[~]`
 
 **Description:** Make clipboard persistence and listener ownership independently testable, then cover malformed JSON, valid mixed entries, duplicate startup import, text clips without a plain-text MIME declaration, and listener removal when panels are dismissed or replaced.
 
 **Acceptance criteria:**
-- [ ] One malformed JSON entry does not prevent valid entries from loading.
-- [ ] Invalid IDs/types are skipped without corrupting `nextId`.
-- [ ] A pre-existing primary clip is imported once and duplicate protection prevents repeated startup imports.
-- [ ] Dismissing a clipboard panel removes its listener, and opening a replacement panel does not leave the old panel subscribed.
-- [ ] Image entries that cannot be resolved are represented as unavailable or safely rejected rather than crashing startup.
+- [✓] One malformed JSON entry does not prevent valid entries from loading.
+- [✓] Invalid IDs/types are skipped without corrupting `nextId`.
+- [✓] A pre-existing primary clip is imported once and duplicate protection prevents repeated startup imports.
+- [~] Clipboard listener removal and unresolved image behavior remain Android
+  provider/context checks and are deferred.
 
 **Verification:**
-- [ ] Persistence tests use an isolated fake or temporary preference context.
-- [ ] Listener tests verify callback counts after repeated show/dismiss cycles.
-- [ ] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest` passes.
+- [✓] Persistence tests cover isolated pure JSON decoding without Android dependencies.
+- [~] Listener callback counts require an Android clipboard provider and are deferred.
+- [✓] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest` passes.
 
 **Dependencies:** None
 
@@ -155,7 +162,7 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 **Verification:**
 - [ ] `KeyboardPreferences` default/reset tests pass.
 - [x] Editor-type policy tests cover supported and excluded variations.
-- [ ] The settings resource compiles in the debug APK build.
+- [✓] The settings resource compiles in the debug APK build.
 
 **Dependencies:** Task 2
 
@@ -168,30 +175,31 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 
 **Estimated scope:** Medium: 3-5 files
 
-### Checkpoint: Regression suite
+### Checkpoint: Regression suite `[~]`
 
-- [ ] Tasks 1-5 focused tests pass together.
-- [ ] No test relies on timing, a real microphone, a real clipboard provider, or a live editor.
-- [ ] `source .bin/env.sh && ./gradlew :app:assembleDebug` succeeds.
-- [ ] `git diff --check` succeeds.
+- [~] Pure portions of Tasks 1-5 pass together; Android lifecycle,
+  clipboard-listener, and preference-reset seams remain deferred.
+- [✓] No test relies on timing, a real microphone, a real clipboard provider, or a live editor.
+- [✓] `source .bin/env.sh && ./gradlew :app:assembleDebug` succeeds.
+- [✓] `git diff --check` succeeds.
 
 ### Phase 4: Delivery gate
 
-## Task 6: Review and land the regression coverage `[ ]`
+## Task 6: Review and land the regression coverage `[~]`
 
 **Description:** Review the final diff for test isolation, package visibility, naming, and accidental production behavior changes. Run the complete relevant verification suite and commit only the focused seam/test changes.
 
 **Acceptance criteria:**
-- [ ] Every review finding addressed by a test or explicitly documented as deferred.
-- [ ] Tests are deterministic and readable from the failure message alone.
-- [ ] No generated APKs, local state, secrets, or unrelated formatting changes are committed.
-- [ ] Commit uses a Conventional Commit message, such as `test: cover IME lifecycle and preference contracts`.
+- [✓] Every review finding addressed by a test or explicitly documented as deferred.
+- [✓] Tests are deterministic and readable from the failure message alone.
+- [✓] No generated APKs, local state, secrets, or unrelated formatting changes are committed.
+- [~] Commit uses a Conventional Commit message, such as `test: cover IME lifecycle and preference contracts` (pending the delivery commit).
 
 **Verification:**
-- [ ] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`
-- [ ] `source .bin/env.sh && ./gradlew :app:assembleDebug`
-- [ ] `git diff --check`
-- [ ] Final `git status --short --branch` is clean after commit.
+- [✓] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`
+- [✓] `source .bin/env.sh && ./gradlew :app:assembleDebug`
+- [✓] `git diff --check`
+- [~] Final `git status --short --branch` will be clean after the delivery commit.
 
 **Dependencies:** Tasks 1-5
 

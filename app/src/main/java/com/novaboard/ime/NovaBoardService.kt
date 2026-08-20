@@ -33,8 +33,10 @@ import com.novaboard.ime.clipboard.ClipboardItem
 import com.novaboard.ime.clipboard.ClipboardPanel
 import com.novaboard.ime.editing.RepeatController
 import com.novaboard.ime.editing.RepeatToken
+import com.novaboard.ime.editing.acceptsInputSessionResult
 import com.novaboard.ime.editing.canUndoAutocorrect
 import com.novaboard.ime.editing.previousWordDeletionCount
+import com.novaboard.ime.editing.shouldResetTrackedTyping
 import com.novaboard.ime.editor.isConversationEditorInputType
 import com.novaboard.ime.emoji.EmojiData
 import com.novaboard.ime.emoji.EmojiPanel
@@ -82,6 +84,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private var speechRecognizer: SpeechRecognizer? = null
     private var listening = false
     private var inputSession = 0L
+    private var voiceRecognizerGeneration = 0L
     private var translationPanel: TranslationPanel? = null
     private var selectionStart = -1
     private var selectionEnd = -1
@@ -215,9 +218,16 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         selectionStart = newSelStart
         selectionEnd = newSelEnd
         val textBeforeCursor = currentInputConnection?.getTextBeforeCursor(128, 0)?.toString().orEmpty()
-        val ownWordStillAtCursor =
-            currentWord.isNotEmpty() && textBeforeCursor.endsWith(currentWord.toString())
-        if ((oldSelStart != newSelStart || oldSelEnd != newSelEnd) && !ownWordStillAtCursor) {
+        if (
+            shouldResetTrackedTyping(
+                oldSelectionStart = oldSelStart,
+                oldSelectionEnd = oldSelEnd,
+                newSelectionStart = newSelStart,
+                newSelectionEnd = newSelEnd,
+                trackedWord = currentWord.toString(),
+                textBeforeCursor = textBeforeCursor,
+            )
+        ) {
             resetTypingState()
             refreshSuggestionsIfReady()
         }
@@ -900,6 +910,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         }
         stopVoiceInput()
         val session = inputSession
+        val recognizerGeneration = ++voiceRecognizerGeneration
         val recognizer = SpeechRecognizer.createSpeechRecognizer(this)
         speechRecognizer = recognizer
         recognizer.setRecognitionListener(
@@ -919,7 +930,14 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 }
 
                 override fun onResults(results: Bundle?) {
-                    if (session != inputSession || recognizer !== speechRecognizer) {
+                    if (
+                        !acceptsInputSessionResult(
+                            resultSession = session,
+                            activeSession = inputSession,
+                            resultRecognizer = recognizerGeneration,
+                            activeRecognizer = voiceRecognizerGeneration,
+                        ) || recognizer !== speechRecognizer
+                    ) {
                         recognizer.destroy()
                         return
                     }
@@ -956,6 +974,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     }
 
     private fun stopVoiceInput() {
+        voiceRecognizerGeneration++
         speechRecognizer?.stopListening()
         speechRecognizer?.destroy()
         speechRecognizer = null
