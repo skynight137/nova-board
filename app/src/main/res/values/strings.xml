@@ -10,7 +10,10 @@
     <string name="cd_tools">Tools</string>
     <string name="cd_clipboard">Clipboard</string>
     <string name="cd_hotkeys">Hotkeys</string>
+    <string name="cd_translate">Translate selected text</string>
     <string name="cd_voice">Voice typing</string>
+    <string name="cd_search">Search</string>
+    <string name="cd_more">More keyboard tools</string>
     <string name="cd_emoji">Emoji</string>
     <string name="tool_translate">Translate</string>
     <string name="tool_search">Search</string>

@@ -52,7 +52,7 @@ without reducing text or touch-target legibility.
 - [ ] Gesture mode provides clear in-progress and cancellation feedback.
 - [ ] Incognito state remains obvious and readable in both themes.
 - [ ] Overflow menu items have readable text, focus feedback, and touch targets.
-- [ ] Content descriptions remain meaningful after visibility changes.
+- [x] Content descriptions remain meaningful after visibility changes.
 
 **Files likely touched:**
 

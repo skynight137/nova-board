@@ -47,13 +47,13 @@
             <ImageButton android:id="@+id/btnHotkeys" style="@style/NovaBoardToolIcon"
                 android:src="@drawable/ic_hotkeys" android:contentDescription="@string/cd_hotkeys" />
             <ImageButton android:id="@+id/btnTranslate" style="@style/NovaBoardToolIcon"
-                android:src="@drawable/ic_translate" android:contentDescription="@string/cd_tools" />
+                android:src="@drawable/ic_translate" android:contentDescription="@string/cd_translate" />
             <ImageButton android:id="@+id/btnVoice" style="@style/NovaBoardToolIcon"
                 android:src="@drawable/ic_mic" android:contentDescription="@string/cd_voice" />
             <ImageButton android:id="@+id/btnSearch" style="@style/NovaBoardToolIcon"
-                android:src="@drawable/ic_search" android:contentDescription="@string/cd_tools" />
+                android:src="@drawable/ic_search" android:contentDescription="@string/cd_search" />
             <ImageButton android:id="@+id/btnMore" style="@style/NovaBoardToolIcon"
-                android:src="@drawable/ic_more" android:contentDescription="@string/cd_tools" />
+                android:src="@drawable/ic_more" android:contentDescription="@string/cd_more" />
         </LinearLayout>
 
         <LinearLayout

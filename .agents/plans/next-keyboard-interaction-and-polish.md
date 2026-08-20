@@ -264,7 +264,7 @@ reference. Incognito should be obvious but should not make the keyboard unusable
 - [ ] Pressed, long-press, menu, incognito, and gesture states have clear visual feedback.
 - [ ] Key-preview and menu transitions are short, cancellable, and disabled/reduced under the
   accessibility reduced-motion preference where applicable.
-- [ ] Light/dark contrast and content descriptions remain valid after theme changes.
+- [x] Light/dark contrast and content descriptions remain valid after theme changes.
 
 **Verification:**
 - [ ] Layout/model tests cover number-row and symbol-page geometry.
