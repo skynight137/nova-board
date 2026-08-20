@@ -15,9 +15,12 @@ the overall clipboard feature in a future product decision.
 
 - Image clips are copied into app-private `clipboard-images` storage.
 - Persisted image references are migrated, trimmed, and cleaned up.
-- The implementation is durable, but there is no user-facing image-history
-  capture toggle.
-- Existing malformed-entry and cleanup behavior still needs dedicated tests.
+- The user-facing image-history toggle defaults off, gates future captures, and
+  is independent from text capture and incognito mode.
+- Settings provide a separately confirmed cleanup action that preserves text
+  history.
+- Deterministic policy and JSON persistence behavior is covered by JVM tests;
+  Android-context lifecycle and provider boundaries remain explicitly deferred.
 
 ## Recommended implementation order
 
@@ -66,10 +69,10 @@ Acceptance criteria:
 
 - [x] Disabled mode never opens an image source stream or writes an image file.
 - [x] Text clips continue to capture normally.
-- [ ] Re-enabling captures only future image clips; it does not reconstruct
+- [x] Re-enabling captures only future image clips; it does not reconstruct
   images that were skipped while disabled.
-- [ ] Duplicate protection remains unchanged.
-- [ ] Incognito and image-history preferences remain independent and clearly
+- [x] Duplicate protection remains unchanged.
+- [x] Incognito and image-history preferences remain independent and clearly
   documented.
 
 ## Phase 3: Define disable and cleanup behavior
@@ -106,22 +109,24 @@ persistence helpers where Android clipboard access prevents JVM testing.
 
 Acceptance criteria:
 
-- [ ] Restart-style load preserves valid durable image entries when files exist.
-- [ ] Malformed JSON and invalid entries do not block valid entries.
-- [ ] Missing durable files are skipped or shown as unavailable without a crash.
-- [ ] Legacy provider URIs migrate only when readable.
-- [ ] Orphan image files are removed during cleanup.
-- [ ] Cap trimming removes the corresponding private files.
-- [ ] Delete removes the corresponding private file and persisted item.
-- [ ] Disabled image capture produces no stored image entry.
-- [ ] Text entries and duplicate startup import behavior remain unchanged.
+- [~] Restart-style load preserves valid durable image entries when files exist.
+- [x] Malformed JSON and invalid entries do not block valid entries.
+- [~] Missing durable files are skipped or shown as unavailable without a crash.
+- [~] Legacy provider URIs migrate only when readable.
+- [~] Orphan image files are removed during cleanup.
+- [~] Cap trimming removes the corresponding private files.
+- [~] Delete removes the corresponding private file and persisted item.
+- [x] Disabled image capture produces no stored image entry.
+- [x] Text entries and duplicate startup import behavior remain unchanged.
 
-Implementation note: the JSON persistence contract now has a pure JVM seam and
-coverage for malformed entries, valid mixed entries, round-tripping, and ID
-allocation. Provider URI migration, filesystem orphan cleanup, cap trimming,
-and listener/startup behavior remain Android-context boundaries and are
-deferred until a Robolectric or instrumentation test dependency is intentionally
-introduced.
+Implementation note: the JSON persistence and capture-policy contracts have
+pure JVM seams and coverage for malformed entries, valid mixed entries,
+round-tripping, ID allocation, future-only capture, text independence, and
+image cleanup filtering. Provider URI migration, filesystem orphan cleanup,
+cap trimming, and listener/startup behavior remain Android-context boundaries
+and are deferred until a Robolectric or instrumentation test dependency is
+intentionally introduced. This is a verification limitation, not an
+implementation claim.
 
 Verification:
 
@@ -134,13 +139,13 @@ Verification:
 
 ### Task 5: Make the state visible and honest `[ ]`
 
-- [ ] Clipboard settings show the image-history state and cleanup action.
-- [ ] The clipboard panel does not expose stale image entries after disabling
+- [x] Clipboard settings show the image-history state and cleanup action.
+- [x] The clipboard panel does not expose stale image entries after disabling
   and cleanup.
-- [ ] Unavailable images have an explicit state instead of a broken preview.
-- [ ] All settings and destructive cleanup actions have content descriptions
+- [~] Unavailable images have an explicit state instead of a broken preview.
+- [x] All settings and destructive cleanup actions have content descriptions
   and confirmation text.
-- [ ] Narrow, tall, light, and dark keyboard layouts remain usable.
+- [~] Narrow, tall, light, and dark keyboard layouts remain usable.
 
 ## Risks and decisions
 
