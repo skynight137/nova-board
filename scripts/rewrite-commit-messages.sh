@@ -84,6 +84,12 @@ normalize_subject() {
     "Refactor emoji panel and add tests for emoji data")
       printf '%s\n' "test: cover emoji search behavior"
       ;;
+    "Implement initial translation feature architecture and result activity")
+      printf '%s\n' "feat: add translation result flow"
+      ;;
+    "Implement infrastructure for editing and preference contracts and policies")
+      printf '%s\n' "feat: add editing and preference contracts"
+      ;;
     *)
       echo "ERROR: no Conventional Commit mapping for '$subject'" >&2
       return 1
@@ -125,6 +131,8 @@ case "$subject" in
   "Update keyboard service logic in NovaBoardService") echo "fix: correct keyboard service behavior" ;;
   "fix commit style") echo "chore: normalize commit message style" ;;
   "Refactor emoji panel and add tests for emoji data") echo "test: cover emoji search behavior" ;;
+  "Implement initial translation feature architecture and result activity") echo "feat: add translation result flow" ;;
+  "Implement infrastructure for editing and preference contracts and policies") echo "feat: add editing and preference contracts" ;;
   *) echo "ERROR: unmapped commit $GIT_COMMIT ($subject)" >&2; exit 1 ;;
 esac
 ' HEAD
