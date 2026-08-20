@@ -15,3 +15,4 @@
 - [IME session state](ime-session-state.md) — scope editor mutations and asynchronous callbacks to the active input session.
 - [Durable clipboard storage](durable-clipboard-storage.md) — copy image bytes privately and expose them through the app-owned content provider, migrating legacy URIs on load.
 - [Conventional history rewrite](conventional-history-rewrite.md) — preview legacy subject mappings with a clean worktree before applying a commit-history rewrite.
+- [Verification before commit](verification-before-commit.md) — use fail-fast gates so failed checks never fall through to a release-style commit.
