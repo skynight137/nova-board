@@ -304,13 +304,11 @@ constructor(
                 schedulePopup(hit)
             }
             MotionEvent.ACTION_POINTER_DOWN -> {
-                // Key previews are useful for a single tap, but a preview for only the
-                // first finger is misleading during multi-touch entry.
-                cancelPopup()
                 val index = event.actionIndex
                 val hit = hitAt(event.getX(index), event.getY(index))
                 if (hit != null) {
                     pointerHits[event.getPointerId(index)] = hit
+                    if (keyPopups) showKeyPreview(hit)
                     invalidate()
                 }
             }
@@ -340,6 +338,7 @@ constructor(
                         event.x - cursorDragLastX < -18
                 ) {
                     quickDeleteTriggered = true
+                    cancelDeleteRepeat()
                     listener?.onQuickDelete()
                     cancelPopup()
                 }
@@ -431,8 +430,12 @@ constructor(
                 override fun run() {
                     if (pressedHit?.key?.type != KeyType.BACKSPACE) return
                     deleteRepeatTriggered = true
-                    listener?.onBackspace()
-                    longPressHandler.postDelayed(this, 90L)
+                    if (quickDelete) {
+                        listener?.onQuickDelete()
+                    } else {
+                        listener?.onBackspace()
+                    }
+                    longPressHandler.postDelayed(this, if (quickDelete) 250L else 90L)
                 }
             }
         deleteRepeatRunnable = runnable
@@ -462,6 +465,8 @@ constructor(
     private fun showKeyPreview(hit: Hit) {
         val label = displayLabel(hit.key)
         if (label.isEmpty()) return
+        popup?.dismiss()
+        popup = null
         val preview =
             TextView(context).apply {
                 text = label
