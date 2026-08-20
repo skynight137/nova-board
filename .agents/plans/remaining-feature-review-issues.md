@@ -36,7 +36,8 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
 - [x] Review current code against the original 12 findings.
 - [x] Complete the low-risk inactive-settings and quick-delete-summary cleanup.
 - [x] Complete translation result replacement.
-- [~] Make image clipboard storage durable (implementation complete; dedicated persistence tests remain).
+- [~] Make image clipboard storage durable and user-controlled (durable implementation exists; opt-in toggle, cleanup semantics, and dedicated persistence tests remain):
+  `.agents/plans/durable-image-clipboard.md`
 - [~] Resolve remaining emoji controls/media policy and refine emoji-on-enter policy.
 - [~] Add focused lifecycle, persistence, layout, and preference regression tests; pure editing/editor-policy/preference contracts are covered, while Android lifecycle, clipboard, and layout seams remain.
 - [~] Execute the next keyboard interaction and polish plan; bounded gesture word entry, cursor repeat, incognito visuals, tools overflow, and bounded geometry are complete, while smart delete and final visual tuning remain:
@@ -48,6 +49,18 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
 - `durable-image-clipboard.md`
 - `emoji-settings-and-quick-delete-contracts.md`
 - `prevent-keyboard-review-regressions-lifecycle-preference.md`
+
+## Recommended next-round order
+
+1. Add the image clipboard history preference and capture gate. This is the
+   smallest user-visible change and does not require a provider integration.
+2. Build the in-keyboard translation composer contract and normal mode. Remove
+   the reachable external-app translation launch.
+3. Add the translation provider boundary and honest loading/error states.
+4. Add opt-in live-write translation only after normal translation is stable.
+
+The rewritten feature plans are intentionally separate so each round can pass
+compile, verification, diff, and Conventional Commit gates independently.
 
 ## Delivery rule
 
