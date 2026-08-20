@@ -1,0 +1,13 @@
+<resources>
+    <!-- Light theme (SwiftKey-style) -->
+    <color name="kb_background">#E9EAEE</color>
+    <color name="kb_key_bg">#FFFFFF</color>
+    <color name="kb_key_bg_special">#D3D6DC</color>
+    <color name="kb_key_text">#1B1C1E</color>
+    <color name="kb_key_pressed">#C7CBD1</color>
+    <color name="kb_accent">#4C7CF3</color>
+    <color name="kb_suggestion_text">#4C4E52</color>
+    <color name="kb_suggestion_text_highlight">#1B1C1E</color>
+    <color name="kb_divider">#C7CBD1</color>
+    <color name="kb_toolbar_icon">#5A5D63</color>
+</resources>

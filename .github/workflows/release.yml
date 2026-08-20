@@ -1,0 +1,176 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Release
+    env:
+      ANDROID_MODULE: ${{ vars.ANDROID_MODULE || 'app' }}
+      RELEASE_JSON: ${{ vars.RELEASE_JSON || 'app-release.json' }}
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Validate release inputs
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEYSTORE_ENTRY_ALIAS: ${{ secrets.KEYSTORE_ENTRY_ALIAS }}
+          KEYSTORE_ENTRY_PASSWORD: ${{ secrets.KEYSTORE_ENTRY_PASSWORD }}
+          GPG_PRIVATE_KEY_B64: ${{ secrets.GPG_PRIVATE_KEY_B64 }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
+        run: |
+          for name in \
+            KEYSTORE_B64 \
+            KEYSTORE_PASSWORD \
+            KEYSTORE_ENTRY_ALIAS \
+            KEYSTORE_ENTRY_PASSWORD \
+            GPG_PRIVATE_KEY_B64 \
+            GPG_PASSPHRASE \
+            GPG_FINGERPRINT; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::${name} is not configured"
+              exit 1
+            fi
+          done
+          if [[ "${KEYSTORE_PASSWORD}" != "${KEYSTORE_ENTRY_PASSWORD}" ]]; then
+            echo "::error::PKCS12 keystores require KEYSTORE_PASSWORD and KEYSTORE_ENTRY_PASSWORD to match"
+            exit 1
+          fi
+
+          if ! printf '%s' "${KEYSTORE_B64}" | base64 --decode >/dev/null; then
+            echo "::error::KEYSTORE_B64 is not valid base64"
+            exit 1
+          fi
+          if ! printf '%s' "${GPG_PRIVATE_KEY_B64}" | base64 --decode >/dev/null; then
+            echo "::error::GPG_PRIVATE_KEY_B64 is not valid base64"
+            exit 1
+          fi
+          if [[ ! "${GPG_FINGERPRINT}" =~ ^[A-Fa-f0-9]{40}$ ]]; then
+            echo "::error::GPG_FINGERPRINT must be a 40-character hexadecimal fingerprint"
+            exit 1
+          fi
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '24'
+          cache: gradle
+
+      - name: Setup keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+        run: |
+          source .github/release-tooling/release-config.sh
+          KEYSTORE_PATH="$(release_tooling_keystore_path)"
+          printf '%s' "${KEYSTORE_B64}" | base64 --decode > "${KEYSTORE_PATH}"
+          test -s "${KEYSTORE_PATH}" || {
+            echo "::error::Decoded keystore is empty"
+            exit 1
+          }
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "lts/*"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate release manifest
+        run: |
+          source .github/release-tooling/release-config.sh
+          RELEASE_JSON="$(release_tooling_release_json)"
+          if [[ -f "${RELEASE_JSON}" ]]; then
+            RELEASE_JSON="${RELEASE_JSON}" bash .github/release-tooling/validate-release-manifest.sh
+          else
+            echo "No previous release manifest; the first release will create ${RELEASE_JSON}"
+          fi
+
+      - name: Verify release scripts
+        run: |
+          bash -n .github/release-tooling/*.sh
+          bash .github/release-tooling/test-github-repository.sh
+          bash .github/release-tooling/test-release-config.sh
+          bash .github/release-tooling/test-release-workflow.sh
+          bash .github/release-tooling/test-release-manifest.sh
+          bash .github/release-tooling/test-release-artifacts.sh
+          bash .github/release-tooling/test-release-keystore.sh
+
+      - name: Import GPG key
+        env:
+          GPG_PRIVATE_KEY_B64: ${{ secrets.GPG_PRIVATE_KEY_B64 }}
+          GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
+        run: |
+          GPG_HOME="$(mktemp -d)"
+          chmod 700 "${GPG_HOME}"
+          trap 'rm -rf "${GPG_HOME}"' EXIT
+          export GNUPGHOME="${GPG_HOME}"
+          printf '%s' "${GPG_PRIVATE_KEY_B64}" \
+            | base64 --decode \
+            | gpg --batch --import >/dev/null
+          FINGERPRINT="$(gpg --batch --list-secret-keys --with-colons \
+            | awk -F: '$1 == "fpr" { print $10; exit }')"
+          test -n "${FINGERPRINT}" || {
+            echo "::error::No fingerprint was found for the imported GPG key"
+            exit 1
+          }
+          test "${FINGERPRINT}" = "${GPG_FINGERPRINT}" || {
+            echo "::error::Imported GPG key does not match GPG_FINGERPRINT"
+            exit 1
+          }
+
+      - name: Verify release signing configuration
+        env:
+          GPG_PRIVATE_KEY_B64: ${{ secrets.GPG_PRIVATE_KEY_B64 }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
+        run: |
+          test -n "${GPG_PRIVATE_KEY_B64}" || {
+            echo "::error::GPG_PRIVATE_KEY_B64 is not configured"
+            exit 1
+          }
+          test -n "${GPG_PASSPHRASE}" || {
+            echo "::error::GPG_PASSPHRASE is not configured"
+            exit 1
+          }
+          test -n "${GPG_FINGERPRINT}" || {
+            echo "::error::No fingerprint was returned for the imported GPG key"
+            exit 1
+          }
+
+      - name: Release
+        uses: cycjimmy/semantic-release-action@v6
+        id: release
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_PRIVATE_KEY_B64: ${{ secrets.GPG_PRIVATE_KEY_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEYSTORE_ENTRY_ALIAS: ${{ secrets.KEYSTORE_ENTRY_ALIAS }}
+          KEYSTORE_ENTRY_PASSWORD: ${{ secrets.KEYSTORE_ENTRY_PASSWORD }}
+
+      - name: Attest
+        if: steps.release.outputs.new_release_published == 'true'
+        uses: actions/attest-build-provenance@v4
+        with:
+           subject-name: '${{ github.event.repository.name }} ${{ steps.release.outputs.new_release_git_tag }}'
+           subject-path: '${{ env.ANDROID_MODULE }}/build/outputs/apk/release/*.apk'

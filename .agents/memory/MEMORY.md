@@ -1,0 +1,16 @@
+- [Patch-added file endings](patch-file-newline.md) — verify terminal newlines because newly added Kotlin files can fail Spotless after compiling.
+- [Gradle verification settings](gradle-verification-resource-pressure.md) — normal commands rely on gradle.properties; use bounded retries only after daemon-loss evidence.
+- [Gradle shell environment](gradle-shell-environment.md) — source the repository environment helper before Gradle verification in a fresh shell.
+- [Workflow entrypoint names](workflow-entrypoint-names.md) — keep renamed workflow targets and documented compatibility commands synchronized.
+- [Diagnostic metadata boundary](debug-log-metadata.md) — Android platform stubs can be null in JVM tests; normalize bounded fields and redact manifest URL credentials before export.
+- [Release manifest integrity](release-manifest-integrity.md) — validate release JSON before semantic-release because backmerges can leave conflict markers that fail after the APK build.
+- [Release fixture parsing](release-fixture-parsing.md) — keep synthetic Gradle project names at column 1 because release preparation parses exact settings lines.
+- [Strict JSON import fields](strict-json-import-fields.md) — reject malformed present values; optional JSON helpers must not silently replace them with defaults.
+- [Android instrumentation service seams](android-instrumentation-service-seams.md) — use package-visible state seams; framework lifecycle callbacks may be protected.
+- [Overlay state boundary](overlay-state-boundary.md) — service gesture state is authoritative; marker count can be zero for a runnable loaded setup.
+- [Android migration verification](android-migration-verification.md) — archived app Gradle overrides can conflict with current Java targets and debug signing.
+- [History rewrite safety](history-rewrite.md) — preview and verify full-history message rewrites; filter-branch uses HEAD to include the root commit.
+- [NovaBoard archive migration](novaboard-migration.md) — native IME archives need current template build/plugin adaptation and APK identity verification.
+- [IME theme compatibility](ime-theme-compatibility.md) — avoid unresolved theme attributes in native keyboard button styles.
+- [IME session state](ime-session-state.md) — scope editor mutations and asynchronous callbacks to the active input session.
+- [Durable clipboard storage](durable-clipboard-storage.md) — copy image bytes privately and expose them through the app-owned content provider, migrating legacy URIs on load.

@@ -1,0 +1,60 @@
+modules = ["nodejs-24", "python-base-3.13"]
+
+[nix]
+channel = "stable-25_05"
+packages = ["gnupg", "rsync"]
+
+[agent]
+expertMode = true
+
+[workflows]
+runButton = "Setup Project"
+
+[[workflows.workflow]]
+name = "Push (dev)"
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "git push origin dev"
+
+[[workflows.workflow]]
+name = "Setup Project"
+mode = "sequential"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash scripts/setup.sh"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "Pull (dev) - rebase"
+mode = "sequential"
+author = 45095703
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "git pull origin dev --rebase"
+
+[userenv.shared]
+NODE_ENV = "production"
+YARN_REGISTRY = "https://registry.yarnpkg.com/"
+YARN_NPM_REGISTRY_SERVER = "https://registry.yarnpkg.com/"
+PIP_INDEX_URL = "https://pypi.org/simple/"
+npm_config_registry = "https://registry.npmjs.org/"
+GOPROXY = "https://proxy.golang.org,direct"
+PIP_TRUSTED_HOST = "pypi.org"
+UV_PYTHON_PREFERENCE = "managed"
+UV_PYTHON_DOWNLOADS = "auto"
+UV_PROJECT_ENVIRONMENT = ".venv"
+
+[[ports]]
+localPort = 80
+externalPort = 80
+
+[[ports]]
+localPort = 8080
+externalPort = 8080

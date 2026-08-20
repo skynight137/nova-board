@@ -1,0 +1,63 @@
+# Next-round plan index: remaining NovaBoard feature-review issues
+
+## Review status
+
+Compared with `attached_assets/untitled_1787187644560.md` and the current source:
+
+### Fixed
+
+- Runtime microphone permission and voice-start failure handling.
+- IME session cleanup, stale voice callback rejection, overlay dismissal, typing reset, and shift reset.
+- Number-row preference on symbols pages.
+- Clipboard malformed-entry tolerance, broad text capture, startup primary-clip import, listener cleanup, and replacement-panel dismissal.
+- Long-press symbols independent from key previews.
+- Key-preview measurement.
+- Duplicate keypress sound mechanisms.
+- Removal of the three inactive typing-setting keys/defaults and alignment of the quick-delete summary.
+- Removal of misleading GIF/media and redundant emoji-search affordances.
+- Accurate emoji typeface labels replacing the unsupported “Latest Google Emoji” claim.
+
+### Partial
+
+- **Typing/autocorrect:** external selection and insertion invalidation exists, but undo-autocorrect still deletes a string at the current cursor without proving the exact replacement range is unchanged.
+- **Emoji-on-enter:** unsupported email/URI/password variations are excluded, but the policy is still based on input type rather than a clear supported conversation-editor contract.
+- **Settings:** the inactive settings were removed from the dialog and storage defaults; regression tests are still pending.
+- **Emoji controls:** text search and categories work; GIF/media remains intentionally unavailable and needs a product decision if it should return.
+
+### Open
+
+- Translation does not return a result to replace the original selected range.
+- Clipboard image URIs are still persisted without durable app-private storage or a durable grant strategy.
+- Quick-delete behavior now has an accurate “delete the previous word” summary; behavioral regression coverage is still pending.
+- Focused regression coverage is still missing; see `prevent-keyboard-review-regressions-lifecycle-preference.md`.
+
+## Progress
+
+- [x] Review current code against the original 12 findings.
+- [x] Complete the low-risk inactive-settings and quick-delete-summary cleanup.
+- [x] Complete translation result replacement.
+- [~] Make image clipboard storage durable (implementation complete; dedicated persistence tests remain).
+- [~] Resolve remaining emoji controls/media policy and refine emoji-on-enter policy.
+- [ ] Add focused lifecycle, persistence, layout, and preference regression tests.
+- [ ] Execute the next keyboard interaction and polish plan:
+  `.agents/plans/next-keyboard-interaction-and-polish.md`
+
+## Next-round plans
+
+- `translation-and-editor-replacement.md`
+- `durable-image-clipboard.md`
+- `emoji-settings-and-quick-delete-contracts.md`
+- `prevent-keyboard-review-regressions-lifecycle-preference.md`
+
+## Delivery rule
+
+Implement each plan as a separate focused round. Resume at the first unchecked task. After each round, run:
+
+```bash
+source .bin/env.sh
+./gradlew :app:testDebugUnitTest
+./gradlew :app:assembleDebug
+git diff --check
+```
+
+Commit each round with a Conventional Commit message and update this index only when the status changes.

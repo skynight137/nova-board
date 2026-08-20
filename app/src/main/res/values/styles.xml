@@ -1,0 +1,49 @@
+<resources>
+    <style name="NovaBoardToolIcon">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_margin">2dp</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:tint">@color/kb_toolbar_icon</item>
+    </style>
+
+    <style name="NovaBoardSuggestion">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/kb_suggestion_text</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <style name="NovaBoardSuggestionHighlighted" parent="NovaBoardSuggestion">
+        <item name="android:textColor">@color/kb_suggestion_text_highlight</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="NovaBoardCursorArrow">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:tint">@color/kb_toolbar_icon</item>
+    </style>
+
+    <style name="NovaBoardHotkey">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_margin">3dp</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingEnd">10dp</item>
+        <item name="android:background">@drawable/bg_key_special</item>
+        <item name="android:textColor">@color/kb_key_text</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+</resources>
