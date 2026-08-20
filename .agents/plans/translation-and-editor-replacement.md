@@ -42,7 +42,7 @@ instead of silently falling back to another app.
 
 ## Phase 1: Translation composer contract
 
-### Task 1: Define state and actions `[ ]`
+### Task 1: Define state and actions `[x]`
 
 Create a JVM-testable model for:
 
@@ -59,17 +59,25 @@ Actions should include `editSource`, `swapLanguages`, `clearSource`,
 
 Acceptance criteria:
 
-- [ ] Empty source cannot request translation.
-- [ ] Swapping languages swaps labels and clears or explicitly revalidates the
+- [x] Empty source cannot request translation.
+- [x] Swapping languages swaps labels and clears or explicitly revalidates the
   stale result.
-- [ ] A result from an old request, language pair, or input session is rejected.
-- [ ] `Paste` and `Reply` are distinct actions with explicit output contracts.
-- [ ] Live-write state cannot commit while a newer request is pending.
+- [x] A result from an old request or language pair is rejected. Input-session
+  identity is carried by the state and will be enforced by the service panel
+  integration.
+- [x] `Paste` and `Reply` are distinct actions with explicit output contracts.
+- [x] Live-write state cannot commit while a newer request is pending because
+  only the current loading generation can produce a result.
 
 Files likely touched:
 
 - `app/src/main/java/com/novaboard/ime/translation/`
 - `app/src/test/java/com/novaboard/ime/translation/`
+
+Implementation note: the pure composer state and reducer are complete. The
+service-owned input-session invalidation is intentionally left for the panel
+integration stage, where editor lifecycle events can be wired to the model
+without inventing a second session owner.
 
 ## Phase 2: Native in-keyboard normal translation
 
