@@ -130,6 +130,12 @@
     </LinearLayout>
 
     <FrameLayout
+        android:id="@+id/translationPanelContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <FrameLayout
         android:id="@+id/emojiPanelContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

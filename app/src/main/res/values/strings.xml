@@ -104,4 +104,16 @@
     <string name="incognito_off">Incognito mode is off</string>
     <string name="incognito_summary">Do not learn new words while typing privately</string>
     <string name="incognito_exit">Exit incognito mode</string>
+    <string name="translation_swap">Swap translation languages</string>
+    <string name="translation_close">Close translation</string>
+    <string name="translation_source_hint">Text to translate</string>
+    <string name="translation_result">Translated result</string>
+    <string name="translation_translate">Translate</string>
+    <string name="translation_clear">Clear</string>
+    <string name="translation_paste">Paste</string>
+    <string name="translation_reply">Reply</string>
+    <string name="translation_loading">Translating…</string>
+    <string name="translation_unavailable">Translation provider unavailable</string>
+    <string name="translation_error">Translation failed</string>
+    <string name="translation_selection_unavailable">The original selection is no longer available</string>
 </resources>

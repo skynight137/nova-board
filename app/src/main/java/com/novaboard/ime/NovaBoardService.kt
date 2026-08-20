@@ -47,9 +47,9 @@ import com.novaboard.ime.settings.MainActivity
 import com.novaboard.ime.suggestion.SuggestionEngine
 import com.novaboard.ime.suggestion.shouldLearnWord
 import com.novaboard.ime.theme.ThemeManager
-import com.novaboard.ime.translation.TranslationRequest
-import com.novaboard.ime.translation.TranslationResultActivity
-import com.novaboard.ime.translation.shouldAcceptTranslationResult
+import com.novaboard.ime.translation.TranslationComposerState
+import com.novaboard.ime.translation.TranslationCommit
+import com.novaboard.ime.translation.TranslationPanel
 import com.novaboard.ime.tools.ToolMenuItem
 import com.novaboard.ime.tools.visibleToolMenuItems
 import com.novaboard.ime.util.AppLog
@@ -67,6 +67,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private lateinit var hotkeysRow: LinearLayout
     private lateinit var cursorRow: LinearLayout
     private lateinit var emojiPanelContainer: android.widget.FrameLayout
+    private lateinit var translationPanelContainer: android.widget.FrameLayout
     private lateinit var incognitoBanner: TextView
 
     private lateinit var clipboardHistory: ClipboardHistoryManager
@@ -81,8 +82,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private var speechRecognizer: SpeechRecognizer? = null
     private var listening = false
     private var inputSession = 0L
-    private var translationRequestId = 0L
-    private var pendingTranslation: TranslationRequest? = null
+    private var translationPanel: TranslationPanel? = null
     private var selectionStart = -1
     private var selectionEnd = -1
     private val cursorRepeatHandler = Handler(Looper.getMainLooper())
@@ -148,6 +148,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         hotkeysScroller = root.findViewById(R.id.hotkeysScroller)
         hotkeysRow = root.findViewById(R.id.hotkeysRow)
         cursorRow = root.findViewById(R.id.cursorRow)
+        translationPanelContainer = root.findViewById(R.id.translationPanelContainer)
         emojiPanelContainer = root.findViewById(R.id.emojiPanelContainer)
         incognitoBanner = root.findViewById(R.id.incognitoBanner)
         incognitoBanner.setOnClickListener {
@@ -189,9 +190,6 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == TranslationResultActivity.ACTION_TRANSLATION_RESULT) {
-            handleTranslationResult(intent)
-        }
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -212,7 +210,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             candidatesEnd,
         )
         if (selectionStart != newSelStart || selectionEnd != newSelEnd) {
-            pendingTranslation = null
+            dismissTranslationPanel()
         }
         selectionStart = newSelStart
         selectionEnd = newSelEnd
