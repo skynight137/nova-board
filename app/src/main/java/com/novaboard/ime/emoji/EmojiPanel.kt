@@ -124,7 +124,7 @@ class EmojiPanel(private val context: Context, private val onPick: (String) -> U
         val scroll = ScrollView(context)
         grid =
             GridLayout(context).apply {
-                columnCount = 8
+                columnCount = 7
                 setPadding(6, 8, 6, 12)
                 clipChildren = false
             }
@@ -189,14 +189,14 @@ class EmojiPanel(private val context: Context, private val onPick: (String) -> U
                     text = emoji
                     contentDescription = context.getString(R.string.emoji_item, emoji)
                     typeface = emojiTypeface
-                    textSize = 28f
+                    textSize = 32f
                     gravity = Gravity.CENTER
                      includeFontPadding = false
-                     setPadding(2, 2, 2, 2)
+                    setPadding(4, 4, 4, 4)
                     layoutParams =
                         GridLayout.LayoutParams().apply {
                             width = 0
-                            height = 56
+                            height = 64
                             columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                         }
                     setOnClickListener { onPick(emoji) }

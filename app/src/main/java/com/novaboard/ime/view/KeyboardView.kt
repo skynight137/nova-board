@@ -99,7 +99,8 @@ constructor(
 
     private var hitRects: List<Hit> = emptyList()
     private var pressedHit: Hit? = null
-    private val secondaryPressedHits = mutableMapOf<Int, Hit>()
+    private val pointerHits = mutableMapOf<Int, Hit>()
+    private var primaryPointerId = MotionEvent.INVALID_POINTER_ID
 
     private val longPressHandler = Handler(Looper.getMainLooper())
     private var longPressRunnable: Runnable? = null
@@ -203,7 +204,8 @@ constructor(
         cancelDeleteRepeat()
         clearGestureState()
         pressedHit = null
-        secondaryPressedHits.clear()
+        pointerHits.clear()
+        primaryPointerId = MotionEvent.INVALID_POINTER_ID
         quickDeleteTriggered = false
         deleteRepeatTriggered = false
         invalidate()
@@ -268,6 +270,8 @@ constructor(
             MotionEvent.ACTION_DOWN -> {
                 val hit = hitAt(event.x, event.y) ?: return true
                 pressedHit = hit
+                primaryPointerId = event.getPointerId(0)
+                pointerHits[primaryPointerId] = hit
                 deleteRepeatTriggered = false
                 if (hit.key.type == KeyType.BACKSPACE) {
                     scheduleDeleteRepeat()
@@ -302,7 +306,7 @@ constructor(
                 val index = event.actionIndex
                 val hit = hitAt(event.getX(index), event.getY(index))
                 if (hit != null) {
-                    secondaryPressedHits[event.getPointerId(index)] = hit
+                    pointerHits[event.getPointerId(index)] = hit
                     invalidate()
                 }
             }
@@ -355,16 +359,23 @@ constructor(
             MotionEvent.ACTION_POINTER_UP -> {
                 val index = event.actionIndex
                 val pointerId = event.getPointerId(index)
-                secondaryPressedHits.remove(pointerId)?.let { hit ->
+                pointerHits.remove(pointerId)?.let { hit ->
                     if (hit.key.type != KeyType.BACKSPACE) {
                         handleKeyUp(hit.key)
                     }
+                }
+                if (pointerId == primaryPointerId) {
+                    pressedHit = null
                 }
             }
             MotionEvent.ACTION_UP -> {
                 cancelPopup()
                 cancelDeleteRepeat()
-                if (gestureActive) {
+                if (pointerHits.size > 1 || pressedHit == null) {
+                    pointerHits.values
+                        .filter { it.key.type != KeyType.BACKSPACE }
+                        .forEach { handleKeyUp(it.key) }
+                } else if (gestureActive) {
                     val word =
                         recognizeGestureWord(
                             labels = gestureLabels,
@@ -381,7 +392,8 @@ constructor(
                     pressedHit?.let { handleKeyUp(it.key) }
                 }
                 pressedHit = null
-                secondaryPressedHits.clear()
+                pointerHits.clear()
+                primaryPointerId = MotionEvent.INVALID_POINTER_ID
                 invalidate()
             }
             MotionEvent.ACTION_CANCEL -> {
@@ -389,7 +401,8 @@ constructor(
                 cancelDeleteRepeat()
                 clearGestureState()
                 pressedHit = null
-                secondaryPressedHits.clear()
+                pointerHits.clear()
+                primaryPointerId = MotionEvent.INVALID_POINTER_ID
                 invalidate()
             }
         }

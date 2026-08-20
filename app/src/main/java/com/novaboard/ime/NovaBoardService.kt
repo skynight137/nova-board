@@ -497,7 +497,16 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private fun openClipboard(root: View) {
         clipboardPanel?.dismiss()
         dismissToolsMenu()
-        clipboardPanel = ClipboardPanel(this, clipboardHistory) { item -> pasteClipboardItem(item) }
+        clipboardPanel =
+            ClipboardPanel(
+                this,
+                clipboardHistory,
+                onPick = { item -> pasteClipboardItem(item) },
+                onClose = {
+                    clipboardPanel?.dismiss()
+                    clipboardPanel = null
+                },
+            )
         clipboardPanel?.show(overlayPanelContainer)
     }
 

@@ -20,6 +20,7 @@ class ClipboardPanel(
     private val context: Context,
     private val history: ClipboardHistoryManager,
     private val onPick: (ClipboardItem) -> Unit,
+    private val onClose: () -> Unit,
 ) {
     private var panel: View? = null
     private var target: ViewGroup? = null
@@ -29,6 +30,16 @@ class ClipboardPanel(
     fun show(target: ViewGroup) {
         dismiss()
         val root = FrameLayout(context)
+        val backButton =
+            TextView(context).apply {
+                text = "‹  Keyboard"
+                textSize = 16f
+                gravity = Gravity.CENTER_VERTICAL
+                setTextColor(context.getColor(R.color.kb_key_text))
+                setPadding(16, 0, 16, 0)
+                contentDescription = context.getString(R.string.clipboard_back_to_keyboard)
+                setOnClickListener { onClose() }
+            }
         val recycler =
             RecyclerView(context).apply {
                 layoutManager = LinearLayoutManager(context)
@@ -46,6 +57,15 @@ class ClipboardPanel(
                 ViewGroup.LayoutParams.MATCH_PARENT,
             ),
         )
+        root.addView(
+            backButton,
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                48,
+            ),
+        )
+        (recycler.layoutParams as FrameLayout.LayoutParams).topMargin = 48
+        (emptyLabel.layoutParams as FrameLayout.LayoutParams).topMargin = 48
         root.addView(
             emptyLabel,
             FrameLayout.LayoutParams(

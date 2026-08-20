@@ -7,6 +7,7 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="clipboard_empty">No clipboard items yet</string>
+    <string name="clipboard_back_to_keyboard">Back to keyboard</string>
     <string name="cd_tools">Tools</string>
     <string name="cd_clipboard">Clipboard</string>
     <string name="cd_hotkeys">Hotkeys</string>
