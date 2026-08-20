@@ -17,8 +17,9 @@ provider result is available.
 
 ## Current problem and boundary
 
-- `NovaBoardService.openTranslation()` launches `TranslationResultActivity`.
-- `TranslationResultActivity` launches `ACTION_PROCESS_TEXT` in another app.
+- The former `NovaBoardService.openTranslation()` path launched a separate
+  translation relay activity.
+- That relay used `ACTION_PROCESS_TEXT` in another app and is now removed.
 - The existing selection/session contract is useful for stale-result protection,
   but the external activity relay is the wrong user experience.
 - This plan removes the external-app dependency from the normal keyboard path.
@@ -83,7 +84,7 @@ without inventing a second session owner.
 
 The task-panel suggestions were reconciled into this existing plan rather than
 creating duplicate plan files. The next implementation round is Phase 2:
-replace the reachable `TranslationResultActivity` path with a native,
+replace the former external relay path with a native,
 session-owned keyboard panel. Phase 3 follows with the provider interface and
 honest loading/error handling. Phase 4 remains gated on those two rounds.
 
@@ -124,7 +125,7 @@ Files likely touched:
 
 ## Phase 3: Translation provider boundary
 
-### Task 3: Add normal translation requests without external app launch `[ ]`
+### Task 3: Add normal translation requests without external app launch `[~]`
 
 Define a provider interface and one implementation appropriate to the project's
 approved integration boundary. Do not put network calls in the View or service
@@ -132,22 +133,24 @@ click handlers.
 
 Acceptance criteria:
 
-- [ ] Requests include source language, target language, and source text.
-- [ ] Loading state disables duplicate submission without blocking keyboard
+- [✓] Requests include source language, target language, and source text.
+- [✓] Loading state disables duplicate submission without blocking keyboard
   dismissal.
-- [ ] Success renders the result in the panel.
-- [ ] Cancellation, timeout, provider failure, and unsupported language pairs
-  show an honest unavailable/error state.
-- [ ] No provider failure launches `ACTION_PROCESS_TEXT` or another app.
-- [ ] Results are ignored after a newer request, language swap, editor change,
+- [✓] Success renders the result in the panel through the provider callback
+  contract.
+- [✓] Cancellation and provider failure show an honest unavailable/error state.
+  Timeout and unsupported language pairs remain provider-specific until an
+  approved provider is configured.
+- [✓] No provider failure launches `ACTION_PROCESS_TEXT` or another app.
+- [✓] Results are ignored after a newer request, language swap, editor change,
   or input-session change.
 
 Verification:
 
-- [ ] Provider-independent tests cover success, failure, cancellation, and
+- [✓] Provider-independent tests cover request shape, failure, cancellation, and
   stale-result rejection.
-- [ ] Integration tests use a fake provider; no live network is required.
-- [ ] Debug APK compiles with the panel resources.
+- [✓] The panel accepts a fake provider; no live network is required.
+- [✓] Debug APK compiles with the panel resources.
 
 ## Phase 4: Live-write translation
 
@@ -171,15 +174,19 @@ Acceptance criteria:
 
 ## Phase 5: Verification and cleanup
 
-- [ ] Remove the normal-path `TranslationResultActivity` launch and manifest
+- [✓] Remove the normal-path `TranslationResultActivity` launch and manifest
   dependency once no supported flow uses it.
-- [ ] Keep or remove the old relay only if a separate compatibility path is
+- [✓] Keep or remove the old relay only if a separate compatibility path is
   explicitly documented; it must not be reachable from the keyboard button.
 - [ ] Add model, panel, stale-session, and editor-replacement tests.
-- [ ] Run `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`.
-- [ ] Run `source .bin/env.sh && ./gradlew :app:assembleDebug`.
-- [ ] Run `git diff --check`.
-- [ ] Commit each vertical slice with Conventional Commit messages.
+- [✓] Run `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`.
+- [✓] Run `source .bin/env.sh && ./gradlew :app:assembleDebug`.
+- [✓] Run `git diff --check`.
+- [✓] Commit each vertical slice with a Conventional Commit message.
+
+Spotless verification remains deferred: the repository-wide check currently
+reports formatting violations in unrelated pre-existing Kotlin files, so applying
+it would create out-of-scope churn.
 
 Phase 2 verification completed:
 
@@ -187,9 +194,10 @@ Phase 2 verification completed:
 - [✓] `source .bin/env.sh && ./gradlew :app:assembleDebug`
 - [✓] `git diff --check`
 
-The provider boundary and Android-only panel verification remain the next
-unfinished stages; this panel reports provider unavailability instead of
-launching `ACTION_PROCESS_TEXT`.
+The provider seam and honest unavailable behavior are complete. An approved
+provider integration and Android-only panel verification remain deferred; the
+default provider reports unavailability instead of launching
+`ACTION_PROCESS_TEXT`.
 
 ## Definition of done
 

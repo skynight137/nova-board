@@ -45,8 +45,8 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
   Android-context verification remains explicitly deferred):
   `.agents/plans/durable-image-clipboard.md`
 - [~] Replace the external translation launch with the in-keyboard panel and
-  provider boundary; the native panel is complete, while the provider boundary
-  and Android-only verification remain:
+  provider boundary; the native panel and provider seam are complete, while an
+  approved provider and Android-only verification remain:
   `.agents/plans/translation-and-editor-replacement.md`
 - [~] Resolve remaining emoji controls/media policy and refine emoji-on-enter policy.
 - [~] Add focused lifecycle, persistence, layout, and preference regression tests; pure session/layout/editing/clipboard parsing contracts are covered, while Android lifecycle, clipboard listener, and preference-reset seams remain deferred:
@@ -65,7 +65,7 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
 
 1. Build the in-keyboard translation panel and normal mode. Remove the
    reachable external-app translation launch.
-2. Add the translation provider boundary and honest loading/error states.
+2. Add an approved translation provider behind the completed boundary.
 3. Add opt-in live-write translation only after normal translation is stable.
 4. Add Android-context verification for image clipboard restart, migration,
    orphan cleanup, trimming, deletion, and startup listener behavior.

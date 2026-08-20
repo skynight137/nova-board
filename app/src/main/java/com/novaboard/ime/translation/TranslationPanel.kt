@@ -16,17 +16,20 @@ import com.novaboard.ime.R
 class TranslationPanel(
     context: Context,
     initialState: TranslationComposerState,
+    private val provider: TranslationProvider,
     private val onDismiss: () -> Unit,
-    private val onUnavailable: () -> Unit,
     private val onPaste: (TranslationComposerState, Int) -> Unit,
     private val onReply: (TranslationComposerState, Int, Int) -> Unit,
 ) {
     private var state = initialState
+    private var requestHandle: TranslationRequestHandle? = null
+    private var dismissed = false
     private val source = EditText(context)
     private lateinit var sourceLabel: TextView
     private lateinit var targetLabel: TextView
     private val result = TextView(context)
     private val status = TextView(context)
+    private lateinit var translate: Button
     private val paste = Button(context)
     private val reply = Button(context)
     val view: View = buildView(context)
@@ -41,6 +44,8 @@ class TranslationPanel(
                         state,
                         TranslationComposerAction.EditSource(editable?.toString().orEmpty()),
                     )
+                    requestHandle?.cancel()
+                    requestHandle = null
                     updateStatusOnly()
                 }
 
@@ -78,6 +83,8 @@ class TranslationPanel(
                             text = "⇄"
                             contentDescription = context.getString(R.string.translation_swap)
                             setOnClickListener {
+                                requestHandle?.cancel()
+                                requestHandle = null
                                 state = reduceTranslationComposer(
                                     state.copy(sourceText = source.text.toString()),
                                     TranslationComposerAction.SwapLanguages,
@@ -93,7 +100,7 @@ class TranslationPanel(
                         Button(context).apply {
                             text = context.getString(R.string.translation_close)
                             contentDescription = context.getString(R.string.translation_close)
-                            setOnClickListener { onDismiss() }
+                            setOnClickListener { dismiss() }
                         },
                         weightedParams(context, 1f),
                     )
@@ -113,6 +120,7 @@ class TranslationPanel(
                 LinearLayout(context).apply {
                     addView(
                         Button(context).apply {
+                            translate = this
                             text = context.getString(R.string.translation_translate)
                             contentDescription = context.getString(R.string.translation_translate)
                             setOnClickListener {
@@ -121,7 +129,29 @@ class TranslationPanel(
                                     TranslationComposerAction.RequestTranslation,
                                 )
                                 update()
-                                onUnavailable()
+                                val generation = state.requestGeneration
+                                val sourceLanguage = state.sourceLanguage
+                                val targetLanguage = state.targetLanguage
+                                requestHandle?.cancel()
+                                requestHandle =
+                                    if (state.status == TranslationStatus.LOADING) {
+                                        provider.translate(
+                                            TranslationProviderRequest(
+                                                sourceLanguage = state.sourceLanguage,
+                                                targetLanguage = state.targetLanguage,
+                                                sourceText = state.sourceText,
+                                            ),
+                                        ) { result ->
+                                            dispatchProviderResult(
+                                                generation,
+                                                sourceLanguage,
+                                                targetLanguage,
+                                                result,
+                                            )
+                                        }
+                                    } else {
+                                        null
+                                    }
                             }
                         },
                         weightedParams(context, 1f),
@@ -131,6 +161,8 @@ class TranslationPanel(
                             text = context.getString(R.string.translation_clear)
                             contentDescription = context.getString(R.string.translation_clear)
                             setOnClickListener {
+                                requestHandle?.cancel()
+                                requestHandle = null
                                 state = reduceTranslationComposer(
                                     state,
                                     TranslationComposerAction.ClearSource,
@@ -178,6 +210,7 @@ class TranslationPanel(
         paste.text = context.getString(R.string.translation_paste)
         paste.contentDescription = context.getString(R.string.translation_paste)
         paste.isEnabled = !state.translatedText.isNullOrBlank()
+        translate.isEnabled = state.canRequest
         paste.setOnClickListener { onPaste(state, source.selectionStart) }
         reply.text = context.getString(R.string.translation_reply)
         reply.contentDescription = context.getString(R.string.translation_reply)
@@ -196,7 +229,48 @@ class TranslationPanel(
                 else -> ""
             }
         paste.isEnabled = !state.translatedText.isNullOrBlank()
+        translate.isEnabled = state.canRequest
         reply.isEnabled = state.hasSelection && !state.translatedText.isNullOrBlank()
+    }
+
+    private fun dispatchProviderResult(
+        generation: Long,
+        sourceLanguage: String,
+        targetLanguage: String,
+        providerResult: TranslationProviderResult,
+    ) {
+        if (dismissed) return
+        val action =
+            when (providerResult) {
+                is TranslationProviderResult.Success ->
+                    TranslationComposerAction.TranslationSucceeded(
+                        generation = generation,
+                        sourceLanguage = sourceLanguage,
+                        targetLanguage = targetLanguage,
+                        text = providerResult.text,
+                    )
+                is TranslationProviderResult.Failure ->
+                    TranslationComposerAction.TranslationFailed(
+                        generation = generation,
+                        sourceLanguage = sourceLanguage,
+                        targetLanguage = targetLanguage,
+                        status = providerResult.status,
+                    )
+            }
+        view.post {
+            if (!dismissed) {
+                state = reduceTranslationComposer(state, action)
+                requestHandle = null
+                update()
+            }
+        }
+    }
+
+    private fun dismiss() {
+        dismissed = true
+        requestHandle?.cancel()
+        requestHandle = null
+        onDismiss()
     }
 
     private fun label(context: Context, text: String): TextView =

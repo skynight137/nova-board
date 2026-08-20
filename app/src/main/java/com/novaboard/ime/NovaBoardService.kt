@@ -52,6 +52,7 @@ import com.novaboard.ime.theme.ThemeManager
 import com.novaboard.ime.translation.TranslationComposerState
 import com.novaboard.ime.translation.TranslationCommit
 import com.novaboard.ime.translation.TranslationPanel
+import com.novaboard.ime.translation.UnavailableTranslationProvider
 import com.novaboard.ime.tools.ToolMenuItem
 import com.novaboard.ime.tools.visibleToolMenuItems
 import com.novaboard.ime.util.AppLog
@@ -86,6 +87,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private var inputSession = 0L
     private var voiceRecognizerGeneration = 0L
     private var translationPanel: TranslationPanel? = null
+    private val translationProvider = UnavailableTranslationProvider()
     private var selectionStart = -1
     private var selectionEnd = -1
     private val cursorRepeatHandler = Handler(Looper.getMainLooper())
@@ -461,14 +463,8 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             TranslationPanel(
                 this,
                 state,
+                provider = translationProvider,
                 onDismiss = { dismissTranslationPanel() },
-                onUnavailable = {
-                    Toast.makeText(
-                        this,
-                        getString(R.string.translation_unavailable),
-                        Toast.LENGTH_SHORT,
-                    ).show()
-                },
                 onPaste = { panelState, cursor ->
                     commitTranslation(
                         TranslationCommit.Paste(panelState.translatedText.orEmpty(), cursor),

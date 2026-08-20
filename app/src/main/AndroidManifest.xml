@@ -22,11 +22,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".translation.TranslationResultActivity"
-            android:exported="false"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
         <provider
             android:name=".clipboard.ClipboardContentProvider"
             android:authorities="com.novaboard.ime.clipboard"
