@@ -74,7 +74,7 @@ Acceptance criteria:
 
 ## Phase 3: Define disable and cleanup behavior
 
-### Task 3: Make disabling image history predictable `[ ]`
+### Task 3: Make disabling image history predictable `[~]`
 
 Use a confirmation step when disabling if stored image history will be
 deleted, or provide a separate “Delete saved image clips” action. The chosen
@@ -91,11 +91,11 @@ Recommended behavior:
 
 Acceptance criteria:
 
-- [ ] The user can see whether image capture is enabled.
-- [ ] A disabled setting cannot leave a new image item in the keyboard panel.
-- [ ] Cleanup is idempotent and safe when files are already missing.
-- [ ] Pinned image entries are handled by the documented cleanup choice.
-- [ ] Storage errors remove or mark only the affected image item.
+- [x] The user can see whether image capture is enabled.
+- [x] A disabled setting cannot leave a new image item in the keyboard panel.
+- [x] Cleanup is idempotent and safe when files are already missing.
+- [x] Pinned image entries are handled by the documented cleanup choice.
+- [x] Storage errors remove or mark only the affected image item.
 
 ## Phase 4: Persistence and cleanup verification
 

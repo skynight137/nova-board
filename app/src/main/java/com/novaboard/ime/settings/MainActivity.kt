@@ -20,6 +20,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import com.novaboard.ime.R
+import com.novaboard.ime.clipboard.ClipboardHistoryManager
 import com.novaboard.ime.theme.ThemeManager
 import com.novaboard.ime.theme.ThemeMode
 import com.novaboard.ime.util.AppLog
@@ -380,6 +381,31 @@ class MainActivity : AppCompatActivity() {
                             override fun onStopTrackingTouch(seekBar: SeekBar?) = Unit
                         }
                     )
+                }
+            )
+            content.addView(
+                Button(this).apply {
+                    text = getString(R.string.delete_saved_image_clips)
+                    contentDescription = getString(R.string.delete_saved_image_clips_summary)
+                    setOnClickListener {
+                        AlertDialog.Builder(this@MainActivity)
+                            .setTitle(R.string.delete_saved_image_clips)
+                            .setMessage(R.string.delete_saved_image_clips_confirmation)
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .setPositiveButton(R.string.delete) { _, _ ->
+                                val removed =
+                                    ClipboardHistoryManager.clearStoredImageHistory(
+                                        this@MainActivity,
+                                    )
+                                Toast.makeText(
+                                        this@MainActivity,
+                                        getString(R.string.saved_image_clips_deleted, removed),
+                                        Toast.LENGTH_SHORT,
+                                    )
+                                    .show()
+                            }
+                            .show()
+                    }
                 }
             )
         }

@@ -37,6 +37,32 @@ class ClipboardHistoryManager(private val context: Context) {
         private const val MAX_UNPINNED = 40
         private const val IMAGE_DIR = "clipboard-images"
         private const val OWN_AUTHORITY = "com.novaboard.ime.clipboard"
+
+        /**
+         * Removes persisted image entries and all private image files without
+         * touching text history. Safe to call repeatedly.
+         */
+        fun clearStoredImageHistory(context: Context): Int {
+            val preferences = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            val raw = preferences.getString(KEY_ITEMS, null)
+            var removed = 0
+            val retained = JSONArray()
+            if (raw != null) {
+                runCatching { JSONArray(raw) }.getOrNull()?.let { entries ->
+                    for (index in 0 until entries.length()) {
+                        val entry = entries.optJSONObject(index) ?: continue
+                        if (entry.optString("type") == ClipType.IMAGE.name) {
+                            removed++
+                        } else {
+                            retained.put(entry)
+                        }
+                    }
+                }
+            }
+            preferences.edit().putString(KEY_ITEMS, retained.toString()).apply()
+            File(context.filesDir, IMAGE_DIR).listFiles()?.forEach { it.delete() }
+            return removed
+        }
     }
 
     private val systemClipboard =

@@ -72,6 +72,11 @@
     <string name="key_popups_summary">Show a pop-up when tapping a key</string>
     <string name="large_key_text_summary">Show larger text on keyboard keys</string>
     <string name="image_clipboard_history_summary">Keep copied images in private NovaBoard storage; disabled by default</string>
+    <string name="delete_saved_image_clips">Delete saved image clips</string>
+    <string name="delete_saved_image_clips_summary">Remove stored image clipboard items and private files; text clips are kept</string>
+    <string name="delete_saved_image_clips_confirmation">This removes saved image clipboard items from NovaBoard. Text clipboard history will remain.</string>
+    <string name="saved_image_clips_deleted">Deleted %1$d saved image clips</string>
+    <string name="delete">Delete</string>
     <string name="autocorrect_summary">Close typos are corrected when you type a word boundary</string>
     <string name="quick_period_summary">Double-tap the spacebar to insert a period</string>
     <string name="undo_autocorrect_summary">Backspacing after an autocorrection will return the original text</string>

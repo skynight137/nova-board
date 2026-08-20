@@ -5,3 +5,6 @@ package com.novaboard.ime.clipboard
  */
 fun shouldCaptureClipboardItem(type: ClipType, imageHistoryEnabled: Boolean): Boolean =
     type != ClipType.IMAGE || imageHistoryEnabled
+
+fun removeImageClipboardItems(items: List<ClipboardItem>): List<ClipboardItem> =
+    items.filterNot { it.type == ClipType.IMAGE }
