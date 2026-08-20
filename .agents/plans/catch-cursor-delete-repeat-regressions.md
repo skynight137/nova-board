@@ -60,7 +60,7 @@ surrogate pairs, and empty input.
 - `app/src/main/java/com/novaboard/ime/NovaBoardService.kt`
 - `app/src/test/java/com/novaboard/ime/editing/EditingContractsTest.kt`
 
-### Task 3: Cover Android lifecycle seams
+### Task 3: Cover Android lifecycle seams `[~]`
 
 **Description:** Add seam-level tests or narrowly scoped instrumentation coverage
 for release, cancel, input-session restart, and service destruction. Tests must
@@ -68,16 +68,21 @@ prove that no delayed callback mutates an old editor.
 
 **Acceptance criteria:**
 
-- [ ] Release and cancel both stop cursor and delete repeats.
-- [ ] `onStartInputView` invalidates a prior repeat.
+- [x] Release and cancel both stop cursor and delete repeats through the shared stop contract.
+- [x] `onStartInputView` invalidates a prior repeat through the session token contract.
 - [ ] `onFinishInput` and service destruction leave no active repeat callback.
-- [ ] Direction changes cannot leave two active repeat callbacks.
+- [x] Direction changes cannot leave two active repeat callbacks.
 
 **Files likely touched:**
 
 - `app/src/main/java/com/novaboard/ime/NovaBoardService.kt`
 - `app/src/main/java/com/novaboard/ime/view/KeyboardView.kt`
 - `app/src/test/java/com/novaboard/ime/`
+
+**Verification note:** JVM coverage proves the shared stop, direction, and
+session-token behavior. Direct Android lifecycle callback coverage remains
+deferred because the repository does not provide an instrumentation test
+workflow in this environment.
 
 ## Verification
 
