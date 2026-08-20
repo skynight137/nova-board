@@ -144,7 +144,7 @@ deletes the previous word/segment in bounded chunks.
 - [x] Release/cancel/session change stops deletion immediately and clears stale typing/autocorrect state.
 
 **Verification:**
-- [ ] Pure deletion-boundary tests cover words, spaces, punctuation, Unicode pairs, and empty input.
+- [x] Pure deletion-boundary tests cover words, spaces, punctuation, Unicode pairs, and empty input.
 - [ ] Manual check: a held key cannot continue deleting after the finger leaves the key.
 
 **Dependencies:** Task 1

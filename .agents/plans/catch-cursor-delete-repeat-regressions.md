@@ -40,7 +40,7 @@ stop, direction changes, cadence, and session invalidation. Keep Android
 - `app/src/main/java/com/novaboard/ime/editing/`
 - `app/src/test/java/com/novaboard/ime/editing/`
 
-### Task 2: Add held-delete boundary regression coverage
+### Task 2: Add held-delete boundary regression coverage `[~]`
 
 **Description:** Expand pure deletion tests around the service's held-delete
 path and preserve code-point-safe behavior for whitespace, punctuation,
@@ -48,10 +48,10 @@ surrogate pairs, and empty input.
 
 **Acceptance criteria:**
 
-- [ ] A word preceded by spaces deletes only the intended previous segment.
-- [ ] Punctuation boundaries remain deterministic.
-- [ ] Unicode surrogate pairs are not split.
-- [ ] Empty input produces no deletion request.
+- [x] A word preceded by spaces deletes only the intended previous segment.
+- [x] Punctuation boundaries remain deterministic.
+- [x] Unicode surrogate pairs are not split.
+- [x] Empty input produces no deletion request.
 - [ ] Repeated deletion clears stale typing/autocorrect state.
 
 **Files likely touched:**
