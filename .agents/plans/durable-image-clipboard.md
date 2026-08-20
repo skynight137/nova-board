@@ -32,7 +32,7 @@ the overall clipboard feature in a future product decision.
 
 ## Phase 1: User preference
 
-### Task 1: Add image clipboard history preference `[ ]`
+### Task 1: Add image clipboard history preference `[x]`
 
 Add a persisted `IMAGE_CLIPBOARD_HISTORY` preference with an explicit default.
 The recommended default is `false` so image content is not retained without
@@ -40,11 +40,11 @@ the user's choice.
 
 Acceptance criteria:
 
-- [ ] Settings exposes “Save image clipboard history” with a clear summary.
-- [ ] The default is disabled for new installations.
-- [ ] The setting survives keyboard recreation and process restart.
-- [ ] Reset restores the documented default.
-- [ ] Accessibility text explains that enabling stores images in app-private
+- [x] Settings exposes “Save image clipboard history” with a clear summary.
+- [x] The default is disabled for new installations.
+- [x] The setting survives keyboard recreation and process restart.
+- [x] Reset restores the documented default.
+- [x] Accessibility text explains that enabling stores images in app-private
   keyboard storage.
 
 Files likely touched:
@@ -56,7 +56,7 @@ Files likely touched:
 
 ## Phase 2: Enforce capture policy
 
-### Task 2: Gate new image capture `[ ]`
+### Task 2: Gate new image capture `[~]`
 
 Pass the preference decision into `ClipboardHistoryManager` or read it through
 an injected policy seam. The manager must evaluate the policy before copying
@@ -64,8 +64,8 @@ any image bytes.
 
 Acceptance criteria:
 
-- [ ] Disabled mode never opens an image source stream or writes an image file.
-- [ ] Text clips continue to capture normally.
+- [x] Disabled mode never opens an image source stream or writes an image file.
+- [x] Text clips continue to capture normally.
 - [ ] Re-enabling captures only future image clips; it does not reconstruct
   images that were skipped while disabled.
 - [ ] Duplicate protection remains unchanged.

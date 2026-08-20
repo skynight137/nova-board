@@ -36,7 +36,7 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
 - [x] Review current code against the original 12 findings.
 - [x] Complete the low-risk inactive-settings and quick-delete-summary cleanup.
 - [x] Complete translation result replacement.
-- [~] Make image clipboard storage durable and user-controlled (durable implementation exists; opt-in toggle, cleanup semantics, and dedicated persistence tests remain):
+- [~] Make image clipboard storage durable and user-controlled (preference and capture gate complete; cleanup semantics and dedicated persistence tests remain):
   `.agents/plans/durable-image-clipboard.md`
 - [~] Resolve remaining emoji controls/media policy and refine emoji-on-enter policy.
 - [~] Add focused lifecycle, persistence, layout, and preference regression tests; pure editing/editor-policy/preference contracts are covered, while Android lifecycle, clipboard, and layout seams remain.

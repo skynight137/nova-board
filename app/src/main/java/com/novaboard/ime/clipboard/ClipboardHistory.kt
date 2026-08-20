@@ -7,6 +7,7 @@ import android.content.Context
 import android.net.Uri
 import java.io.File
 import java.util.UUID
+import com.novaboard.ime.settings.KeyboardPreferences
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -77,6 +78,19 @@ class ClipboardHistoryManager(private val context: Context) {
         if (clip.itemCount == 0) return
         val item = clip.getItemAt(0)
         val desc = clip.description
+        val isImage = item.uri != null && desc.hasMimeType("image/*")
+        if (
+            isImage &&
+                !shouldCaptureClipboardItem(
+                    ClipType.IMAGE,
+                    KeyboardPreferences.getBoolean(
+                        context,
+                        KeyboardPreferences.IMAGE_CLIPBOARD_HISTORY,
+                    ),
+                )
+        ) {
+            return
+        }
 
         val newEntry =
             when {

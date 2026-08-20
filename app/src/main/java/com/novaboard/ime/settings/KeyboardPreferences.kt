@@ -29,6 +29,8 @@ object KeyboardPreferences {
     const val CLEAR_TYPING_DATA = "clear_typing_data"
     const val GESTURE_MODE = "gesture_mode"
     const val INCOGNITO_MODE = "incognito_mode"
+    const val IMAGE_CLIPBOARD_HISTORY = "image_clipboard_history"
+    const val DEFAULT_IMAGE_CLIPBOARD_HISTORY = false
 
     private val defaults =
         mapOf(
@@ -51,6 +53,7 @@ object KeyboardPreferences {
             VIBRATION_ON_KEYPRESS to false,
             UNDO_AUTOCORRECT to false,
             QUICK_PREDICTION_INSERT to false,
+            IMAGE_CLIPBOARD_HISTORY to DEFAULT_IMAGE_CLIPBOARD_HISTORY,
         )
 
     fun getBoolean(context: Context, key: String): Boolean =

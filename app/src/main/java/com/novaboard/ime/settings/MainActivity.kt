@@ -118,6 +118,12 @@ class MainActivity : AppCompatActivity() {
                         KeyboardPreferences.LARGE_KEY_TEXT,
                         false,
                     ),
+                    PreferenceSpec(
+                        R.string.image_clipboard_history,
+                        R.string.image_clipboard_history_summary,
+                        KeyboardPreferences.IMAGE_CLIPBOARD_HISTORY,
+                        false,
+                    ),
                 ),
             )
         }
