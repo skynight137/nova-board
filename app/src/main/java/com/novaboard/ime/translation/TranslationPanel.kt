@@ -9,6 +9,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.text.Editable
+import android.text.TextWatcher
 import com.novaboard.ime.R
 
 class TranslationPanel(
@@ -21,6 +23,8 @@ class TranslationPanel(
 ) {
     private var state = initialState
     private val source = EditText(context)
+    private lateinit var sourceLabel: TextView
+    private lateinit var targetLabel: TextView
     private val result = TextView(context)
     private val status = TextView(context)
     private val paste = Button(context)
@@ -30,6 +34,31 @@ class TranslationPanel(
     init {
         source.setText(state.sourceText)
         source.setSelection(source.length())
+        source.addTextChangedListener(
+            object : TextWatcher {
+                override fun afterTextChanged(editable: Editable?) {
+                    state = reduceTranslationComposer(
+                        state,
+                        TranslationComposerAction.EditSource(editable?.toString().orEmpty()),
+                    )
+                    updateStatusOnly()
+                }
+
+                override fun beforeTextChanged(
+                    text: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int,
+                ) = Unit
+
+                override fun onTextChanged(
+                    text: CharSequence?,
+                    start: Int,
+                    before: Int,
+                    count: Int,
+                ) = Unit
+            },
+        )
         update()
     }
 
@@ -42,7 +71,8 @@ class TranslationPanel(
             addView(
                 LinearLayout(context).apply {
                     gravity = Gravity.CENTER_VERTICAL
-                    addView(label(context, state.sourceLanguage))
+                    sourceLabel = label(context, state.sourceLanguage)
+                    addView(sourceLabel)
                     addView(
                         Button(context).apply {
                             text = "⇄"
@@ -57,7 +87,8 @@ class TranslationPanel(
                         },
                         weightedParams(context, 0f),
                     )
-                    addView(label(context, state.targetLanguage))
+                    targetLabel = label(context, state.targetLanguage)
+                    addView(targetLabel)
                     addView(
                         Button(context).apply {
                             text = context.getString(R.string.translation_close)
@@ -136,17 +167,14 @@ class TranslationPanel(
 
     private fun update() {
         val context = view.context
-        source.setText(state.sourceText)
-        source.setSelection(source.length())
+        if (source.text.toString() != state.sourceText) {
+            source.setText(state.sourceText)
+            source.setSelection(source.length())
+        }
+        sourceLabel.text = state.sourceLanguage.uppercase()
+        targetLabel.text = state.targetLanguage.uppercase()
         result.text = state.translatedText.orEmpty()
-        status.text =
-            when (state.status) {
-                TranslationStatus.LOADING -> context.getString(R.string.translation_loading)
-                TranslationStatus.UNAVAILABLE ->
-                    context.getString(R.string.translation_unavailable)
-                TranslationStatus.ERROR -> context.getString(R.string.translation_error)
-                else -> ""
-            }
+        updateStatusOnly()
         paste.text = context.getString(R.string.translation_paste)
         paste.contentDescription = context.getString(R.string.translation_paste)
         paste.isEnabled = !state.translatedText.isNullOrBlank()
@@ -155,6 +183,20 @@ class TranslationPanel(
         reply.contentDescription = context.getString(R.string.translation_reply)
         reply.isEnabled = state.hasSelection && !state.translatedText.isNullOrBlank()
         reply.setOnClickListener { onReply(state, state.selectedStart, state.selectedEnd) }
+    }
+
+    private fun updateStatusOnly() {
+        val context = view.context
+        status.text =
+            when (state.status) {
+                TranslationStatus.LOADING -> context.getString(R.string.translation_loading)
+                TranslationStatus.UNAVAILABLE ->
+                    context.getString(R.string.translation_unavailable)
+                TranslationStatus.ERROR -> context.getString(R.string.translation_error)
+                else -> ""
+            }
+        paste.isEnabled = !state.translatedText.isNullOrBlank()
+        reply.isEnabled = state.hasSelection && !state.translatedText.isNullOrBlank()
     }
 
     private fun label(context: Context, text: String): TextView =

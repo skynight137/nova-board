@@ -89,7 +89,7 @@ honest loading/error handling. Phase 4 remains gated on those two rounds.
 
 ## Phase 2: Native in-keyboard normal translation
 
-### Task 2: Replace the external launch with a keyboard panel `[ ]`
+### Task 2: Replace the external launch with a keyboard panel `[✓]`
 
 Add a panel/container inside `keyboard_container.xml` or as a native child
 managed by `NovaBoardService`. It must open over or replace the tools/suggestion
@@ -97,15 +97,18 @@ strip without opening an Activity.
 
 Acceptance criteria:
 
-- [ ] `Translate` opens the in-keyboard panel.
-- [ ] Selected editor text pre-fills the source field when available.
-- [ ] The source field can be edited without mutating the host editor yet.
-- [ ] Language labels, swap, clear, back, result area, `Paste`, and `Reply`
+- [✓] `Translate` opens the in-keyboard panel.
+- [✓] Selected editor text pre-fills the source field when available.
+- [✓] The source field can be edited without mutating the host editor yet.
+- [✓] Language labels, swap, clear, close, result area, `Paste`, and `Reply`
   match the reference interaction hierarchy.
-- [ ] Outside tap, back, editor change, input-session reset, and service
-  destruction dismiss or invalidate the panel safely.
-- [ ] The panel remains usable on narrow and tall phone layouts.
-- [ ] All controls have content descriptions and keyboard-focusable states.
+- [~] Outside tap and system back remain deferred to the provider/panel
+  interaction pass; editor change, input-session reset, and service destruction
+  dismiss the panel safely.
+- [~] Narrow and tall phone visual verification remains deferred because no
+  Android device/preview automation is available in this JVM-only pass.
+- [✓] All visible controls have content descriptions and keyboard-focusable
+  states.
 
 `Paste` should commit the translated result at the current cursor without
 replacing unrelated text. `Reply` should replace only the originally selected
@@ -177,6 +180,16 @@ Acceptance criteria:
 - [ ] Run `source .bin/env.sh && ./gradlew :app:assembleDebug`.
 - [ ] Run `git diff --check`.
 - [ ] Commit each vertical slice with Conventional Commit messages.
+
+Phase 2 verification completed:
+
+- [✓] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`
+- [✓] `source .bin/env.sh && ./gradlew :app:assembleDebug`
+- [✓] `git diff --check`
+
+The provider boundary and Android-only panel verification remain the next
+unfinished stages; this panel reports provider unavailability instead of
+launching `ACTION_PROCESS_TEXT`.
 
 ## Definition of done
 

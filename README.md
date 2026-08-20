@@ -14,8 +14,8 @@ input without a third-party keyboard SDK.
 - Clipboard history for text and image references with pinning and deletion
 - System, light, and dark themes
 - Voice typing through Android's on-device `SpeechRecognizer`
-- Translation actions through Android's `ACTION_PROCESS_TEXT` contract when a
-  translation-capable app is installed
+- In-keyboard translation composer with selection-scoped Reply and cursor-safe
+  Paste actions; provider-backed translation is not yet available
 - Optional gesture typing across letter keys with bounded path recognition
 - Settings actions to enable NovaBoard and switch the active input method
 - Exportable diagnostic report with bounded device, app, and application-log

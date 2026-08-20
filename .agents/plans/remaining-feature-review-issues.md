@@ -45,7 +45,8 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
   Android-context verification remains explicitly deferred):
   `.agents/plans/durable-image-clipboard.md`
 - [~] Replace the external translation launch with the in-keyboard panel and
-  provider boundary; the pure composer contract is complete:
+  provider boundary; the native panel is complete, while the provider boundary
+  and Android-only verification remain:
   `.agents/plans/translation-and-editor-replacement.md`
 - [~] Resolve remaining emoji controls/media policy and refine emoji-on-enter policy.
 - [~] Add focused lifecycle, persistence, layout, and preference regression tests; pure editing/editor-policy/preference contracts are covered, while Android lifecycle, clipboard, and layout seams remain.

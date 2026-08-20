@@ -239,9 +239,9 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         clipboardPanel = null
         emojiPanel?.dismiss()
         emojiPanel = null
+        dismissTranslationPanel()
         toolsMenuPopup?.dismiss()
         toolsMenuPopup = null
-        pendingTranslation = null
         selectionStart = -1
         selectionEnd = -1
         resetTypingState()
@@ -439,65 +439,92 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         val text = ic?.getSelectedText(0)?.toString()?.takeIf { it.isNotBlank() }
         val start = selectionStart
         val end = selectionEnd
-        if (text.isNullOrBlank() || start < 0 || end <= start) {
-            Toast.makeText(this, "Select text first", Toast.LENGTH_SHORT).show()
-            return
-        }
-        val request =
-            TranslationRequest(
+        dismissTranslationPanel()
+        val state =
+            TranslationComposerState(
                 session = inputSession,
-                requestId = ++translationRequestId,
-                selectionStart = start,
-                selectionEnd = end,
+                selectedStart = start.takeIf { text != null && it >= 0 } ?: -1,
+                selectedEnd = end.takeIf { text != null && it > start } ?: -1,
+                sourceText = text.orEmpty(),
             )
-        pendingTranslation = request
-        startActivity(
-            Intent(this, TranslationResultActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                putExtra(TranslationResultActivity.EXTRA_SESSION, request.session)
-                putExtra(TranslationResultActivity.EXTRA_REQUEST_ID, request.requestId)
-                putExtra(TranslationResultActivity.EXTRA_SELECTION_START, start)
-                putExtra(TranslationResultActivity.EXTRA_SELECTION_END, end)
-                putExtra(TranslationResultActivity.EXTRA_TEXT, text)
-            },
+        translationPanel =
+            TranslationPanel(
+                this,
+                state,
+                onDismiss = { dismissTranslationPanel() },
+                onUnavailable = {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.translation_unavailable),
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                },
+                onPaste = { panelState, cursor ->
+                    commitTranslation(
+                        TranslationCommit.Paste(panelState.translatedText.orEmpty(), cursor),
+                    )
+                },
+                onReply = { panelState, selectedStart, selectedEnd ->
+                    commitTranslation(
+                        TranslationCommit.Reply(
+                            panelState.translatedText.orEmpty(),
+                            selectedStart,
+                            selectedEnd,
+                        ),
+                    )
+                },
+            )
+        translationPanelContainer.removeAllViews()
+        translationPanelContainer.addView(
+            translationPanel!!.view,
+            ViewGroup.LayoutParams.MATCH_PARENT,
         )
+        translationPanelContainer.visibility = View.VISIBLE
+        toolsBar.visibility = View.GONE
+        suggestionBar.visibility = View.GONE
+        hotkeysScroller.visibility = View.GONE
     }
 
-    private fun handleTranslationResult(intent: Intent) {
-        val request =
-            TranslationRequest(
-                session = intent.getLongExtra(TranslationResultActivity.EXTRA_SESSION, -1L),
-                requestId = intent.getLongExtra(TranslationResultActivity.EXTRA_REQUEST_ID, -1L),
-                selectionStart =
-                    intent.getIntExtra(TranslationResultActivity.EXTRA_SELECTION_START, -1),
-                selectionEnd =
-                    intent.getIntExtra(TranslationResultActivity.EXTRA_SELECTION_END, -1),
-            )
-        val result = intent.getStringExtra(TranslationResultActivity.EXTRA_RESULT)
-        val accepted =
-            shouldAcceptTranslationResult(
-                request,
-                inputSession,
-                pendingTranslation?.requestId ?: -1L,
-                selectionStart,
-                selectionEnd,
-            )
-        pendingTranslation = null
-        if (!accepted || result.isNullOrBlank()) {
-            Toast.makeText(this, "Translation is unavailable", Toast.LENGTH_SHORT).show()
-            return
+    private fun dismissTranslationPanel() {
+        if (!::translationPanelContainer.isInitialized) return
+        translationPanelContainer.removeAllViews()
+        translationPanelContainer.visibility = View.GONE
+        translationPanel = null
+        if (::toolsBar.isInitialized) showToolsStrip()
+    }
+
+    private fun commitTranslation(commit: TranslationCommit) {
+        val ic = currentInputConnection ?: return
+        when (commit) {
+            is TranslationCommit.Paste -> {
+                ic.setSelection(commit.cursor, commit.cursor)
+                ic.commitText(commit.text, 1)
+                selectionStart = commit.cursor + commit.text.length
+                selectionEnd = selectionStart
+            }
+            is TranslationCommit.Reply -> {
+                if (
+                    commit.selectionStart != selectionStart ||
+                    commit.selectionEnd != selectionEnd ||
+                    commit.selectionStart < 0 ||
+                    commit.selectionEnd <= commit.selectionStart
+                ) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.translation_selection_unavailable),
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                    return
+                }
+                ic.setSelection(commit.selectionStart, commit.selectionEnd)
+                ic.commitText(commit.text, 1)
+                selectionStart = commit.selectionStart + commit.text.length
+                selectionEnd = selectionStart
+            }
         }
-        val ic = currentInputConnection
-        if (ic == null) {
-            Toast.makeText(this, "Translation is unavailable", Toast.LENGTH_SHORT).show()
-            return
-        }
-        ic.setSelection(request.selectionStart, request.selectionEnd)
-        ic.commitText(result, 1)
-        selectionStart = request.selectionStart + result.length
-        selectionEnd = selectionStart
         resetTypingState()
         refreshSuggestionsIfReady()
+        dismissTranslationPanel()
     }
 
     private fun toggleHotkeys() {
