@@ -120,8 +120,13 @@ class ClipboardHistoryManager(private val context: Context) {
 
         val newEntry =
             when {
-                !item.text.isNullOrBlank() ->
-                    ClipboardItem(nextId++, ClipType.TEXT, text = item.text.toString())
+                !isImage ->
+                    clipboardText(
+                        directText = item.text?.toString(),
+                        coercedText = item.coerceToText(context)?.toString(),
+                    )?.let { text ->
+                        ClipboardItem(nextId++, ClipType.TEXT, text = text)
+                    }
                 item.uri != null && desc.hasMimeType("image/*") ->
                     copyImage(item.uri, desc.getMimeType(0) ?: "image/*")?.let { uri ->
                         ClipboardItem(nextId++, ClipType.IMAGE, imageUri = uri.toString())

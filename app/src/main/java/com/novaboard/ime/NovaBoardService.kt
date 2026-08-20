@@ -1030,11 +1030,20 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 override fun onEndOfSpeech() {}
 
                 override fun onError(error: Int) {
-                    listening = false
-                    if (recognizer === speechRecognizer) {
-                        speechRecognizer = null
+                    if (
+                        !acceptsInputSessionResult(
+                            resultSession = session,
+                            activeSession = inputSession,
+                            resultRecognizer = recognizerGeneration,
+                            activeRecognizer = voiceRecognizerGeneration,
+                        ) || recognizer !== speechRecognizer
+                    ) {
                         recognizer.destroy()
+                        return
                     }
+                    listening = false
+                    speechRecognizer = null
+                    recognizer.destroy()
                     val message =
                         if (
                             error == SpeechRecognizer.ERROR_NO_MATCH ||

@@ -24,6 +24,13 @@ class ClipboardCapturePolicyTest {
     }
 
     @Test
+    fun clipboardTextFallsBackToCoercedRepresentation() {
+        assertEquals("formatted copy", clipboardText(null, "formatted copy"))
+        assertEquals("direct copy", clipboardText("direct copy", "formatted copy"))
+        assertEquals(null, clipboardText(" ", "\t"))
+    }
+
+    @Test
     fun cleanupRemovesImagesButKeepsTextHistory() {
         val items =
             listOf(
