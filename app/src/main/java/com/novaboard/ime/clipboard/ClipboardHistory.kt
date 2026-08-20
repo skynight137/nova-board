@@ -194,22 +194,10 @@ class ClipboardHistoryManager(private val context: Context) {
     }
 
     private fun save() {
-        val arr = JSONArray()
-        items.forEach { item ->
-            arr.put(
-                JSONObject().apply {
-                    put("id", item.id)
-                    put("type", item.type.name)
-                    put("text", item.text ?: JSONObject.NULL)
-                    put("imageUri", item.imageUri ?: JSONObject.NULL)
-                    put("pinned", item.pinned)
-                }
-            )
-        }
         context
             .getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
-            .putString(KEY_ITEMS, arr.toString())
+            .putString(KEY_ITEMS, ClipboardPersistence.encode(items))
             .apply()
     }
 
@@ -217,30 +205,12 @@ class ClipboardHistoryManager(private val context: Context) {
         val raw =
             context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_ITEMS, null)
                 ?: return
-        val arr = runCatching { JSONArray(raw) }.getOrNull() ?: return
+        val loaded = ClipboardPersistence.decode(raw)
         items.clear()
-        for (i in 0 until arr.length()) {
-            runCatching {
-                val o = arr.getJSONObject(i)
-                val id = o.getLong("id")
-                val type = ClipType.valueOf(o.getString("type"))
-                ClipboardItem(
-                    id = id,
-                    type = type,
-                    text = o.optString("text").takeIf { o.has("text") && !o.isNull("text") },
-                    imageUri = o.optString("imageUri").takeIf {
-                        o.has("imageUri") && !o.isNull("imageUri")
-                    },
-                    pinned = o.optBoolean("pinned", false),
-                )
-            }.onSuccess { item ->
-                val migrated =
-                    if (item.type == ClipType.IMAGE) migrateImage(item) else item
-                if (migrated != null) {
-                    items.add(migrated)
-                    if (migrated.id >= nextId) nextId = migrated.id + 1
-                }
-            }
+        nextId = loaded.nextId
+        loaded.items.forEach { item ->
+            val migrated = if (item.type == ClipType.IMAGE) migrateImage(item) else item
+            if (migrated != null) items.add(migrated)
         }
         trim()
         cleanupOrphanImages()

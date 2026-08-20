@@ -99,7 +99,7 @@ Acceptance criteria:
 
 ## Phase 4: Persistence and cleanup verification
 
-### Task 4: Add deterministic clipboard regression coverage `[ ]`
+### Task 4: Add deterministic clipboard regression coverage `[~]`
 
 Create isolated tests around the existing manager seams or extract pure
 persistence helpers where Android clipboard access prevents JVM testing.
@@ -115,6 +115,13 @@ Acceptance criteria:
 - [ ] Delete removes the corresponding private file and persisted item.
 - [ ] Disabled image capture produces no stored image entry.
 - [ ] Text entries and duplicate startup import behavior remain unchanged.
+
+Implementation note: the JSON persistence contract now has a pure JVM seam and
+coverage for malformed entries, valid mixed entries, round-tripping, and ID
+allocation. Provider URI migration, filesystem orphan cleanup, cap trimming,
+and listener/startup behavior remain Android-context boundaries and are
+deferred until a Robolectric or instrumentation test dependency is intentionally
+introduced.
 
 Verification:
 

@@ -190,4 +190,5 @@ dependencies {
     implementation("androidx.preference:preference-ktx:1.2.1")
 
     testImplementation("junit:junit:4.13.2")
+    testImplementation(libs.json)
 }
