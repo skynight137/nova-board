@@ -335,7 +335,9 @@ constructor(
                     listener?.onCursorMove(if (event.x > cursorDragLastX) 1 else -1)
                     cursorDragLastX = event.x
                 }
-                if (hit != pressedHit) {
+                // Keep the original key during small finger jitter. Clearing the active hit when
+                // the pointer briefly leaves a key causes a normal tap to be dropped on ACTION_UP.
+                if (hit != null && hit != pressedHit) {
                     cancelPopup()
                     pressedHit = hit
                     invalidate()

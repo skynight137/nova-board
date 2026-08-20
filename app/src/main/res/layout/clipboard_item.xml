@@ -31,7 +31,7 @@
         android:id="@+id/btnPin"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:background="@android:color/transparent"
         android:src="@drawable/ic_pin"
         app:tint="@color/kb_toolbar_icon"
         android:contentDescription="@string/cd_pin" />

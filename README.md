@@ -7,7 +7,8 @@ input without a third-party keyboard SDK.
 
 ## Features
 
-- Tools row with clipboard, hotkeys, translation, voice, search, and more
+- Tools row with clipboard, hotkeys, translation, voice, search, and an
+  in-keyboard four-column overflow tools grid
 - Suggestions, small grammar/autocorrect helpers, and next-word prediction
 - QWERTY, number, symbol, and cursor-arrow layouts
 - Long-press accented characters and symbol popups

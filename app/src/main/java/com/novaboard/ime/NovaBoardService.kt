@@ -23,10 +23,13 @@ import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputContentInfo
 import android.widget.HorizontalScrollView
 import android.widget.ImageButton
+import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
 import android.widget.Toast
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import com.novaboard.ime.clipboard.ClipType
 import com.novaboard.ime.clipboard.ClipboardHistoryManager
 import com.novaboard.ime.clipboard.ClipboardItem
@@ -330,7 +333,26 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 setBackgroundColor(getColor(R.color.kb_key_bg_special))
-                setPadding(8, 8, 8, 8)
+                setPadding(8, 6, 8, 8)
+            }
+        menu.addView(
+            TextView(this).apply {
+                text = getString(R.string.tool_menu_title)
+                textSize = 16f
+                setTextColor(getColor(R.color.kb_key_text))
+                gravity = Gravity.CENTER
+                setPadding(8, 10, 8, 10)
+            },
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            ),
+        )
+        val grid =
+            GridLayout(this).apply {
+                columnCount = 4
+                alignmentMode = GridLayout.ALIGN_BOUNDS
+                useDefaultMargins = false
             }
         val items =
             visibleToolMenuItems(
@@ -341,44 +363,95 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                     ToolMenuItem("voice", getString(R.string.cd_voice)),
                     ToolMenuItem("search", getString(R.string.tool_search)),
                     ToolMenuItem("emoji", getString(R.string.cd_emoji)),
-                    ToolMenuItem("settings", getString(R.string.keyboard_preferences)),
+                    ToolMenuItem("settings", getString(R.string.tool_settings)),
+                    ToolMenuItem("languages", getString(R.string.tool_languages)),
+                    ToolMenuItem("layouts", getString(R.string.tool_layouts)),
+                    ToolMenuItem("themes", getString(R.string.tool_themes)),
+                    ToolMenuItem("modes", getString(R.string.tool_modes)),
+                    ToolMenuItem("resize", getString(R.string.tool_resize)),
+                    ToolMenuItem("incognito", getString(R.string.tool_incognito)),
+                    ToolMenuItem("stickers", getString(R.string.tool_stickers)),
+                    ToolMenuItem("gif", getString(R.string.tool_gif)),
+                    ToolMenuItem("tips", getString(R.string.tool_tips)),
                 ),
             )
         items.forEach { item ->
-            menu.addView(
-                TextView(this).apply {
-                    text = item.label
-                    textSize = 15f
-                    setTextColor(getColor(R.color.kb_key_text))
-                    gravity = Gravity.CENTER_VERTICAL
-                    minHeight = (48 * resources.displayMetrics.density).toInt()
-                    setPadding(16, 0, 16, 0)
+            val cell =
+                LinearLayout(this).apply {
+                    orientation = LinearLayout.VERTICAL
+                    gravity = Gravity.CENTER
                     isFocusable = true
                     isClickable = true
                     contentDescription = item.label
-                    setOnClickListener {
-                        toolsMenuPopup?.dismiss()
-                        toolsMenuPopup = null
-                        when (item.id) {
-                            "clipboard" -> openClipboard(anchor)
-                            "hotkeys" -> toggleHotkeys()
-                            "translate" -> openTranslation()
-                            "voice" -> toggleVoiceInput()
-                            "search" ->
-                                currentInputConnection?.performEditorAction(
-                                    EditorInfo.IME_ACTION_SEARCH,
-                                )
-                            "emoji" -> onEmoji()
-                            "settings" ->
-                                startActivity(
-                                    Intent(this@NovaBoardService, MainActivity::class.java)
-                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                                )
-                        }
+                    setPadding(4, 10, 4, 10)
+                }
+            cell.addView(
+                TextView(this).apply {
+                    text = toolGlyph(item.id)
+                    textSize = 25f
+                    setTextColor(getColor(R.color.kb_key_text))
+                    gravity = Gravity.CENTER
+                },
+                LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    (36 * resources.displayMetrics.density).toInt(),
+                ),
+            )
+            cell.addView(
+                TextView(this).apply {
+                    text = item.label
+                    textSize = 13f
+                    setTextColor(getColor(R.color.kb_key_text))
+                    gravity = Gravity.CENTER
+                    maxLines = 1
+                    ellipsize = android.text.TextUtils.TruncateAt.END
+                },
+                LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                ),
+            )
+            cell.setOnClickListener {
+                toolsMenuPopup?.dismiss()
+                toolsMenuPopup = null
+                when (item.id) {
+                    "clipboard" -> openClipboard(anchor)
+                    "hotkeys" -> toggleHotkeys()
+                    "translate" -> openTranslation()
+                    "voice" -> toggleVoiceInput()
+                    "search" ->
+                        currentInputConnection?.performEditorAction(EditorInfo.IME_ACTION_SEARCH)
+                    "emoji", "stickers", "gif" -> onEmoji()
+                    "settings", "languages", "layouts", "themes", "modes", "resize", "tips" ->
+                        startActivity(
+                            Intent(this@NovaBoardService, MainActivity::class.java)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        )
+                    "incognito" -> {
+                        KeyboardPreferences.setIncognitoMode(
+                            this,
+                            !KeyboardPreferences.isIncognitoMode(this),
+                        )
+                        updateIncognitoBanner()
                     }
+                }
+            }
+            grid.addView(
+                cell,
+                GridLayout.LayoutParams().apply {
+                    width = 0
+                    height = ViewGroup.LayoutParams.WRAP_CONTENT
+                    columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                 },
             )
         }
+        menu.addView(
+            grid,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+            ),
+        )
         toolsMenuPopup =
             PopupWindow(
                 menu,
@@ -387,13 +460,31 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 true,
             ).also { popup ->
                 popup.isOutsideTouchable = true
-                popup.setBackgroundDrawable(
-                    resources.getDrawable(R.color.kb_key_bg_special, theme),
-                )
+                popup.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                popup.elevation = 8f
                 popup.setOnDismissListener { toolsMenuPopup = null }
                 popup.showAtLocation(anchor, Gravity.BOTTOM, 0, anchor.height)
             }
     }
+
+    private fun toolGlyph(id: String): String =
+        when (id) {
+            "clipboard" -> "▣"
+            "hotkeys" -> "⌨"
+            "translate" -> "文"
+            "voice" -> "♩"
+            "search" -> "⌕"
+            "emoji", "stickers", "gif" -> "☺"
+            "settings" -> "⚙"
+            "languages" -> "◎"
+            "layouts" -> "▦"
+            "themes" -> "◉"
+            "modes" -> "◆"
+            "resize" -> "↗"
+            "incognito" -> "⌒"
+            "tips" -> "ⓘ"
+            else -> "•"
+        }
 
     private fun openClipboard(root: View) {
         clipboardPanel?.dismiss()
