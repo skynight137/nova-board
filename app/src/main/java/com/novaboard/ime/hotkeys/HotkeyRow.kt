@@ -1,6 +1,7 @@
 package com.novaboard.ime.hotkeys
 
 import android.content.Context
+import android.graphics.drawable.GradientDrawable
 import android.view.KeyEvent
 import android.view.inputmethod.InputConnection
 import android.widget.LinearLayout
@@ -16,6 +17,8 @@ class HotkeyController(private val getInputConnection: () -> InputConnection?) {
 
     private var ctrlArmed = false
     private var altArmed = false
+    private var ctrlView: TextView? = null
+    private var altView: TextView? = null
 
     fun isCtrlArmed() = ctrlArmed
 
@@ -24,24 +27,24 @@ class HotkeyController(private val getInputConnection: () -> InputConnection?) {
     fun disarm() {
         ctrlArmed = false
         altArmed = false
+        ctrlView?.let { updateToggleAppearance(it, false) }
+        altView?.let { updateToggleAppearance(it, false) }
     }
 
     fun build(context: Context, row: LinearLayout, onModifierChanged: () -> Unit) {
         row.removeAllViews()
         row.addView(hotkeyButton(context, "ESC") { sendKey(KeyEvent.KEYCODE_ESCAPE) })
         row.addView(hotkeyButton(context, "TAB") { sendKey(KeyEvent.KEYCODE_TAB) })
-        row.addView(
-            toggleButton(context, "CTRL", { ctrlArmed }) {
+        ctrlView = toggleButton(context, "CTRL", { ctrlArmed }) {
                 ctrlArmed = it
                 onModifierChanged()
             }
-        )
-        row.addView(
-            toggleButton(context, "ALT", { altArmed }) {
+        row.addView(ctrlView)
+        altView = toggleButton(context, "ALT", { altArmed }) {
                 altArmed = it
                 onModifierChanged()
             }
-        )
+        row.addView(altView)
         row.addView(hotkeyButton(context, "DEL") { sendKey(KeyEvent.KEYCODE_FORWARD_DEL) })
         row.addView(hotkeyButton(context, "HOME") { sendKey(KeyEvent.KEYCODE_MOVE_HOME) })
         row.addView(hotkeyButton(context, "END") { sendKey(KeyEvent.KEYCODE_MOVE_END) })
@@ -109,13 +112,38 @@ class HotkeyController(private val getInputConnection: () -> InputConnection?) {
         TextView(context)
             .apply {
                 text = label
-                alpha = if (isOn()) 1f else 0.6f
                 setOnClickListener {
                     onToggle(!isOn())
-                    alpha = if (isOn()) 1f else 0.6f
+                    updateToggleAppearance(this, isOn())
                 }
             }
-            .also { applyHotkeyStyle(it) }
+            .also {
+                applyHotkeyStyle(it)
+                updateToggleAppearance(it, isOn())
+            }
+
+    private fun updateToggleAppearance(view: TextView, armed: Boolean) {
+        val density = view.resources.displayMetrics.density
+        view.background =
+            GradientDrawable().apply {
+                setColor(
+                    view.resources.getColor(
+                        if (armed) R.color.kb_accent else R.color.kb_key_bg_special,
+                        view.context.theme,
+                    )
+                )
+                cornerRadius = 6 * density
+            }
+        view.setTextColor(
+            view.resources.getColor(
+                if (armed) android.R.color.white else R.color.kb_key_text,
+                view.context.theme,
+            )
+        )
+        view.alpha = 1f
+        view.contentDescription =
+            if (armed) "${view.text} is armed" else "${view.text} is unarmed"
+    }
 
     private fun applyHotkeyStyle(view: TextView) {
         view.setBackgroundResource(R.drawable.bg_key_special)
