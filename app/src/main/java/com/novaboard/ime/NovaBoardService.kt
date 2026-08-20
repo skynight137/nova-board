@@ -25,11 +25,8 @@ import android.widget.HorizontalScrollView
 import android.widget.ImageButton
 import android.widget.GridLayout
 import android.widget.LinearLayout
-import android.widget.PopupWindow
 import android.widget.TextView
 import android.widget.Toast
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import com.novaboard.ime.clipboard.ClipType
 import com.novaboard.ime.clipboard.ClipboardHistoryManager
 import com.novaboard.ime.clipboard.ClipboardItem
@@ -73,6 +70,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private lateinit var hotkeysRow: LinearLayout
     private lateinit var cursorRow: LinearLayout
     private lateinit var emojiPanelContainer: android.widget.FrameLayout
+    private lateinit var overlayPanelContainer: android.widget.FrameLayout
     private lateinit var translationPanelContainer: android.widget.FrameLayout
     private lateinit var incognitoBanner: TextView
 
@@ -81,7 +79,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private val hotkeyController = HotkeyController { currentInputConnection }
     private var clipboardPanel: ClipboardPanel? = null
     private var emojiPanel: EmojiPanel? = null
-    private var toolsMenuPopup: PopupWindow? = null
+    private var toolsMenuView: View? = null
     private var lastSpaceTime = 0L
     private var lastAutocorrectOriginal: String? = null
     private var lastAutocorrectReplacement: String? = null
@@ -94,6 +92,8 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private var selectionStart = -1
     private var selectionEnd = -1
     private val cursorRepeatHandler = Handler(Looper.getMainLooper())
+    private val suggestionRefreshHandler = Handler(Looper.getMainLooper())
+    private val suggestionRefreshRunnable = Runnable { refreshSuggestions() }
     private var cursorRepeatRunnable: Runnable? = null
     private val cursorRepeatController =
         RepeatController(
@@ -158,6 +158,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         cursorRow = root.findViewById(R.id.cursorRow)
         translationPanelContainer = root.findViewById(R.id.translationPanelContainer)
         emojiPanelContainer = root.findViewById(R.id.emojiPanelContainer)
+        overlayPanelContainer = root.findViewById(R.id.overlayPanelContainer)
         incognitoBanner = root.findViewById(R.id.incognitoBanner)
         incognitoBanner.setOnClickListener {
             KeyboardPreferences.setIncognitoMode(this, false)
@@ -189,7 +190,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         resetTypingState()
         applyKeyboardPreferences()
         keyboardView.setShiftState(false)
-        refreshSuggestions()
+        scheduleSuggestionsRefresh()
     }
 
     override fun onFinishInput() {
@@ -255,8 +256,11 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         emojiPanel?.dismiss()
         emojiPanel = null
         dismissTranslationPanel()
-        toolsMenuPopup?.dismiss()
-        toolsMenuPopup = null
+        dismissToolsMenu()
+        if (::overlayPanelContainer.isInitialized) {
+            overlayPanelContainer.removeAllViews()
+            overlayPanelContainer.visibility = View.GONE
+        }
         selectionStart = -1
         selectionEnd = -1
         resetTypingState()
@@ -328,7 +332,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     }
 
     private fun showToolsMenu(anchor: View) {
-        toolsMenuPopup?.dismiss()
+        dismissToolsMenu()
         val menu =
             LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
@@ -342,6 +346,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 setTextColor(getColor(R.color.kb_key_text))
                 gravity = Gravity.CENTER
                 setPadding(8, 10, 8, 10)
+                setOnClickListener { dismissToolsMenu() }
             },
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -412,8 +417,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 ),
             )
             cell.setOnClickListener {
-                toolsMenuPopup?.dismiss()
-                toolsMenuPopup = null
+                dismissToolsMenu()
                 when (item.id) {
                     "clipboard" -> openClipboard(anchor)
                     "hotkeys" -> toggleHotkeys()
@@ -452,19 +456,23 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 ViewGroup.LayoutParams.WRAP_CONTENT,
             ),
         )
-        toolsMenuPopup =
-            PopupWindow(
-                menu,
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                true,
-            ).also { popup ->
-                popup.isOutsideTouchable = true
-                popup.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-                popup.elevation = 8f
-                popup.setOnDismissListener { toolsMenuPopup = null }
-                popup.showAtLocation(anchor, Gravity.BOTTOM, 0, anchor.height)
-            }
+        overlayPanelContainer.removeAllViews()
+        overlayPanelContainer.addView(
+            menu,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+        )
+        overlayPanelContainer.visibility = View.VISIBLE
+        toolsMenuView = menu
+    }
+
+    private fun dismissToolsMenu() {
+        if (!::overlayPanelContainer.isInitialized) return
+        toolsMenuView?.let(overlayPanelContainer::removeView)
+        toolsMenuView = null
+        if (overlayPanelContainer.childCount == 0) {
+            overlayPanelContainer.visibility = View.GONE
+        }
     }
 
     private fun toolGlyph(id: String): String =
@@ -488,8 +496,9 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
 
     private fun openClipboard(root: View) {
         clipboardPanel?.dismiss()
+        dismissToolsMenu()
         clipboardPanel = ClipboardPanel(this, clipboardHistory) { item -> pasteClipboardItem(item) }
-        clipboardPanel?.show(root)
+        clipboardPanel?.show(overlayPanelContainer)
     }
 
     private fun pasteClipboardItem(item: ClipboardItem) {
@@ -699,6 +708,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private companion object {
         const val CURSOR_REPEAT_INITIAL_DELAY_MS = 350L
         const val CURSOR_REPEAT_INTERVAL_MS = 70L
+        const val SUGGESTION_REFRESH_DELAY_MS = 40L
     }
 
     // ---- suggestions ----
@@ -723,6 +733,11 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             }
         val views = listOf(suggestion1, suggestion2, suggestion3)
         views.forEachIndexed { i, tv -> tv.text = list.getOrNull(i) ?: "" }
+    }
+
+    private fun scheduleSuggestionsRefresh() {
+        suggestionRefreshHandler.removeCallbacks(suggestionRefreshRunnable)
+        suggestionRefreshHandler.postDelayed(suggestionRefreshRunnable, SUGGESTION_REFRESH_DELAY_MS)
     }
 
     private fun emojiSuggestions(query: String): List<String> {
@@ -793,7 +808,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 }
                 lastSpaceTime = now
                 currentWord.clear()
-                refreshSuggestions()
+                scheduleSuggestionsRefresh()
             }
             KeyType.COMMA,
             KeyType.PERIOD -> {
@@ -826,7 +841,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             }
             else -> Unit
         }
-        refreshSuggestions()
+        scheduleSuggestionsRefresh()
     }
 
     private fun refreshSuggestionsIfReady() {
@@ -872,6 +887,13 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
 
     override fun onBackspace() {
         val ic = currentInputConnection ?: return
+        if (selectionStart >= 0 && selectionEnd > selectionStart) {
+            ic.commitText("", 1)
+            selectionStart = selectionEnd
+            resetTypingState()
+            scheduleSuggestionsRefresh()
+            return
+        }
         if (
             KeyboardPreferences.getBoolean(this, KeyboardPreferences.UNDO_AUTOCORRECT) &&
                 canUndoAutocorrect(
@@ -885,12 +907,12 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             ic.commitText(lastAutocorrectOriginal, 1)
             lastAutocorrectOriginal = null
             lastAutocorrectReplacement = null
-            refreshSuggestions()
+            scheduleSuggestionsRefresh()
             return
         }
         ic.deleteSurroundingText(1, 0)
         if (currentWord.isNotEmpty()) currentWord.deleteCharAt(currentWord.length - 1)
-        refreshSuggestions()
+        scheduleSuggestionsRefresh()
     }
 
     override fun onEnter() {

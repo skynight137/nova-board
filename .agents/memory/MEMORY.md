@@ -13,6 +13,7 @@
 - [NovaBoard archive migration](novaboard-migration.md) — native IME archives need current template build/plugin adaptation and APK identity verification.
 - [IME theme compatibility](ime-theme-compatibility.md) — avoid unresolved theme attributes in native keyboard button styles.
 - [Keyboard hit testing](keyboard-hit-testing.md) — retain the active key through small pointer jitter so taps are not dropped on ACTION_UP.
+- [IME overlay host](ime-overlay-host.md) — host clipboard and tool panels inside the input view instead of positioning PopupWindows from IME anchors.
 - [IME session state](ime-session-state.md) — scope editor mutations and asynchronous callbacks to the active input session.
 - [Durable clipboard storage](durable-clipboard-storage.md) — copy image bytes privately and expose them through the app-owned content provider, migrating legacy URIs on load.
 - [Conventional history rewrite](conventional-history-rewrite.md) — preview legacy subject mappings with a clean worktree before applying a commit-history rewrite.

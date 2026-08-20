@@ -5,7 +5,6 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,11 +21,11 @@ class ClipboardPanel(
     private val history: ClipboardHistoryManager,
     private val onPick: (ClipboardItem) -> Unit,
 ) {
-    private var popup: PopupWindow? = null
+    private var panel: View? = null
     private lateinit var adapter: ClipboardAdapter
     private lateinit var emptyLabel: TextView
 
-    fun show(anchor: View) {
+    fun show(target: ViewGroup) {
         dismiss()
         val root = FrameLayout(context)
         val recycler =
@@ -92,15 +91,14 @@ class ClipboardPanel(
         refresh()
         history.setOnChangedListener { refresh() }
 
-        val pw =
-            PopupWindow(
-                root,
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                (320 * context.resources.displayMetrics.density).toInt(),
-                true,
-            )
-        pw.showAtLocation(anchor, Gravity.BOTTOM, 0, anchor.height)
-        popup = pw
+        target.removeAllViews()
+        target.addView(
+            root,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+        )
+        target.visibility = View.VISIBLE
+        panel = root
     }
 
     private fun refresh() {
@@ -111,7 +109,9 @@ class ClipboardPanel(
 
     fun dismiss() {
         history.removeOnChangedListener()
-        popup?.dismiss()
-        popup = null
+        panel?.let { view ->
+            (view.parent as? ViewGroup)?.removeView(view)
+        }
+        panel = null
     }
 }

@@ -3,15 +3,10 @@ package com.novaboard.ime.emoji
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
-import android.graphics.drawable.GradientDrawable
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.GridLayout
-import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -118,8 +113,6 @@ class EmojiPanel(private val context: Context, private val onPick: (String) -> U
     private var container: ViewGroup? = null
     private var panel: View? = null
     private var grid: GridLayout? = null
-    private var selectedEmojis = EmojiData.all
-
     fun show(target: ViewGroup) {
         val root =
             LinearLayout(context).apply {
@@ -127,13 +120,13 @@ class EmojiPanel(private val context: Context, private val onPick: (String) -> U
                 setBackgroundColor(Color.rgb(25, 26, 32))
             }
         root.addView(createHeader())
-        root.addView(createSearchField(), LinearLayout.LayoutParams.MATCH_PARENT, 52)
 
         val scroll = ScrollView(context)
         grid =
             GridLayout(context).apply {
                 columnCount = 10
-                setPadding(8, 8, 8, 8)
+                setPadding(8, 12, 8, 16)
+                clipChildren = false
             }
         scroll.addView(grid)
         root.addView(
@@ -144,7 +137,6 @@ class EmojiPanel(private val context: Context, private val onPick: (String) -> U
                 )
                 .apply { weight = 1f },
         )
-        root.addView(createCategoryBar())
         target.removeAllViews()
         target.addView(
             root,
@@ -182,103 +174,6 @@ class EmojiPanel(private val context: Context, private val onPick: (String) -> U
             )
         }
 
-    private fun createSearchField(): EditText =
-        EditText(context).apply {
-            hint = context.getString(R.string.emoji_search_hint)
-            contentDescription = context.getString(R.string.emoji_search_hint)
-            textSize = 16f
-            setSingleLine(true)
-            setTextColor(Color.WHITE)
-            setHintTextColor(Color.LTGRAY)
-            setPadding(18, 0, 18, 0)
-            background =
-                GradientDrawable().apply {
-                    setColor(Color.rgb(57, 58, 68))
-                    cornerRadius = 36f
-                }
-            addTextChangedListener(
-                object : TextWatcher {
-                    override fun beforeTextChanged(
-                        s: CharSequence?,
-                        start: Int,
-                        count: Int,
-                        after: Int,
-                    ) = Unit
-
-                    override fun onTextChanged(
-                        s: CharSequence?,
-                        start: Int,
-                        before: Int,
-                        count: Int,
-                    ) {
-                        selectedEmojis = EmojiData.search(s?.toString().orEmpty())
-                        renderEmojis()
-                    }
-
-                    override fun afterTextChanged(s: Editable?) = Unit
-                }
-            )
-        }
-
-    private fun createCategoryBar(): HorizontalScrollView =
-        HorizontalScrollView(context).apply {
-            isHorizontalScrollBarEnabled = false
-            addView(
-                LinearLayout(context).apply {
-                    gravity = Gravity.CENTER_VERTICAL
-                    setPadding(12, 0, 12, 0)
-                    listOf(
-                            "abc" to
-                                (context.getString(R.string.emoji_category_all) to EmojiData.all),
-                            "◷" to
-                                (context.getString(R.string.emoji_category_smileys) to
-                                    EmojiData.smileys),
-                            "☺" to
-                                (context.getString(R.string.emoji_category_smileys) to
-                                    EmojiData.smileys),
-                            "♟" to
-                                (context.getString(R.string.emoji_category_gestures) to
-                                    EmojiData.gestures),
-                            "☕" to
-                                (context.getString(R.string.emoji_category_objects) to
-                                    EmojiData.objects),
-                            "✦" to
-                                (context.getString(R.string.emoji_category_symbols) to
-                                    EmojiData.symbols),
-                        )
-                        .forEach { (label, category) ->
-                            val (description, emojis) = category
-                            addView(
-                                TextView(context).apply {
-                                    text = label
-                                    contentDescription = description
-                                    textSize = if (label == "abc") 14f else 24f
-                                    gravity = Gravity.CENTER
-                                    setTextColor(Color.WHITE)
-                                    setPadding(14, 0, 14, 0)
-                                    setOnClickListener {
-                                        selectedEmojis = emojis
-                                        renderEmojis()
-                                    }
-                                },
-                                LinearLayout.LayoutParams(64, 56),
-                            )
-                        }
-                    addView(
-                        TextView(context).apply {
-                            text = "⌫"
-                            contentDescription = context.getString(R.string.emoji_panel_close)
-                            textSize = 22f
-                            gravity = Gravity.CENTER
-                            setTextColor(Color.WHITE)
-                            setOnClickListener { dismiss() }
-                        },
-                        LinearLayout.LayoutParams(64, 56),
-                    )
-                }
-            )
-        }
-
     private fun renderEmojis() {
         val target = grid ?: return
         target.removeAllViews()
@@ -288,19 +183,20 @@ class EmojiPanel(private val context: Context, private val onPick: (String) -> U
             } else {
                 Typeface.DEFAULT
             }
-        selectedEmojis.forEach { emoji ->
+        EmojiData.all.forEach { emoji ->
             target.addView(
                 TextView(context).apply {
                     text = emoji
                     contentDescription = context.getString(R.string.emoji_item, emoji)
                     typeface = emojiTypeface
-                    textSize = 28f
+                    textSize = 30f
                     gravity = Gravity.CENTER
-                    setPadding(4, 8, 4, 8)
+                    includeFontPadding = true
+                    setPadding(4, 10, 4, 10)
                     layoutParams =
                         GridLayout.LayoutParams().apply {
                             width = 0
-                            height = 58
+                            height = 72
                             columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                         }
                     setOnClickListener { onPick(emoji) }

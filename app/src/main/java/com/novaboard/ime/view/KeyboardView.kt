@@ -292,9 +292,8 @@ constructor(
                         HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
                     )
                 }
-                if (keyPopups) {
-                    showKeyPreview(hit)
-                }
+                // Do not create a PopupWindow for every tap. That work happens on the IME main
+                // thread and was enough to make rapid consecutive letters feel intermittent.
                 schedulePopup(hit)
             }
             MotionEvent.ACTION_MOVE -> {

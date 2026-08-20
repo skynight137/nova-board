@@ -53,13 +53,30 @@ class HotkeyController(private val getInputConnection: () -> InputConnection?) {
      * them.
      */
     fun sendCharWithModifiers(char: Char) {
+        val normalized = char.lowercaseChar()
+        val ic = getInputConnection()
+        if (ctrlArmed && ic != null) {
+            val handled =
+                when (normalized) {
+                    'a' -> ic.performContextMenuAction(android.R.id.selectAll)
+                    'c' -> ic.performContextMenuAction(android.R.id.copy)
+                    'x' -> ic.performContextMenuAction(android.R.id.cut)
+                    'v' -> ic.performContextMenuAction(android.R.id.paste)
+                    else -> false
+                }
+            if (handled) {
+                ctrlArmed = false
+                altArmed = false
+                return
+            }
+        }
         var meta = 0
         if (ctrlArmed) meta = meta or KeyEvent.META_CTRL_ON
         if (altArmed) meta = meta or KeyEvent.META_ALT_ON
         val keyCode = KeyEvent.keyCodeFromString("KEYCODE_${char.uppercaseChar()}")
-        val ic = getInputConnection()
         if (meta != 0 && keyCode != KeyEvent.KEYCODE_UNKNOWN) {
-            val down = KeyEvent(0, 0, KeyEvent.ACTION_DOWN, keyCode, 0, meta)
+            val now = android.os.SystemClock.uptimeMillis()
+            val down = KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0, meta)
             ic?.sendKeyEvent(down)
             ic?.sendKeyEvent(KeyEvent.changeAction(down, KeyEvent.ACTION_UP))
         } else {

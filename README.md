@@ -13,6 +13,7 @@ input without a third-party keyboard SDK.
 - QWERTY, number, symbol, and cursor-arrow layouts
 - Long-press accented characters and symbol popups
 - Clipboard history for text and image references with pinning and deletion
+- Scrollable emoji picker with padded, uncropped emoji cells
 - System, light, and dark themes
 - Voice typing through Android's on-device `SpeechRecognizer`
 - In-keyboard translation composer with selection-scoped Reply and cursor-safe
