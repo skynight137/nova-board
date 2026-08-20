@@ -230,13 +230,13 @@ reference. Incognito should be obvious but should not make the keyboard unusable
   icons and a three-dot menu/grid for secondary actions, following the attached reference’s hierarchy.
 
 **Acceptance criteria:**
-- [ ] Clipboard, emoji, voice, search, translation, settings, and future actions have one source of
+- [x] Clipboard, emoji, voice, search, translation, settings, and future actions have one source of
   truth for menu labels, icons, availability, and click behavior.
-- [ ] The overflow surface opens inside the keyboard window and dismisses on outside tap, editor
+- [x] The overflow surface opens inside the keyboard window and dismisses on outside tap, editor
   change, and back/cancel.
-- [ ] Menu items are keyboard-focusable/touch-target sized and have content descriptions.
-- [ ] Unsupported GIF/media/rewards-style items are omitted rather than shown as dead controls.
-- [ ] The main keyboard keeps enough vertical space for keys and suggestions.
+- [x] Menu items are keyboard-focusable/touch-target sized and have content descriptions.
+- [x] Unsupported GIF/media/rewards-style items are omitted rather than shown as dead controls.
+- [x] The main keyboard keeps enough vertical space for keys and suggestions.
 
 **Verification:**
 - [ ] Menu-model tests cover ordering, unavailable-item omission, and dismissal state.

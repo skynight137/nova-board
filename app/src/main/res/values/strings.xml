@@ -12,6 +12,8 @@
     <string name="cd_hotkeys">Hotkeys</string>
     <string name="cd_voice">Voice typing</string>
     <string name="cd_emoji">Emoji</string>
+    <string name="tool_translate">Translate</string>
+    <string name="tool_search">Search</string>
     <string name="emoji_panel_close">Close emoji panel</string>
     <string name="emoji_search_hint">Search emojis</string>
     <string name="emoji_item">Emoji %1$s</string>

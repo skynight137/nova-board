@@ -39,7 +39,7 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
 - [~] Make image clipboard storage durable (implementation complete; dedicated persistence tests remain).
 - [~] Resolve remaining emoji controls/media policy and refine emoji-on-enter policy.
 - [~] Add focused lifecycle, persistence, layout, and preference regression tests; pure editing/editor-policy/preference contracts are covered, while Android lifecycle, clipboard, and layout seams remain.
-- [~] Execute the next keyboard interaction and polish plan; bounded gesture word entry, cursor repeat, and incognito visuals are complete, while smart delete, tools overflow, and geometry remain:
+- [~] Execute the next keyboard interaction and polish plan; bounded gesture word entry, cursor repeat, incognito visuals, and tools overflow are complete, while smart delete and geometry remain:
   `.agents/plans/next-keyboard-interaction-and-polish.md`
 
 ## Next-round plans
