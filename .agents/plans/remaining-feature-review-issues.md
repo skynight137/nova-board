@@ -37,10 +37,10 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
 
 ## Progress
 
-- [x] Review current code against the original 12 findings.
-- [x] Complete the low-risk inactive-settings and quick-delete-summary cleanup.
-- [x] Complete translation result replacement.
-- [x] Make image clipboard storage durable and user-controlled (preference,
+- [✓] Review current code against the original 12 findings.
+- [✓] Complete the low-risk inactive-settings and quick-delete-summary cleanup.
+- [✓] Complete translation result replacement.
+- [✓] Make image clipboard storage durable and user-controlled (preference,
   capture gate, cleanup semantics, and deterministic JVM contracts complete;
   Android-context verification remains explicitly deferred):
   `.agents/plans/durable-image-clipboard.md`
