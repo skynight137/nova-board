@@ -13,4 +13,5 @@ color/position changes that the platform switch does not provide directly.
 
 **How to apply:** Preserve the native switch for settings preferences and keep
 the surrounding row as the touch-target container. Keep the visual control at
-52dp × 30dp and its touch target at 44dp high.
+52dp × 30dp, give it horizontal breathing room in its host, and retain a
+44dp-high touch target.

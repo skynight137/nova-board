@@ -386,7 +386,7 @@ class MainActivity : AppCompatActivity() {
             row.addView(
                 SettingsSwitch(this).apply {
                     checked = KeyboardPreferences.getBoolean(this@MainActivity, spec.key)
-                    layoutParams = LinearLayout.LayoutParams(dp(52), dp(44))
+                    layoutParams = LinearLayout.LayoutParams(dp(56), dp(44))
                     onCheckedChange = { checked ->
                         KeyboardPreferences.setBoolean(this@MainActivity, spec.key, checked)
                     }

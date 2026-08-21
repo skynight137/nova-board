@@ -99,14 +99,13 @@ class SettingsSwitch(context: Context) : View(context) {
                 ValueAnimator.ofFloat(start, target).apply {
                     duration = 200
                     addUpdateListener {
-                        val fraction = it.animatedFraction
                         knobPosition = it.animatedValue as Float
                         trackPaint.color =
-                            ArgbEvaluator().evaluate(fraction, trackStart, trackEnd) as Int
+                            ArgbEvaluator().evaluate(knobPosition, trackStart, trackEnd) as Int
                         borderPaint.color =
-                            ArgbEvaluator().evaluate(fraction, borderStart, borderEnd) as Int
+                            ArgbEvaluator().evaluate(knobPosition, borderStart, borderEnd) as Int
                         knobPaint.color =
-                            ArgbEvaluator().evaluate(fraction, knobStart, knobEnd) as Int
+                            ArgbEvaluator().evaluate(knobPosition, knobStart, knobEnd) as Int
                         invalidate()
                     }
                     doOnEnd { animator = null }
