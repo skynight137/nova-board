@@ -211,7 +211,10 @@ class TranslationPanel(
         paste.contentDescription = context.getString(R.string.translation_paste)
         paste.isEnabled = !state.translatedText.isNullOrBlank()
         translate.isEnabled = state.canRequest
-        paste.setOnClickListener { onPaste(state, source.selectionStart) }
+        // The source editor has its own cursor. The target editor cursor was captured in state
+        // before this panel opened, so using source.selectionStart here can paste at the wrong
+        // location in the target app.
+        paste.setOnClickListener { onPaste(state, state.insertionCursor) }
         reply.text = context.getString(R.string.translation_reply)
         reply.contentDescription = context.getString(R.string.translation_reply)
         reply.isEnabled = state.hasSelection && !state.translatedText.isNullOrBlank()

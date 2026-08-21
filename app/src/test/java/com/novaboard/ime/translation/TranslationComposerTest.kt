@@ -72,11 +72,12 @@ class TranslationComposerTest {
                 status = TranslationStatus.READY,
                 selectedStart = 5,
                 selectedEnd = 9,
+                insertionCursor = 9,
             )
 
         assertEquals(
-            TranslationCommit.Paste("hello", 12),
-            translationCommit(state, TranslationComposerAction.PasteResult(12)),
+            TranslationCommit.Paste("hello", 9),
+            translationCommit(state, TranslationComposerAction.PasteResult(state.insertionCursor)),
         )
         assertEquals(
             TranslationCommit.Reply("hello", 5, 9),
@@ -84,5 +85,21 @@ class TranslationComposerTest {
         )
         assertNull(translationCommit(state, TranslationComposerAction.ReplyWithResult(0, 4)))
         assertTrue(translationCommit(state, TranslationComposerAction.PasteResult(-1)) is TranslationCommit.Paste)
+    }
+
+    @Test
+    fun pasteCursorComesFromTheTargetEditorStateNotTheSourceField() {
+        val state =
+            TranslationComposerState(
+                sourceText = "hola",
+                translatedText = "hello",
+                status = TranslationStatus.READY,
+                insertionCursor = 17,
+            )
+
+        assertEquals(
+            TranslationCommit.Paste("hello", 17),
+            translationCommit(state, TranslationComposerAction.PasteResult(state.insertionCursor)),
+        )
     }
 }

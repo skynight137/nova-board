@@ -14,4 +14,5 @@ be retained without a clear user choice.
 
 **How to apply:** Build the image preference/capture gate first, then the native
 translation composer and normal mode, then provider integration, and only then
-live-write translation.
+live-write translation. Keep target-editor cursor state separate from the
+translation source-field cursor when committing pasted results.

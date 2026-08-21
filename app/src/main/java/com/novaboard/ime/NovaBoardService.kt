@@ -566,6 +566,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 selectedStart = start.takeIf { text != null && it >= 0 } ?: -1,
                 selectedEnd = end.takeIf { text != null && it > start } ?: -1,
                 sourceText = text.orEmpty(),
+                insertionCursor = end.takeIf { it >= 0 } ?: -1,
             )
         translationPanel =
             TranslationPanel(
@@ -611,9 +612,12 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         val ic = currentInputConnection ?: return
         when (commit) {
             is TranslationCommit.Paste -> {
-                ic.setSelection(commit.cursor, commit.cursor)
+                if (commit.cursor >= 0) {
+                    ic.setSelection(commit.cursor, commit.cursor)
+                }
                 ic.commitText(commit.text, 1)
-                selectionStart = commit.cursor + commit.text.length
+                selectionStart =
+                    if (commit.cursor >= 0) commit.cursor + commit.text.length else -1
                 selectionEnd = selectionStart
             }
             is TranslationCommit.Reply -> {

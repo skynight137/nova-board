@@ -24,6 +24,8 @@ data class TranslationComposerState(
     val requestGeneration: Long = 0L,
     val selectedStart: Int = -1,
     val selectedEnd: Int = -1,
+    /** Cursor in the target editor captured when the translation panel opened, or -1 if unknown. */
+    val insertionCursor: Int = -1,
 ) {
     val canRequest: Boolean
         get() = sourceText.isNotBlank() && status != TranslationStatus.LOADING
