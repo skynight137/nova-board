@@ -397,16 +397,16 @@ class MainActivity : AppCompatActivity() {
                         ColorStateList(
                             arrayOf(checked, unchecked),
                             intArrayOf(
-                                getColor(R.color.kb_accent),
-                                getColor(R.color.kb_key_bg),
+                                getColor(R.color.kb_switch_on_thumb),
+                                getColor(R.color.kb_switch_off_thumb),
                             ),
                         )
                     trackTintList =
                         ColorStateList(
                             arrayOf(checked, unchecked),
                             intArrayOf(
-                                getColor(R.color.kb_accent_pressed),
-                                getColor(R.color.kb_divider),
+                                getColor(R.color.kb_switch_on_track),
+                                getColor(R.color.kb_switch_off_track),
                             ),
                         )
                     setOnCheckedChangeListener { _, checked ->

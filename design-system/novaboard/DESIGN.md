@@ -155,6 +155,8 @@ delete key red.
 - full-row touch target when the row is actionable
 - state is described in text, not color alone
 - destructive/reset actions are separated from normal preferences
+- enabled switches use a blue track with a light thumb; disabled switches use
+  a soft neutral track with a darker thumb while retaining a 44dp touch target
 
 ### Feedback
 
