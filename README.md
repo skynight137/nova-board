@@ -9,7 +9,7 @@ input without a third-party keyboard SDK.
 
 - SwiftKey-inspired toolbar layout with a prediction bar always visible directly
   above the number row
-- Expandable tools row: the up chevron opens clipboard, hotkeys, translation,
+- Expandable tools row: the up chevron opens clipboard, hotkeys,
   voice, and overflow tools above the prediction bar; the down chevron collapses
   it without hiding predictions
 - Suggestions, small grammar/autocorrect helpers, and next-word prediction
@@ -26,8 +26,6 @@ input without a third-party keyboard SDK.
 - Scrollable, compact emoji picker with padded, uncropped emoji cells
 - System, light, and dark themes
 - Voice typing through Android's on-device `SpeechRecognizer`
-- In-keyboard translation composer with selection-scoped Reply and cursor-safe
-  Paste actions; provider-backed translation is not yet available
 - Optional gesture typing across letter keys with bounded path recognition
 - Settings actions to enable NovaBoard and switch the active input method
 - Exportable diagnostic report with bounded device, app, and application-log

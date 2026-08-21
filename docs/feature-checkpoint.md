@@ -98,23 +98,18 @@ These behaviors were manually confirmed in the active keyboard:
 - [✓] Expandable tools row
 - [✓] Clipboard panel
 - [✓] Hotkeys panel
-- [✓] Translation panel
 - [✓] Voice panel
 - [✓] Emoji panel
 - [✓] Overflow/tools actions
 - [✓] Outside-tap and editor-change dismissal boundaries
 
-### Voice, emoji, and translation
+### Voice and emoji
 
 - [✓] Android on-device speech recognizer integration
 - [✓] Voice request/session cancellation handling
 - [✓] Scrollable emoji picker
 - [✓] Padded emoji cells
 - [✓] System emoji fallback rendering
-- [✓] Selection-scoped translation Reply
-- [✓] Cursor-safe translation Paste
-- [~] Translation provider is not connected; the composer and editor actions
-  are ready, but live translation is not yet available
 
 ### Appearance and settings
 
@@ -216,20 +211,7 @@ Recommended scope:
 - improve keyboard height and toolbar overflow behavior
 - replace the placeholder launcher icon
 
-### 5. Connect translation only after the privacy boundary is explicit
-
-**Why:** Translation handles user-entered text and therefore needs a deliberate
-provider, disclosure, error state, and network/privacy decision.
-
-Required before enabling live translation:
-
-- choose and approve a provider
-- document whether text leaves the device
-- add loading, timeout, offline, and provider-error states
-- prevent stale results from entering a newer editor session
-- add provider integration tests without storing credentials in the repository
-
-### 6. Prepare a small closed beta release
+### 5. Prepare a small closed beta release
 
 **Why:** Real keyboard usage exposes issues that scripted tests cannot.
 

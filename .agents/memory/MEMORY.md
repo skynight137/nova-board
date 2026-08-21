@@ -18,7 +18,7 @@
 - [Durable clipboard storage](durable-clipboard-storage.md) — copy image bytes privately and expose them through the app-owned content provider, migrating legacy URIs on load.
 - [Conventional history rewrite](conventional-history-rewrite.md) — preview legacy subject mappings with a clean worktree before applying a commit-history rewrite.
 - [Verification before commit](verification-before-commit.md) — use fail-fast gates so failed checks never fall through to a release-style commit.
-- [Translation and image clipboard direction](translation-and-image-clipboard-direction.md) — translation stays in-keyboard; image retention is opt-in and disabled by default.
+- [Image clipboard retention](translation-and-image-clipboard-direction.md) — image retention is opt-in and disabled by default; translation UI is not part of the product.
 - [Spotless baseline](spotless-baseline.md) — repository-wide formatting currently has unrelated pre-existing Kotlin violations; avoid broad formatter churn.
 - [Symbol layout switcher alignment](symbol-layout-switcher-alignment.md) — primary and secondary symbol switchers share a row based on the number-row preference.
 - [Clipboard search input](clipboard-search-input.md) — the clipboard overlay needs an embedded NovaBoard keyboard because the app is already the active IME.

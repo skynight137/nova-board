@@ -277,12 +277,12 @@ class MainActivity : AppCompatActivity() {
         updateIncognitoButton()
 
         setSettingsRowIcon(R.id.btnEnable, R.drawable.ic_keyboard)
-        setSettingsRowIcon(R.id.btnSwitch, R.drawable.ic_translate)
+        setSettingsRowIcon(R.id.btnSwitch, R.drawable.ic_keyboard)
         setSettingsRowIcon(R.id.btnLayoutSettings, R.drawable.ic_keyboard)
         setSettingsRowIcon(R.id.btnTypingSettings, R.drawable.ic_typing)
         setSettingsRowIcon(R.id.btnEmojiSettings, R.drawable.ic_emoji)
         setSettingsRowIcon(R.id.btnSoundSettings, R.drawable.ic_mic)
-        setSettingsRowIcon(R.id.btnGestureSettings, R.drawable.ic_translate)
+        setSettingsRowIcon(R.id.btnGestureSettings, R.drawable.ic_typing)
         setSettingsRowIcon(R.id.btnIncognito, R.drawable.ic_privacy)
         setSettingsRowIcon(R.id.btnExportLog, R.drawable.ic_info)
         setSettingsRowIcon(R.id.btnThemeSettings, R.drawable.ic_theme)
@@ -753,9 +753,6 @@ class MainActivity : AppCompatActivity() {
         root.findViewById<ImageButton>(R.id.btnClipboard).setOnClickListener {
             showPreviewPanel(root, R.string.preview_clipboard, "No clipboard items yet")
         }
-        root.findViewById<ImageButton>(R.id.btnTranslate).setOnClickListener {
-            showPreviewPanel(root, R.string.preview_translation, "Select text to translate")
-        }
         root.findViewById<ImageButton>(R.id.btnVoice).setOnClickListener {
             Toast.makeText(this, R.string.preview_voice_ready, Toast.LENGTH_SHORT).show()
         }
@@ -820,7 +817,6 @@ class MainActivity : AppCompatActivity() {
         listOf(
             R.string.cd_clipboard to R.drawable.ic_clipboard,
             R.string.cd_hotkeys to R.drawable.ic_hotkeys,
-            R.string.cd_translate to R.drawable.ic_translate,
             R.string.cd_voice to R.drawable.ic_mic,
             R.string.cd_emoji to R.drawable.ic_keyboard,
             R.string.tool_resize to R.drawable.ic_more,
@@ -842,12 +838,6 @@ class MainActivity : AppCompatActivity() {
                                     root,
                                     R.string.preview_clipboard,
                                     "No clipboard items yet",
-                                )
-                            R.string.cd_translate ->
-                                showPreviewPanel(
-                                    root,
-                                    R.string.preview_translation,
-                                    "Select text to translate",
                                 )
                         }
                     }
