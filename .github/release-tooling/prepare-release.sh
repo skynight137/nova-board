@@ -164,9 +164,12 @@ if [[ -n "${ANDROID_CERTIFICATE_SHA256:-}" ]]; then
   ACTUAL_CERTIFICATE_SHA256="$(
     apksigner verify --print-certs "${APK_TEMP}" 2>/dev/null |
       sed -n 's/.*Signer #1 certificate SHA-256 digest: //p' | head -n1 |
-      tr -d '[:space:]' | tr '[:lower:]' '[:upper:]'
+      tr -d '[:space:]:' | tr '[:lower:]' '[:upper:]'
   )"
-  EXPECTED_CERTIFICATE_SHA256="$(printf '%s' "${ANDROID_CERTIFICATE_SHA256}" | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')"
+  EXPECTED_CERTIFICATE_SHA256="$(
+    printf '%s' "${ANDROID_CERTIFICATE_SHA256}" |
+      tr -d '[:space:]:' | tr '[:lower:]' '[:upper:]'
+  )"
   [[ "${ACTUAL_CERTIFICATE_SHA256}" == "${EXPECTED_CERTIFICATE_SHA256}" ]] || {
     echo "ERROR: APK certificate fingerprint does not match the configured release identity" >&2
     exit 1

@@ -26,3 +26,4 @@
 - [Settings theme surfaces](settings-theme-surfaces.md) — Material dialogs need explicit NovaBoard surface and text roles in light and dark themes.
 - [Settings switch styling](native-settings-switches.md) — settings preferences use the approved compact custom switch with animated outlined states.
 - [PR release secret boundary](pr-release-secret-boundary.md) — PR validation must never expose signing or publication credentials to PR-controlled code.
+- [APK certificate formatting](apk-certificate-formatting.md) — normalize colon-separated and unseparated SHA-256 output before comparing release identities.
