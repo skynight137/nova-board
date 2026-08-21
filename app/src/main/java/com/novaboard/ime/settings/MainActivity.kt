@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
@@ -128,7 +129,7 @@ class MainActivity : AppCompatActivity() {
                 ),
             )
         }
-        findViewById<Button>(R.id.btnLayoutPreview).setOnClickListener {
+        findViewById<ImageButton>(R.id.btnLayoutPreview).setOnClickListener {
             showLayoutPreview()
         }
         findViewById<Button>(R.id.btnTypingSettings).setOnClickListener {
