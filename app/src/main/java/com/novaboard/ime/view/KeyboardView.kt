@@ -105,6 +105,7 @@ constructor(
     private val longPressHandler = Handler(Looper.getMainLooper())
     private var longPressRunnable: Runnable? = null
     private var popup: PopupWindow? = null
+    private val keyPreviewPopups = mutableMapOf<Int, PopupWindow>()
     private var lastDoubleTapTime = 0L
     private var longPressDuration = 350L
     private var longPressSymbols = true
@@ -299,7 +300,7 @@ constructor(
                     )
                 }
                 if (keyPopups) {
-                    showKeyPreview(hit)
+                    showKeyPreview(primaryPointerId, hit)
                 }
                 schedulePopup(hit)
             }
@@ -307,8 +308,9 @@ constructor(
                 val index = event.actionIndex
                 val hit = hitAt(event.getX(index), event.getY(index))
                 if (hit != null) {
-                    pointerHits[event.getPointerId(index)] = hit
-                    if (keyPopups) showKeyPreview(hit)
+                    val pointerId = event.getPointerId(index)
+                    pointerHits[pointerId] = hit
+                    if (keyPopups) showKeyPreview(pointerId, hit)
                     invalidate()
                 }
             }
@@ -328,7 +330,7 @@ constructor(
                     } else {
                         gestureCancelled = true
                     }
-                    cancelPopup()
+                    cancelActivePopup(primaryPointerId)
                 }
                 if (
                     !gestureActive &&
@@ -340,7 +342,7 @@ constructor(
                     quickDeleteTriggered = true
                     cancelDeleteRepeat()
                     listener?.onQuickDelete()
-                    cancelPopup()
+                    cancelActivePopup(primaryPointerId)
                 }
                 if (
                     !gestureActive &&
@@ -354,7 +356,7 @@ constructor(
                 // Keep the original key during small finger jitter. Clearing the active hit when
                 // the pointer briefly leaves a key causes a normal tap to be dropped on ACTION_UP.
                 if (hit != null && hit != pressedHit) {
-                    cancelPopup()
+                    cancelActivePopup(primaryPointerId)
                     pressedHit = hit
                     if (primaryPointerId != MotionEvent.INVALID_POINTER_ID) {
                         pointerHits[primaryPointerId] = hit
@@ -365,6 +367,7 @@ constructor(
             MotionEvent.ACTION_POINTER_UP -> {
                 val index = event.actionIndex
                 val pointerId = event.getPointerId(index)
+                dismissKeyPreview(pointerId)
                 pointerHits.remove(pointerId)?.let { hit ->
                     if (hit.key.type != KeyType.BACKSPACE) {
                         handleKeyUp(hit.key)
@@ -462,11 +465,10 @@ constructor(
         longPressHandler.postDelayed(runnable, longPressDuration)
     }
 
-    private fun showKeyPreview(hit: Hit) {
+    private fun showKeyPreview(pointerId: Int, hit: Hit) {
         val label = displayLabel(hit.key)
         if (label.isEmpty()) return
-        popup?.dismiss()
-        popup = null
+        dismissKeyPreview(pointerId)
         val preview =
             TextView(context).apply {
                 text = label
@@ -495,14 +497,29 @@ constructor(
             loc[0] + hit.rect.centerX().toInt() - preview.measuredWidth / 2,
             popupTop(loc[1], hit.rect.top, preview.measuredHeight),
         )
-        popup = window
+        keyPreviewPopups[pointerId] = window
     }
 
     private fun cancelPopup() {
+        cancelLongPressPopup()
+        keyPreviewPopups.values.forEach(PopupWindow::dismiss)
+        keyPreviewPopups.clear()
+    }
+
+    private fun cancelActivePopup(pointerId: Int) {
+        cancelLongPressPopup()
+        dismissKeyPreview(pointerId)
+    }
+
+    private fun cancelLongPressPopup() {
         longPressRunnable?.let { longPressHandler.removeCallbacks(it) }
         longPressRunnable = null
         popup?.dismiss()
         popup = null
+    }
+
+    private fun dismissKeyPreview(pointerId: Int) {
+        keyPreviewPopups.remove(pointerId)?.dismiss()
     }
 
     /** Long-press symbol picker: a row of alternate characters above the key. */
