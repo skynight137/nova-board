@@ -1,8 +1,6 @@
 package com.novaboard.ime.clipboard
 
 import android.content.Context
-import android.content.Context.INPUT_METHOD_SERVICE
-import android.view.inputmethod.InputMethodManager
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +16,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.novaboard.ime.R
 import com.novaboard.ime.model.Key
 import com.novaboard.ime.model.KeyType
+import com.novaboard.ime.model.KeyboardLayouts
+import com.novaboard.ime.settings.KeyboardPreferences
+import com.novaboard.ime.view.KeyboardView
 
 /**
  * Shows clipboard history as an overlay above the keyboard (rather than a separate Activity, since
@@ -35,6 +36,7 @@ class ClipboardPanel(
     private lateinit var adapter: ClipboardAdapter
     private lateinit var emptyLabel: TextView
     private lateinit var searchField: EditText
+    private lateinit var searchKeyboard: KeyboardView
     private var searchQuery = ""
 
     fun show(target: ViewGroup) {
@@ -65,6 +67,77 @@ class ClipboardPanel(
                 contentDescription = context.getString(R.string.clipboard_search_hint)
                 isFocusable = true
                 isFocusableInTouchMode = true
+                showSoftInputOnFocus = false
+            }
+        searchKeyboard =
+            KeyboardView(context).apply {
+                listener =
+                    object : KeyboardView.OnKeyListener {
+                        override fun onKey(key: Key, outputChar: String) {
+                            handleKey(key, outputChar)
+                        }
+
+                        override fun onBackspace() {
+                            handleBackspace()
+                        }
+
+                        override fun onEnter() = Unit
+
+                        override fun onShiftToggled(shiftOn: Boolean, capsLock: Boolean) {
+                            setShiftState(shiftOn, capsLock)
+                        }
+
+                        override fun onSwitchToSymbols() {
+                            setPage(
+                                KeyboardLayouts.symbols(
+                                    KeyboardPreferences.getBoolean(
+                                        context,
+                                        KeyboardPreferences.SHOW_NUMBER_ROW,
+                                    ),
+                                ),
+                            )
+                        }
+
+                        override fun onSwitchToLetters() {
+                            setPage(
+                                if (
+                                    KeyboardPreferences.getBoolean(
+                                        context,
+                                        KeyboardPreferences.SHOW_NUMBER_ROW,
+                                    )
+                                ) {
+                                    KeyboardLayouts.letters
+                                } else {
+                                    KeyboardLayouts.lettersWithoutNumberRow
+                                },
+                            )
+                        }
+
+                        override fun onEmoji() = Unit
+
+                        override fun onCursorMove(direction: Int) = Unit
+
+                        override fun onQuickDelete() {
+                            searchField.setText("")
+                        }
+
+                        override fun onGestureWord(path: String) {
+                            handleKey(Key(KeyType.CHAR, path), path)
+                        }
+                    }
+                applyPreferences()
+                setPage(
+                    if (
+                        KeyboardPreferences.getBoolean(
+                            context,
+                            KeyboardPreferences.SHOW_NUMBER_ROW,
+                        )
+                    ) {
+                        KeyboardLayouts.letters
+                    } else {
+                        KeyboardLayouts.lettersWithoutNumberRow
+                    },
+                )
             }
         header.addView(
             backButton,
@@ -104,6 +177,32 @@ class ClipboardPanel(
         )
         (emptyLabel.layoutParams as FrameLayout.LayoutParams).apply {
             topMargin = dp(56)
+        }.also { emptyLabel.layoutParams = it }
+        root.addView(
+            searchKeyboard,
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.BOTTOM,
+            ),
+        )
+        val keyboardRows =
+            if (
+                KeyboardPreferences.getBoolean(
+                    context,
+                    KeyboardPreferences.SHOW_NUMBER_ROW,
+                )
+            ) {
+                5
+            } else {
+                4
+            }
+        val keyboardHeight = dp(keyboardRows * 58)
+        (recycler.layoutParams as FrameLayout.LayoutParams).apply {
+            bottomMargin = keyboardHeight
+        }.also { recycler.layoutParams = it }
+        (emptyLabel.layoutParams as FrameLayout.LayoutParams).apply {
+            bottomMargin = keyboardHeight
         }.also { emptyLabel.layoutParams = it }
 
         adapter =
@@ -192,12 +291,6 @@ class ClipboardPanel(
     private fun focusSearchField() {
         searchField.requestFocus()
         searchField.setSelection(searchField.length())
-        searchField.post {
-            if (!searchField.hasFocus()) return@post
-            val inputMethodManager =
-                context.getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
-            inputMethodManager?.showSoftInput(searchField, InputMethodManager.SHOW_IMPLICIT)
-        }
     }
 
     private fun refresh() {

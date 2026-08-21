@@ -21,3 +21,4 @@
 - [Translation and image clipboard direction](translation-and-image-clipboard-direction.md) — translation stays in-keyboard; image retention is opt-in and disabled by default.
 - [Spotless baseline](spotless-baseline.md) — repository-wide formatting currently has unrelated pre-existing Kotlin violations; avoid broad formatter churn.
 - [Symbol layout switcher alignment](symbol-layout-switcher-alignment.md) — primary and secondary symbol switchers share a row based on the number-row preference.
+- [Clipboard search input](clipboard-search-input.md) — the clipboard overlay needs an embedded NovaBoard keyboard because the app is already the active IME.

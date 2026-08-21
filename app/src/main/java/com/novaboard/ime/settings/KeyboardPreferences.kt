@@ -36,9 +36,9 @@ object KeyboardPreferences {
         mapOf(
             SHOW_NUMBER_ROW to true,
             SHOW_ARROW_KEYS to true,
-            LONG_PRESS_SYMBOLS to true,
-            ACCENTED_CHARACTERS to true,
-            KEY_POPUPS to true,
+            LONG_PRESS_SYMBOLS to false,
+            ACCENTED_CHARACTERS to false,
+            KEY_POPUPS to false,
             LARGE_KEY_TEXT to false,
             AUTOCORRECT to false,
             QUICK_PERIOD to true,
