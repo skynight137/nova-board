@@ -64,6 +64,15 @@ grep -Fq 'KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}' <<<"${setup_block}" ||
 grep -Fq 'KEYSTORE_PATH="$(release_tooling_keystore_path)"' <<<"${setup_block}" ||
   fail "decoded keystore is not checked for non-empty output"
 
+android_tools_line="$(grep -n -- "- name: Install Android signing tools" "${WORKFLOW}" | cut -d: -f1 || true)"
+setup_keystore_line="$(grep -n -- "- name: Setup keystore" "${WORKFLOW}" | cut -d: -f1 || true)"
+[[ -n "${android_tools_line}" && "${android_tools_line}" -lt "${setup_keystore_line}" ]] ||
+  fail "Android signing tools must be installed before release setup"
+grep -Fq 'sdkmanager "platform-tools" "build-tools;35.0.0"' "${WORKFLOW}" ||
+  fail "release workflow does not install Android signing tools"
+grep -Fq 'build-tools/35.0.0' "${WORKFLOW}" ||
+  fail "release workflow does not add apksigner to PATH"
+
 manifest_validation_line="$(grep -n -- "- name: Validate release manifest" "${WORKFLOW}" | cut -d: -f1 || true)"
 release_action_line="$(grep -n -- "cycjimmy/semantic-release-action@" "${WORKFLOW}" | cut -d: -f1 || true)"
 [[ -n "${manifest_validation_line}" && -n "${release_action_line}" ]] ||

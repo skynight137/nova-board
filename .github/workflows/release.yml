@@ -82,6 +82,14 @@ jobs:
           java-version: '24'
           cache: gradle
 
+      - name: Setup Android build tools
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android signing tools
+        run: |
+          sdkmanager "platform-tools" "build-tools;35.0.0"
+          echo "${ANDROID_HOME}/build-tools/35.0.0" >> "${GITHUB_PATH}"
+
       - name: Setup keystore
         env:
           KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
