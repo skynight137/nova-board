@@ -157,4 +157,4 @@ echo
 echo "Rewrite complete. Verify before force-pushing:"
 echo "  git log --reverse --format='%h %s'"
 echo "  git log --format='%s' | grep -Ev '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\\([^)]*\\))?!?: .+'"
-echo "  git push --force-with-lease origin main"
+echo "  git push --force-with-lease origin $branch"
