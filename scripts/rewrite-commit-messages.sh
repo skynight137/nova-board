@@ -99,6 +99,9 @@ normalize_subject() {
     "Remove deprecated translation and editor replacement plan")
       printf '%s\n' "docs: remove deprecated translation plan"
       ;;
+    "Update memory documentation and add theme surfaces settings")
+      printf '%s\n' "docs: document theme surface settings"
+      ;;
     *)
       echo "ERROR: no Conventional Commit mapping for '$subject'" >&2
       return 1
@@ -145,6 +148,7 @@ case "$subject" in
   "Extract clipboard persistence logic to a dedicated class and add tests") echo "test: cover clipboard persistence contracts" ;;
   "Implement durable image clipboard persistence and settings support") echo "feat: persist image clipboard history and settings" ;;
   "Remove deprecated translation and editor replacement plan") echo "docs: remove deprecated translation plan" ;;
+  "Update memory documentation and add theme surfaces settings") echo "docs: document theme surface settings" ;;
   *) echo "ERROR: unmapped commit $GIT_COMMIT ($subject)" >&2; exit 1 ;;
 esac
 ' HEAD
