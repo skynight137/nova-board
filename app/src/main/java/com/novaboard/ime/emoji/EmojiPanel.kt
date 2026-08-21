@@ -11,6 +11,7 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.ImageButton
+import android.widget.FrameLayout
 import com.novaboard.ime.R
 import com.novaboard.ime.settings.KeyboardPreferences
 
@@ -151,29 +152,31 @@ class EmojiPanel(private val context: Context, private val onPick: (String) -> U
     }
 
     private fun createHeader(): View =
-        LinearLayout(context).apply {
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(12, 0, 12, 0)
+        FrameLayout(context).apply {
+            setPadding(dp(12), 0, dp(12), 0)
+            addView(
+                TextView(context).apply {
+                    text = "☺  Emoji"
+                    textSize = 18f
+                    gravity = Gravity.CENTER
+                    setTextColor(Color.WHITE)
+                },
+                FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    dp(56),
+                ),
+            )
             addView(
                 ImageButton(context).apply {
                     setImageResource(R.drawable.ic_arrow_back)
                     contentDescription = context.getString(R.string.emoji_panel_close)
-                    gravity = Gravity.CENTER
                     setBackgroundColor(Color.TRANSPARENT)
                     setColorFilter(Color.WHITE)
                     minimumWidth = dp(56)
                     minimumHeight = dp(56)
                     setOnClickListener { dismiss() }
                 },
-                LinearLayout.LayoutParams(dp(56), dp(56)),
-            )
-            addView(
-                TextView(context).apply {
-                    text = "☺  Emoji"
-                    textSize = 18f
-                    setTextColor(Color.WHITE)
-                },
-                LinearLayout.LayoutParams(0, dp(56), 1f),
+                FrameLayout.LayoutParams(dp(56), dp(56), Gravity.START),
             )
         }
 

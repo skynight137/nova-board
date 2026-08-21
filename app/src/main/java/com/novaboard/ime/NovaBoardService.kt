@@ -776,6 +776,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     // ---- KeyboardView.OnKeyListener ----
 
     override fun onKey(key: Key, outputChar: String) {
+        if (clipboardPanel?.handleKey(key, outputChar) == true) return
         val ic = currentInputConnection ?: return
 
         if (
@@ -894,6 +895,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private fun maybeAutocorrectLastChar(ic: InputConnection) = Unit
 
     override fun onBackspace() {
+        if (clipboardPanel?.handleBackspace() == true) return
         val ic = currentInputConnection ?: return
         if (selectionStart >= 0 && selectionEnd > selectionStart) {
             ic.commitText("", 1)

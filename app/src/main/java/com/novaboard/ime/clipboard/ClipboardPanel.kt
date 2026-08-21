@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.novaboard.ime.R
+import com.novaboard.ime.model.Key
+import com.novaboard.ime.model.KeyType
 
 /**
  * Shows clipboard history as an overlay above the keyboard (rather than a separate Activity, since
@@ -30,6 +32,7 @@ class ClipboardPanel(
     private var target: ViewGroup? = null
     private lateinit var adapter: ClipboardAdapter
     private lateinit var emptyLabel: TextView
+    private lateinit var searchField: EditText
     private var searchQuery = ""
 
     fun show(target: ViewGroup) {
@@ -51,20 +54,22 @@ class ClipboardPanel(
                 contentDescription = context.getString(R.string.clipboard_back_to_keyboard)
                 setOnClickListener { onClose() }
             }
-        val search =
+        searchField =
             EditText(context).apply {
                 hint = context.getString(R.string.clipboard_search_hint)
                 setSingleLine(true)
                 setText(searchQuery)
                 setPadding(dp(12), 0, dp(12), 0)
                 contentDescription = context.getString(R.string.clipboard_search_hint)
+                isFocusable = true
+                isFocusableInTouchMode = true
             }
         header.addView(
             backButton,
             LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(56)),
         )
         header.addView(
-            search,
+            searchField,
             LinearLayout.LayoutParams(0, dp(56), 1f),
         )
         val recycler =
@@ -111,7 +116,7 @@ class ClipboardPanel(
                 },
             )
         recycler.adapter = adapter
-        search.addTextChangedListener(
+        searchField.addTextChangedListener(
             object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
 
@@ -157,7 +162,27 @@ class ClipboardPanel(
         target.visibility = View.VISIBLE
         panel = root
         this.target = target
+        searchField.requestFocus()
     }
+
+    fun handleKey(key: Key, outputChar: String): Boolean {
+        when (key.type) {
+            KeyType.CHAR, KeyType.COMMA, KeyType.PERIOD, KeyType.SPACE -> searchField.append(outputChar)
+            KeyType.BACKSPACE -> {
+                val start = searchField.selectionStart
+                val end = searchField.selectionEnd
+                if (start != end) {
+                    searchField.text.delete(minOf(start, end), maxOf(start, end))
+                } else if (start > 0) {
+                    searchField.text.delete(start - 1, start)
+                }
+            }
+            else -> return false
+        }
+        return true
+    }
+
+    fun handleBackspace(): Boolean = handleKey(Key(KeyType.BACKSPACE, ""), "")
 
     private fun refresh() {
         val list = filterClipboardItems(history.getItems(), searchQuery)
