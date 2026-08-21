@@ -27,6 +27,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
+import androidx.activity.OnBackPressedCallback
 import com.novaboard.ime.R
 import com.novaboard.ime.clipboard.ClipboardHistoryManager
 import com.novaboard.ime.emoji.EmojiPanel
@@ -37,6 +38,7 @@ import com.novaboard.ime.util.AppLog
 import com.novaboard.ime.view.KeyboardView
 
 class MainActivity : AppCompatActivity() {
+    private val settingsPageStack = ArrayDeque<View>()
     private val requestMicrophone =
         registerForActivityResult(
             androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
@@ -69,7 +71,17 @@ class MainActivity : AppCompatActivity() {
         ThemeManager.applyStored(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        findViewById<ImageButton>(R.id.btnBack).setOnClickListener { finish() }
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (!closeTopSettingsPage()) finish()
+                }
+            },
+        )
+        findViewById<ImageButton>(R.id.btnBack).setOnClickListener {
+            if (!closeTopSettingsPage()) finish()
+        }
         if (intent.getBooleanExtra(EXTRA_REQUEST_MICROPHONE, false) &&
             android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M &&
             checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED
@@ -286,19 +298,22 @@ class MainActivity : AppCompatActivity() {
         setSettingsRowIcon(R.id.btnEnable, R.drawable.ic_keyboard)
         setSettingsRowIcon(R.id.btnSwitch, R.drawable.ic_translate)
         setSettingsRowIcon(R.id.btnLayoutSettings, R.drawable.ic_keyboard)
-        setSettingsRowIcon(R.id.btnTypingSettings, R.drawable.ic_hotkeys)
-        setSettingsRowIcon(R.id.btnEmojiSettings, R.drawable.ic_keyboard)
+        setSettingsRowIcon(R.id.btnTypingSettings, R.drawable.ic_typing)
+        setSettingsRowIcon(R.id.btnEmojiSettings, R.drawable.ic_emoji)
         setSettingsRowIcon(R.id.btnSoundSettings, R.drawable.ic_mic)
         setSettingsRowIcon(R.id.btnGestureSettings, R.drawable.ic_translate)
-        setSettingsRowIcon(R.id.btnIncognito, R.drawable.ic_more)
-        setSettingsRowIcon(R.id.btnExportLog, R.drawable.ic_more)
-        setSettingsRowIcon(R.id.btnThemeSettings, R.drawable.ic_keyboard)
-        setSettingsRowIcon(R.id.btnResetSettings, R.drawable.ic_more)
+        setSettingsRowIcon(R.id.btnIncognito, R.drawable.ic_privacy)
+        setSettingsRowIcon(R.id.btnExportLog, R.drawable.ic_info)
+        setSettingsRowIcon(R.id.btnThemeSettings, R.drawable.ic_theme)
+        setSettingsRowIcon(R.id.btnResetSettings, R.drawable.ic_reset)
     }
 
     private fun setSettingsRowIcon(buttonId: Int, drawableRes: Int) {
-        findViewById<Button>(buttonId).setCompoundDrawablesWithIntrinsicBounds(drawableRes, 0, 0, 0)
-        findViewById<Button>(buttonId).compoundDrawablePadding = dp(20)
+        findViewById<Button>(buttonId).apply {
+            setCompoundDrawablesWithIntrinsicBounds(drawableRes, 0, 0, 0)
+            compoundDrawablePadding = dp(20)
+            compoundDrawableTintList = ColorStateList.valueOf(getColor(R.color.kb_toolbar_icon))
+        }
     }
 
     private fun showThemeDialog() {
@@ -314,22 +329,17 @@ class MainActivity : AppCompatActivity() {
                 ThemeMode.LIGHT -> 1
                 ThemeMode.DARK -> 2
             }
-        AlertDialog.Builder(this)
-            .setTitle(R.string.theme_label)
-            .setSingleChoiceItems(labels, selected) { dialog, which ->
-                ThemeManager.set(
-                    this,
-                    when (which) {
-                        1 -> ThemeMode.LIGHT
-                        2 -> ThemeMode.DARK
-                        else -> ThemeMode.SYSTEM
-                    },
-                )
-                dialog.dismiss()
-                recreate()
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+        showChoicePage(R.string.theme_label, labels, selected) { which ->
+            ThemeManager.set(
+                this,
+                when (which) {
+                    1 -> ThemeMode.LIGHT
+                    2 -> ThemeMode.DARK
+                    else -> ThemeMode.SYSTEM
+                },
+            )
+            recreate()
+        }
     }
 
     private fun updateIncognitoButton() {
@@ -353,14 +363,9 @@ class MainActivity : AppCompatActivity() {
                 getString(R.string.gesture_input_gestures),
             )
         val selected = modes.indexOf(KeyboardPreferences.getGestureMode(this)).coerceAtLeast(0)
-        AlertDialog.Builder(this)
-            .setTitle(R.string.gesture_input)
-            .setSingleChoiceItems(labels, selected) { dialog, which ->
-                KeyboardPreferences.setGestureMode(this, modes[which])
-                dialog.dismiss()
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+        showChoicePage(R.string.gesture_input, labels, selected) { which ->
+            KeyboardPreferences.setGestureMode(this, modes[which])
+        }
     }
 
     private fun showPreferencePage(titleRes: Int, specs: List<PreferenceSpec>) {
@@ -552,6 +557,44 @@ class MainActivity : AppCompatActivity() {
                 }
             )
         }
+        showSettingsContentPage(titleRes, content, includePreview = true)
+    }
+
+    private fun showChoicePage(
+        titleRes: Int,
+        labels: Array<String>,
+        selected: Int,
+        onSelected: (Int) -> Unit,
+    ) {
+        val content =
+            LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(16), dp(8), dp(16), dp(24))
+            }
+        labels.forEachIndexed { index, label ->
+            content.addView(
+                RadioButton(this).apply {
+                    text = label
+                    isChecked = index == selected
+                    setTextColor(getColor(R.color.kb_key_text))
+                    buttonTintList = ColorStateList.valueOf(getColor(R.color.kb_accent))
+                    minHeight = dp(56)
+                    setPadding(0, 0, 0, 0)
+                    setOnClickListener {
+                        onSelected(index)
+                        closeTopSettingsPage()
+                    }
+                },
+            )
+        }
+        showSettingsContentPage(titleRes, content, includePreview = false)
+    }
+
+    private fun showSettingsContentPage(
+        titleRes: Int,
+        content: View,
+        includePreview: Boolean,
+    ) {
         val page =
             FrameLayout(this).apply {
                 setBackgroundColor(getColor(R.color.kb_background))
@@ -573,9 +616,7 @@ class MainActivity : AppCompatActivity() {
                 minimumWidth = dp(48)
                 minimumHeight = dp(48)
                 setPadding(dp(12), dp(12), dp(12), dp(12))
-                setOnClickListener {
-                    (page.parent as? ViewGroup)?.removeView(page)
-                }
+                setOnClickListener { closeTopSettingsPage() }
             },
             LinearLayout.LayoutParams(dp(52), dp(64)),
         )
@@ -584,7 +625,6 @@ class MainActivity : AppCompatActivity() {
                 text = getString(titleRes)
                 textSize = 20f
                 setTextColor(getColor(R.color.kb_key_text))
-                typeface = android.graphics.Typeface.DEFAULT
                 gravity = Gravity.CENTER_VERTICAL
             },
             LinearLayout.LayoutParams(0, dp(64), 1f),
@@ -608,23 +648,32 @@ class MainActivity : AppCompatActivity() {
                 topMargin = dp(64)
             },
         )
-        page.addView(
-            ImageButton(this).apply {
-                setImageResource(R.drawable.ic_keyboard)
-                contentDescription = getString(R.string.layout_preview)
-                setBackgroundResource(R.drawable.bg_settings_primary)
-                setColorFilter(getColor(R.color.kb_on_accent))
-                minimumWidth = dp(56)
-                minimumHeight = dp(56)
-                setPadding(dp(12), dp(12), dp(12), dp(12))
-                setOnClickListener { showLayoutPreview() }
-            },
-            FrameLayout.LayoutParams(dp(56), dp(56), Gravity.BOTTOM or Gravity.END).apply {
-                setMargins(0, 0, dp(16), dp(16))
-            },
-        )
+        if (includePreview) {
+            page.addView(
+                ImageButton(this).apply {
+                    setImageResource(R.drawable.ic_keyboard)
+                    contentDescription = getString(R.string.layout_preview)
+                    setBackgroundResource(R.drawable.bg_settings_primary)
+                    setColorFilter(getColor(R.color.kb_on_accent))
+                    minimumWidth = dp(56)
+                    minimumHeight = dp(56)
+                    setPadding(dp(12), dp(12), dp(12), dp(12))
+                    setOnClickListener { showLayoutPreview() }
+                },
+                FrameLayout.LayoutParams(dp(56), dp(56), Gravity.BOTTOM or Gravity.END).apply {
+                    setMargins(0, 0, dp(16), dp(16))
+                },
+            )
+        }
         findViewById<FrameLayout>(android.R.id.content).addView(page)
+        settingsPageStack.addLast(page)
         page.requestFocus()
+    }
+
+    private fun closeTopSettingsPage(): Boolean {
+        val page = settingsPageStack.removeLastOrNull() ?: return false
+        (page.parent as? ViewGroup)?.removeView(page)
+        return true
     }
 
     private fun showLayoutPreview() {
@@ -707,11 +756,7 @@ class MainActivity : AppCompatActivity() {
                 marginEnd = dp(8)
             },
         )
-        AlertDialog.Builder(this)
-            .setTitle(R.string.layout_preview)
-            .setView(content)
-            .setPositiveButton(android.R.string.ok, null)
-            .show()
+        showSettingsContentPage(R.string.layout_preview, content, includePreview = false)
     }
 
     private fun wirePreview(root: View, keyboard: KeyboardView) {
