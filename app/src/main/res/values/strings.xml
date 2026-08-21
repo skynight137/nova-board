@@ -7,8 +7,12 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="clipboard_empty">No clipboard items yet</string>
+    <string name="clipboard_no_matches">No clipboard items match your search</string>
+    <string name="clipboard_search_hint">Search clipboard</string>
     <string name="clipboard_back_to_keyboard">Back to keyboard</string>
     <string name="cd_tools">Tools</string>
+    <string name="cd_expand_tools">Expand tools</string>
+    <string name="cd_collapse_tools">Collapse tools</string>
     <string name="cd_clipboard">Clipboard</string>
     <string name="cd_hotkeys">Hotkeys</string>
     <string name="cd_translate">Translate selected text</string>

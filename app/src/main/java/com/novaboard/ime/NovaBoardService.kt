@@ -300,6 +300,8 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private fun wireToggleChevrons(root: View) {
         val toChevron = root.findViewById<ImageButton>(R.id.btnToggleStrip)
         val fromChevron = root.findViewById<ImageButton>(R.id.btnToggleStripFromSuggestions)
+        toChevron.contentDescription = getString(R.string.cd_collapse_tools)
+        fromChevron.contentDescription = getString(R.string.cd_expand_tools)
         toChevron.setOnClickListener { showSuggestionStrip() }
         fromChevron.setOnClickListener { showToolsStrip() }
     }

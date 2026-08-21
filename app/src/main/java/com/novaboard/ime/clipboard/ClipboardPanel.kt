@@ -4,8 +4,12 @@ import android.content.Context
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.TextView
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,10 +30,16 @@ class ClipboardPanel(
     private var target: ViewGroup? = null
     private lateinit var adapter: ClipboardAdapter
     private lateinit var emptyLabel: TextView
+    private var searchQuery = ""
 
     fun show(target: ViewGroup) {
         dismiss()
         val root = FrameLayout(context)
+        val header =
+            LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+            }
         val backButton =
             TextView(context).apply {
                 text = "‹  Keyboard"
@@ -41,13 +51,29 @@ class ClipboardPanel(
                 contentDescription = context.getString(R.string.clipboard_back_to_keyboard)
                 setOnClickListener { onClose() }
             }
+        val search =
+            EditText(context).apply {
+                hint = context.getString(R.string.clipboard_search_hint)
+                setSingleLine(true)
+                setText(searchQuery)
+                setPadding(dp(12), 0, dp(12), 0)
+                contentDescription = context.getString(R.string.clipboard_search_hint)
+            }
+        header.addView(
+            backButton,
+            LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(56)),
+        )
+        header.addView(
+            search,
+            LinearLayout.LayoutParams(0, dp(56), 1f),
+        )
         val recycler =
             RecyclerView(context).apply {
                 layoutManager = LinearLayoutManager(context)
             }
         emptyLabel =
             TextView(context).apply {
-                text = context.getString(R.string.clipboard_empty)
+                 text = context.getString(R.string.clipboard_empty)
                 gravity = Gravity.CENTER
                 setPadding(24, 48, 24, 48)
             }
@@ -58,13 +84,7 @@ class ClipboardPanel(
                 ViewGroup.LayoutParams.MATCH_PARENT,
             ),
         )
-        root.addView(
-            backButton,
-            FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(56),
-            ),
-        )
+        root.addView(header, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(56)))
         (recycler.layoutParams as FrameLayout.LayoutParams).apply {
             topMargin = dp(56)
         }.also { recycler.layoutParams = it }
@@ -91,6 +111,18 @@ class ClipboardPanel(
                 },
             )
         recycler.adapter = adapter
+        search.addTextChangedListener(
+            object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    searchQuery = s?.toString().orEmpty()
+                    refresh()
+                }
+
+                override fun afterTextChanged(s: Editable?) = Unit
+            },
+        )
 
         ItemTouchHelper(
                 object :
@@ -128,8 +160,14 @@ class ClipboardPanel(
     }
 
     private fun refresh() {
-        val list = history.getItems()
+        val list = filterClipboardItems(history.getItems(), searchQuery)
         adapter.submit(list)
+        emptyLabel.text =
+            if (searchQuery.trim().isEmpty()) {
+                context.getString(R.string.clipboard_empty)
+            } else {
+                context.getString(R.string.clipboard_no_matches)
+            }
         emptyLabel.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
     }
 
