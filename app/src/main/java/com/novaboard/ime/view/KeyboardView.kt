@@ -67,6 +67,7 @@ constructor(
     private var capsLock = false
 
     private var measuredRowHeight = 58 * resources.displayMetrics.density
+    private var heightScale = 1f
 
     private val rowHeight
         get() = measuredRowHeight
@@ -134,11 +135,12 @@ constructor(
         val width = MeasureSpec.getSize(widthMeasureSpec)
         val heightMode = MeasureSpec.getMode(heightMeasureSpec)
         val availableHeight = MeasureSpec.getSize(heightMeasureSpec)
+        measuredRowHeight = 58 * resources.displayMetrics.density * heightScale
         if (heightMode != MeasureSpec.UNSPECIFIED && availableHeight > 0) {
             val density = resources.displayMetrics.density
-            val preferredMinimum = 48 * density
-            val compactMinimum = 36 * density
-            val maximum = 64 * density
+            val preferredMinimum = 48 * density * heightScale
+            val compactMinimum = 36 * density * heightScale
+            val maximum = 64 * density * heightScale
             val availablePerRow = availableHeight / page.rows.size.toFloat()
             measuredRowHeight =
                 if (availablePerRow >= preferredMinimum) {
@@ -171,6 +173,8 @@ constructor(
     }
 
     fun applyPreferences() {
+        heightScale =
+            KeyboardPreferences.getKeyboardHeightScale(context) / 100f
         longPressDuration = KeyboardPreferences.getLongPressDuration(context).toLong()
         longPressSymbols =
             KeyboardPreferences.getBoolean(context, KeyboardPreferences.LONG_PRESS_SYMBOLS)

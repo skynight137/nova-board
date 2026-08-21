@@ -129,6 +129,8 @@ These behaviors were manually confirmed in the active keyboard:
 - [~] Settings action hierarchy, typography, and preference-row styling
   implemented; device visual verification remains part of the narrow/tall
   layout pass
+- [~] Interactive keyboard preview supports tools, emoji, panels, and keyboard
+  height adjustment; device visual verification remains part of the layout pass
 - [~] Launcher icon remains a placeholder monogram
 - [~] Visual polish should still be checked on narrow, tall, light, and dark
   phone layouts
