@@ -51,7 +51,7 @@
     </style>
 
     <style name="NovaBoardSettingsPrimaryButton">
-        <item name="android:layout_height">56dp</item>
+        <item name="android:layout_height">52dp</item>
         <item name="android:minHeight">@dimen/nb_settings_row_min_height</item>
         <item name="android:background">@drawable/bg_settings_primary</item>
         <item name="android:textColor">@color/kb_on_accent</item>
@@ -65,12 +65,12 @@
     </style>
 
     <style name="NovaBoardSettingsRow">
-        <item name="android:layout_height">56dp</item>
+        <item name="android:layout_height">52dp</item>
         <item name="android:minHeight">@dimen/nb_settings_row_min_height</item>
         <item name="android:background">@drawable/bg_settings_row</item>
         <item name="android:textColor">@color/kb_key_text</item>
         <item name="android:textSize">@dimen/nb_settings_label</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">sans-serif</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:letterSpacing">0.02</item>
         <item name="android:stateListAnimator">@null</item>
@@ -81,6 +81,7 @@
     <style name="NovaBoardSettingsReset" parent="NovaBoardSettingsRow">
         <item name="android:background">@drawable/bg_settings_reset</item>
         <item name="android:textColor">@color/kb_danger</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="NovaBoardSettingsTitle">

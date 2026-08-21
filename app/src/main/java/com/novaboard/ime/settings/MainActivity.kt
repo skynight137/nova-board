@@ -313,14 +313,14 @@ class MainActivity : AppCompatActivity() {
         val content =
             LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                setPadding(24, 8, 24, 8)
+                setPadding(dp(20), dp(8), dp(20), dp(8))
             }
         specs.forEach { spec ->
             val row =
                 LinearLayout(this).apply {
                     orientation = LinearLayout.HORIZONTAL
                     gravity = android.view.Gravity.CENTER_VERTICAL
-                    setPadding(0, 10, 0, 10)
+                    setPadding(0, dp(8), 0, dp(8))
                 }
             val labels =
                 LinearLayout(this).apply {
@@ -332,13 +332,14 @@ class MainActivity : AppCompatActivity() {
                 TextView(this).apply {
                     text = getString(spec.titleRes)
                     textSize = 16f
+                    setTextColor(getColor(R.color.kb_key_text))
                 }
             )
             labels.addView(
                 TextView(this).apply {
                     text = getString(spec.summaryRes)
                     textSize = 12f
-                    alpha = 0.7f
+                    setTextColor(getColor(R.color.kb_toolbar_icon))
                 }
             )
             row.addView(labels)
@@ -349,9 +350,24 @@ class MainActivity : AppCompatActivity() {
                     minimumWidth = dp(52)
                     minimumHeight = dp(44)
                     setPadding(0, 0, 0, 0)
-                    thumbTintList = ColorStateList.valueOf(getColor(R.color.kb_key_bg))
+                    val unchecked = intArrayOf()
+                    val checked = intArrayOf(android.R.attr.state_checked)
+                    thumbTintList =
+                        ColorStateList(
+                            arrayOf(checked, unchecked),
+                            intArrayOf(
+                                getColor(R.color.kb_accent),
+                                getColor(R.color.kb_key_bg),
+                            ),
+                        )
                     trackTintList =
-                        ColorStateList.valueOf(getColor(R.color.kb_key_pressed))
+                        ColorStateList(
+                            arrayOf(checked, unchecked),
+                            intArrayOf(
+                                getColor(R.color.kb_accent_pressed),
+                                getColor(R.color.kb_divider),
+                            ),
+                        )
                     setOnCheckedChangeListener { _, checked ->
                         KeyboardPreferences.setBoolean(this@MainActivity, spec.key, checked)
                     }
