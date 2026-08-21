@@ -39,7 +39,7 @@ fi
 normalize_subject() {
   local subject="$1"
   case "$subject" in
-    feat:*|fix:*|docs:*|style:*|refactor:*|perf:*|test:*|build:*|ci:*|chore:*|revert:*)
+    feat*:*|fix*:*|docs*:*|style*:*|refactor*:*|perf*:*|test*:*|build*:*|ci*:*|chore*:*|revert*:*)
       printf '%s\n' "$subject"
       ;;
     "Initial commit")
@@ -125,7 +125,7 @@ echo "Rewriting all commits on $branch..."
 git filter-branch -f --msg-filter '
 subject="$(git log -1 --format=%s "$GIT_COMMIT")"
 case "$subject" in
-  feat:*|fix:*|docs:*|style:*|refactor:*|perf:*|test:*|build:*|ci:*|chore:*|revert:*) printf "%s\n" "$subject" ;;
+  feat*:*|fix*:*|docs*:*|style*:*|refactor*:*|perf*:*|test*:*|build*:*|ci*:*|chore*:*|revert*:*) printf "%s\n" "$subject" ;;
   "Initial commit") echo "chore: initialize project" ;;
   "Bump "*) echo "build: update release tooling dependencies" ;;
   "Merge "*) echo "chore: merge dependency update" ;;
