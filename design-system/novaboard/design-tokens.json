@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "NovaBoard",
+  "version": "1.0.0",
+  "platform": "android-native-views",
+  "description": "Precision-first design tokens for a private Android keyboard.",
+  "primitive": {
+    "color": {
+      "blue500": { "light": "#4C7CF3", "dark": "#8AB4FF" },
+      "blue700": { "light": "#315FCE", "dark": "#B7D0FF" },
+      "ink950": { "light": "#15171A", "dark": "#F4F5F7" },
+      "ink700": { "light": "#4C4F55", "dark": "#C4C7CD" },
+      "surface0": { "light": "#F4F5F8", "dark": "#111317" },
+      "surface1": { "light": "#FFFFFF", "dark": "#262A31" },
+      "surface2": { "light": "#DDE1E8", "dark": "#1D2026" },
+      "surfacePressed": { "light": "#C9CED8", "dark": "#414650" },
+      "line": { "light": "#C7CBD3", "dark": "#343840" },
+      "success": { "light": "#177245", "dark": "#66D39A" },
+      "warning": { "light": "#8A5A00", "dark": "#F6C866" },
+      "danger": { "light": "#B3261E", "dark": "#FFB4AB" }
+    },
+    "spaceDp": {
+      "1": 2,
+      "2": 4,
+      "3": 6,
+      "4": 8,
+      "5": 12,
+      "6": 16,
+      "7": 24,
+      "8": 32
+    },
+    "shapeDp": {
+      "key": 6,
+      "panel": 10,
+      "dialog": 16,
+      "pill": 999
+    },
+    "motionMs": {
+      "pressedResponse": 80,
+      "panelTransition": 160,
+      "feedbackMinimum": 2000
+    }
+  },
+  "semantic": {
+    "background": "surface0",
+    "keyDefault": "surface1",
+    "keyUtility": "surface2",
+    "keyPressed": "surfacePressed",
+    "textPrimary": "ink950",
+    "textSecondary": "ink700",
+    "actionPrimary": "blue500",
+    "actionPressed": "blue700",
+    "focusRing": "blue500",
+    "divider": "line",
+    "incognitoSurface": { "light": "#DCE8FF", "dark": "#263B61" },
+    "incognitoText": { "light": "#183A75", "dark": "#D9E7FF" },
+    "danger": "danger"
+  },
+  "typography": {
+    "settingsTitle": { "family": "sans-serif", "sizeSp": 24, "weight": 600 },
+    "sectionTitle": { "family": "sans-serif", "sizeSp": 16, "weight": 600 },
+    "body": { "family": "sans-serif", "sizeSp": 16, "weight": 400 },
+    "supporting": { "family": "sans-serif", "sizeSp": 13, "weight": 400 },
+    "keyLabel": { "family": "sans-serif", "sizeSp": 20, "weight": 500 },
+    "utilityLabel": { "family": "sans-serif", "sizeSp": 12, "weight": 600 },
+    "shortcutLabel": { "family": "monospace", "sizeSp": 12, "weight": 500 }
+  },
+  "component": {
+    "touchTargetMinDp": 44,
+    "toolbarGapDp": 8,
+    "settingsRowMinHeightDp": 56,
+    "iconOpticalBoxDp": 24,
+    "keyElevationDp": { "rest": 1, "pressed": 2 },
+    "panelElevationDp": 3,
+    "dialogElevationDp": 8
+  },
+  "rules": {
+    "normalTextContrast": 4.5,
+    "largeTextContrast": 3,
+    "noEmojiAsIcons": true,
+    "reducedMotion": true,
+    "sessionSafeAsync": true,
+    "offlineFontDependency": true
+  }
+}
