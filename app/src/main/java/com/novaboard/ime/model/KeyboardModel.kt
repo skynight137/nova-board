@@ -158,13 +158,24 @@ object KeyboardLayouts {
     val symbols = symbols(showNumberRow = true)
 
     /** Secondary symbols page shown from the primary symbols page's "{&=" key. */
-    val symbolsSecondary =
+    fun symbolsSecondary(showNumberRow: Boolean) =
         KeyboardPage(
-            listOf(
-                secondarySymbolsRow1,
-                secondarySymbolsRow2,
-                secondarySymbolsRow3,
-                secondarySymbolsBottomRow,
-            )
+            if (showNumberRow) {
+                listOf(
+                    secondarySymbolsRow1,
+                    secondarySymbolsRow3,
+                    secondarySymbolsRow2,
+                    secondarySymbolsBottomRow,
+                )
+            } else {
+                listOf(
+                    secondarySymbolsRow1,
+                    secondarySymbolsRow2,
+                    secondarySymbolsRow3,
+                    secondarySymbolsBottomRow,
+                )
+            }
         )
+
+    val symbolsSecondary = symbolsSecondary(showNumberRow = true)
 }

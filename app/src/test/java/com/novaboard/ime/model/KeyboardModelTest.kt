@@ -44,7 +44,7 @@ class KeyboardModelTest {
         assertEquals(KeyType.LETTERS, KeyboardLayouts.symbols.rows.last().keys.first().type)
         assertTrue(secondaryLabels.containsAll(listOf("$", "€", "¥", "©", "™", "~", "¿")))
         assertEquals(4, KeyboardLayouts.symbolsSecondary.rows.size)
-        assertEquals(KeyType.SYMBOLS, KeyboardLayouts.symbolsSecondary.rows[1].keys.first().type)
+        assertEquals(KeyType.SYMBOLS, KeyboardLayouts.symbolsSecondary.rows[2].keys.first().type)
         assertEquals(
             KeyType.LETTERS,
             KeyboardLayouts.symbolsSecondary.rows.last().keys.first().type,
@@ -68,9 +68,34 @@ class KeyboardModelTest {
     }
 
     @Test
-    fun secondarySymbolsKeepTheirNavigationShapeRegardlessOfNumberRow() {
+    fun symbolSwitcherRowsStayAlignedAcrossPrimaryAndSecondaryPages() {
+        val primaryWithNumberRow = KeyboardLayouts.symbols(showNumberRow = true)
+        val secondaryWithNumberRow = KeyboardLayouts.symbolsSecondary(showNumberRow = true)
+        val primaryWithoutNumberRow = KeyboardLayouts.symbols(showNumberRow = false)
+        val secondaryWithoutNumberRow = KeyboardLayouts.symbolsSecondary(showNumberRow = false)
+
+        assertEquals(2, primaryWithNumberRow.rows.indexOfFirst { row ->
+            row.keys.first().type == KeyType.SYMBOLS_SECONDARY
+        })
+        assertEquals(2, secondaryWithNumberRow.rows.indexOfFirst { row ->
+            row.keys.first().type == KeyType.SYMBOLS
+        })
+        assertEquals(1, primaryWithoutNumberRow.rows.indexOfFirst { row ->
+            row.keys.first().type == KeyType.SYMBOLS_SECONDARY
+        })
+        assertEquals(1, secondaryWithoutNumberRow.rows.indexOfFirst { row ->
+            row.keys.first().type == KeyType.SYMBOLS
+        })
+    }
+
+    @Test
+    fun secondarySymbolsKeepTheirFourRowShapeForEitherNumberRowPreference() {
         assertEquals(4, KeyboardLayouts.symbolsSecondary.rows.size)
-        assertEquals(KeyType.SYMBOLS, KeyboardLayouts.symbolsSecondary.rows[1].keys.first().type)
+        assertEquals(KeyType.SYMBOLS, KeyboardLayouts.symbolsSecondary.rows[2].keys.first().type)
+        assertEquals(
+            KeyType.SYMBOLS,
+            KeyboardLayouts.symbolsSecondary(showNumberRow = false).rows[1].keys.first().type,
+        )
         assertEquals(KeyType.LETTERS, KeyboardLayouts.symbolsSecondary.rows.last().keys.first().type)
     }
 

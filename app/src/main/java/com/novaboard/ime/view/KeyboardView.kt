@@ -615,7 +615,14 @@ constructor(
                 listener?.onSwitchToSymbols()
             }
             KeyType.SYMBOLS_SECONDARY -> {
-                setPage(KeyboardLayouts.symbolsSecondary)
+                setPage(
+                    KeyboardLayouts.symbolsSecondary(
+                        KeyboardPreferences.getBoolean(
+                            context,
+                            KeyboardPreferences.SHOW_NUMBER_ROW,
+                        ),
+                    ),
+                )
                 listener?.onSwitchToSymbols()
             }
             KeyType.LETTERS -> {
