@@ -88,7 +88,8 @@
         <item name="android:textSize">15sp</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:gravity">center_vertical</item>
+        <item name="android:gravity">center_vertical|start</item>
+        <item name="android:textAlignment">viewStart</item>
         <item name="android:paddingStart">68dp</item>
         <item name="android:paddingEnd">@dimen/nb_space_6</item>
         <item name="android:stateListAnimator">@null</item>

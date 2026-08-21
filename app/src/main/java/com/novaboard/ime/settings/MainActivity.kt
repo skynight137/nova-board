@@ -388,27 +388,11 @@ class MainActivity : AppCompatActivity() {
                 SwitchCompat(this).apply {
                     isChecked = KeyboardPreferences.getBoolean(this@MainActivity, spec.key)
                     showText = false
-                    minimumWidth = dp(52)
+                    minimumWidth = dp(48)
                     minimumHeight = dp(44)
                     setPadding(0, 0, 0, 0)
-                    val unchecked = intArrayOf()
-                    val checked = intArrayOf(android.R.attr.state_checked)
-                    thumbTintList =
-                        ColorStateList(
-                            arrayOf(checked, unchecked),
-                            intArrayOf(
-                                getColor(R.color.kb_switch_on_thumb),
-                                getColor(R.color.kb_switch_off_thumb),
-                            ),
-                        )
-                    trackTintList =
-                        ColorStateList(
-                            arrayOf(checked, unchecked),
-                            intArrayOf(
-                                getColor(R.color.kb_switch_on_track),
-                                getColor(R.color.kb_switch_off_track),
-                            ),
-                        )
+                    setThumbResource(R.drawable.settings_switch_thumb)
+                    setTrackResource(R.drawable.settings_switch_track)
                     setOnCheckedChangeListener { _, checked ->
                         KeyboardPreferences.setBoolean(this@MainActivity, spec.key, checked)
                     }
