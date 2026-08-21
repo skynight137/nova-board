@@ -34,7 +34,8 @@ The release workflow uses:
 - `GPG_PASSPHRASE` — passphrase for the GPG private key
 - `GPG_FINGERPRINT` — repository secret used to select the GPG signing key
 - `ANDROID_CERTIFICATE_SHA256` — SHA-256 fingerprint of the Android release
-  certificate, used to verify the built APK before publication
+  certificate, used to verify the built APK before publication; this is
+  required to preserve Android signing-key continuity
 
 Optional clone settings are read from the environment and default to the
 repository template layout:
@@ -75,6 +76,15 @@ The app uses a deliberately simple update flow: **Open release page** opens
 GitHub Releases, where the user chooses an APK and follows Android's installer
 prompts. Release automation still publishes the APK, detached signature, and
 metadata for release tooling and distribution records.
+
+The Android certificate check is intentionally retained even though users
+install APKs manually from GitHub Releases. A GitHub download does not prove
+that the APK was produced with the intended Android release key. The check
+detects an incorrect or replaced keystore before publication, preserving the
+ability to install future updates over the existing app. The APK SHA-256
+digest and detached GPG signature provide artifact integrity and publisher
+verification, respectively, but neither replaces Android's signing identity
+check.
 
 The main screen also provides an explicit **Export app log…** action. The
 resulting plain-text file contains bounded app-owned events and device/APK
@@ -133,6 +143,11 @@ Keep `${ANDROID_MODULE:-app}/keystore.jks` in the local release environment.
 It is ignored by Git and must never be committed.
 
 ### Android certificate fingerprint
+
+This setting is required for releases. Do not remove it merely because APKs
+are installed manually: Android uses the signing certificate as the app's
+update identity, and a release signed with a different certificate cannot
+update the existing installation.
 
 `ANDROID_CERTIFICATE_SHA256` must match the certificate in the existing
 release keystore. When the keystore and its credentials are available as
