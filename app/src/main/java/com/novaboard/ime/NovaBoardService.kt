@@ -63,6 +63,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private lateinit var keyboardView: KeyboardView
     private lateinit var toolsBar: LinearLayout
     private lateinit var suggestionBar: LinearLayout
+    private lateinit var toolsToggleFromSuggestions: ImageButton
     private lateinit var suggestion1: TextView
     private lateinit var suggestion2: TextView
     private lateinit var suggestion3: TextView
@@ -300,6 +301,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private fun wireToggleChevrons(root: View) {
         val toChevron = root.findViewById<ImageButton>(R.id.btnToggleStrip)
         val fromChevron = root.findViewById<ImageButton>(R.id.btnToggleStripFromSuggestions)
+        toolsToggleFromSuggestions = fromChevron
         toChevron.contentDescription = getString(R.string.cd_collapse_tools)
         fromChevron.contentDescription = getString(R.string.cd_expand_tools)
         toChevron.setOnClickListener { showSuggestionStrip() }
@@ -309,11 +311,13 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private fun showSuggestionStrip() {
         toolsBar.visibility = View.GONE
         suggestionBar.visibility = View.VISIBLE
+        toolsToggleFromSuggestions.visibility = View.VISIBLE
     }
 
     private fun showToolsStrip() {
         toolsBar.visibility = View.VISIBLE
         suggestionBar.visibility = View.VISIBLE
+        toolsToggleFromSuggestions.visibility = View.GONE
     }
 
     // ---- tools row ----
