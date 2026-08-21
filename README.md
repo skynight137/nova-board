@@ -70,7 +70,7 @@ For development:
 ## Build and run
 
 ```bash
-source .bin/env.sh
+source .local/env.sh
 ./gradlew :app:assembleDebug
 ```
 
@@ -87,7 +87,7 @@ The debug application ID is `com.novaboard.ime.debug`.
 For source-only changes:
 
 ```bash
-source .bin/env.sh
+source .local/env.sh
 ./gradlew :app:testDebugUnitTest
 ```
 

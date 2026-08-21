@@ -12,8 +12,8 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 - The number-row preference is applied when entering both letters and symbols pages.
 - Current JVM tests live under `app/src/test/java/com/novaboard/ime`.
 - Existing verification commands are documented in `README.md`:
-  - `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`
-  - `source .bin/env.sh && ./gradlew :app:assembleDebug`
+  - `source .local/env.sh && ./gradlew :app:testDebugUnitTest`
+  - `source .local/env.sh && ./gradlew :app:assembleDebug`
 
 ## Progress
 
@@ -56,7 +56,7 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 
 **Verification:**
 - [✓] Focused JVM tests cover accepted, stale, and changed-editor cases.
-- [✓] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest` passes.
+- [✓] `source .local/env.sh && ./gradlew :app:testDebugUnitTest` passes.
 
 **Dependencies:** None
 
@@ -113,7 +113,7 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 **Verification:**
 - [✓] Persistence tests cover isolated pure JSON decoding without Android dependencies.
 - [~] Listener callback counts require an Android clipboard provider and are deferred.
-- [✓] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest` passes.
+- [✓] `source .local/env.sh && ./gradlew :app:testDebugUnitTest` passes.
 
 **Dependencies:** None
 
@@ -187,7 +187,7 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 - [~] Pure portions of Tasks 1-5 pass together; Android lifecycle,
   clipboard-listener, and preference-reset seams remain deferred.
 - [✓] No test relies on timing, a real microphone, a real clipboard provider, or a live editor.
-- [✓] `source .bin/env.sh && ./gradlew :app:assembleDebug` succeeds.
+- [✓] `source .local/env.sh && ./gradlew :app:assembleDebug` succeeds.
 - [✓] `git diff --check` succeeds.
 
 ### Phase 4: Delivery gate
@@ -203,8 +203,8 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 - [✓] Commit uses a Conventional Commit message.
 
 **Verification:**
-- [✓] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`
-- [✓] `source .bin/env.sh && ./gradlew :app:assembleDebug`
+- [✓] `source .local/env.sh && ./gradlew :app:testDebugUnitTest`
+- [✓] `source .local/env.sh && ./gradlew :app:assembleDebug`
 - [✓] `git diff --check`
 - [✓] Final `git status --short --branch` is clean after the delivery commit.
 

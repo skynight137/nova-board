@@ -67,8 +67,8 @@ Remove misleading UI promises and make the remaining emoji/settings/quick-delete
 ### Verification gate
 
 - [ ] Tests cover emoji search/control state, font preference behavior, retained settings, and quick-delete semantics.
-- [ ] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`
-- [ ] `source .bin/env.sh && ./gradlew :app:assembleDebug`
+- [ ] `source .local/env.sh && ./gradlew :app:testDebugUnitTest`
+- [ ] `source .local/env.sh && ./gradlew :app:assembleDebug`
 - [ ] `git diff --check`
 - [ ] Commit: `fix: align emoji and typing preference contracts`
 

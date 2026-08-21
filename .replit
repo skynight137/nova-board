@@ -55,10 +55,5 @@ UV_PROJECT_ENVIRONMENT = ".venv"
 localPort = 80
 externalPort = 80
 
-[[ports]]
-localPort = 8080
-externalPort = 8080
 
-[[ports]]
-localPort = 18765
-externalPort = 3000
+

@@ -111,7 +111,7 @@ root. It generates the keystore without prompts, creates a single-line
 `KEYSTORE_B64`, and uploads the keystore values to GitHub:
 
 ```bash
-source .bin/env.sh
+source .local/env.sh
 export ANDROID_MODULE="${ANDROID_MODULE:-app}"
 export KEYSTORE_PASSWORD="$(openssl rand -hex 32)"
 export KEYSTORE_ENTRY_ALIAS="android-release"
@@ -139,7 +139,7 @@ release keystore. When the keystore and its credentials are available as
 Replit Secrets, source the repository environment and run:
 
 ```bash
-source .bin/env.sh
+source .local/env.sh
 tmp_keystore="$(mktemp)"
 trap 'rm -f "$tmp_keystore"' EXIT
 printf '%s' "$KEYSTORE_B64" | base64 --decode > "$tmp_keystore"
@@ -220,7 +220,7 @@ resource change instead of carrying forward a size claim from the source
 template:
 
 ```bash
-source .bin/env.sh
+source .local/env.sh
 ./gradlew :app:assembleRelease
 stat -c '%s bytes' "${ANDROID_MODULE:-app}/build/outputs/apk/release/<ProjectName>-release.apk"
 unzip -lv "${ANDROID_MODULE:-app}/build/outputs/apk/release/<ProjectName>-release.apk" \
@@ -341,7 +341,7 @@ so a manual dispatch waits for an active publication rather than racing it.
 Run the repository-managed toolchain before opening a release pull request:
 
 ```bash
-source .bin/env.sh
+source .local/env.sh
 ./gradlew :"${ANDROID_MODULE:-app}":testDebugUnitTest \
   :"${ANDROID_MODULE:-app}":compileDebugAndroidTestKotlin \
   :"${ANDROID_MODULE:-app}":assembleDebug
@@ -371,7 +371,7 @@ changelog rendering and release-note output without publishing anything or
 depending on authenticated release access.
 
 For a real signed preparation test, configure the release secrets in the
-environment, source `.bin/env.sh`, and run:
+environment, source `.local/env.sh`, and run:
 
 ```bash
 bash .github/release-tooling/prepare-release.sh 0.1.1

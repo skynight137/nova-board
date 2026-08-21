@@ -9,7 +9,7 @@ CMDLINE_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-lin
 # ── Paths ─────────────────────────────────────────────────────────────────────
 WORKSPACE="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$WORKSPACE"
-BIN="$WORKSPACE/.bin"
+BIN="$WORKSPACE/.local"
 SDK="$BIN/android-sdk"
 JAVA_HOME_DIR="$BIN/java"
 GRADLE_USER_HOME="$WORKSPACE/.gradle"   # Gradle cache dir — binary comes from gradlew
@@ -233,7 +233,7 @@ install_java() {
   mkdir -p "$TMP_DIR"
   tar -xzf "$TMP_TGZ" -C "$TMP_DIR"
 
-  # Temurin extracts to jdk-24.x.x+y/ — move contents into .bin/java/
+  # Temurin extracts to jdk-24.x.x+y/ — move contents into .local/java/
   EXTRACTED=$(ls "$TMP_DIR")
   [[ -n "$EXTRACTED" ]] || die "JDK extraction produced empty directory"
   mv "$TMP_DIR/$EXTRACTED"/* "$JAVA_HOME_DIR/"
@@ -259,7 +259,7 @@ echo "  Workspace disk: ${AVAIL_GB} GB available  (need ~5 GB)"
 ok "Preflight passed"
 
 # ── 2. Directories ───────────────────────────────────────────────────────────
-step "Creating .bin directory tree"
+step "Creating .local directory tree"
 mkdir -p "$SDK" "$JAVA_HOME_DIR" "$GRADLE_USER_HOME"
 ok "Created: $BIN/{android-sdk, java, gradle-home}"
 
@@ -363,7 +363,7 @@ cat <<SUMMARY
 
   Directory layout
   ────────────────
-  .bin/
+  .local/
   ├── android-sdk/          ANDROID_HOME
   │   ├── cmdline-tools/    sdkmanager + license acceptance
   │   ├── platform-tools/

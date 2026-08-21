@@ -179,8 +179,8 @@ Acceptance criteria:
 - [✓] Keep or remove the old relay only if a separate compatibility path is
   explicitly documented; it must not be reachable from the keyboard button.
 - [ ] Add model, panel, stale-session, and editor-replacement tests.
-- [✓] Run `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`.
-- [✓] Run `source .bin/env.sh && ./gradlew :app:assembleDebug`.
+- [✓] Run `source .local/env.sh && ./gradlew :app:testDebugUnitTest`.
+- [✓] Run `source .local/env.sh && ./gradlew :app:assembleDebug`.
 - [✓] Run `git diff --check`.
 - [✓] Commit each vertical slice with a Conventional Commit message.
 
@@ -190,8 +190,8 @@ it would create out-of-scope churn.
 
 Phase 2 verification completed:
 
-- [✓] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`
-- [✓] `source .bin/env.sh && ./gradlew :app:assembleDebug`
+- [✓] `source .local/env.sh && ./gradlew :app:testDebugUnitTest`
+- [✓] `source .local/env.sh && ./gradlew :app:assembleDebug`
 - [✓] `git diff --check`
 
 The provider seam and honest unavailable behavior are complete. An approved

@@ -78,7 +78,7 @@ compile, verification, diff, and Conventional Commit gates independently.
 Implement each plan as a separate focused round. Resume at the first unchecked task. After each round, run:
 
 ```bash
-source .bin/env.sh
+source .local/env.sh
 ./gradlew :app:testDebugUnitTest
 ./gradlew :app:assembleDebug
 git diff --check

@@ -102,7 +102,7 @@ tests where practical.
 Run the available automated checks:
 
 ```bash
-source .bin/env.sh
+source .local/env.sh
 ./gradlew :app:testDebugUnitTest
 ./gradlew :app:assembleDebug
 git diff --check

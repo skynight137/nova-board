@@ -90,7 +90,7 @@ workflow in this environment.
 Run each step with the repository environment loaded:
 
 ```bash
-source .bin/env.sh
+source .local/env.sh
 ./gradlew :app:testDebugUnitTest
 ./gradlew :app:assembleDebug
 git diff --check

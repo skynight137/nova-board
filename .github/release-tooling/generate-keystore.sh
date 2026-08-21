@@ -31,7 +31,7 @@ require_env() {
 }
 
 command -v keytool >/dev/null 2>&1 ||
-  fail "keytool not found; run 'source .bin/env.sh' first"
+  fail "keytool not found; run 'source .local/env.sh' first"
 
 require_env KEYSTORE_PASSWORD
 require_env KEYSTORE_ENTRY_ALIAS
