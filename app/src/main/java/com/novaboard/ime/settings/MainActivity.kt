@@ -11,6 +11,7 @@ import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.FrameLayout
@@ -20,6 +21,7 @@ import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.SeekBar
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -93,7 +95,7 @@ class MainActivity : AppCompatActivity() {
             showThemeDialog()
         }
         findViewById<Button>(R.id.btnLayoutSettings).setOnClickListener {
-            showPreferenceDialog(
+            showPreferencePage(
                 R.string.layout_keys,
                 listOf(
                     PreferenceSpec(
@@ -145,7 +147,7 @@ class MainActivity : AppCompatActivity() {
             showLayoutPreview()
         }
         findViewById<Button>(R.id.btnTypingSettings).setOnClickListener {
-            showPreferenceDialog(
+            showPreferencePage(
                 R.string.typing,
                 listOf(
                     PreferenceSpec(
@@ -200,7 +202,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
         findViewById<Button>(R.id.btnEmojiSettings).setOnClickListener {
-            showPreferenceDialog(
+            showPreferencePage(
                 R.string.emoji,
                 listOf(
                     PreferenceSpec(
@@ -225,7 +227,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
         findViewById<Button>(R.id.btnSoundSettings).setOnClickListener {
-            showPreferenceDialog(
+            showPreferencePage(
                 R.string.sound_vibration,
                 listOf(
                     PreferenceSpec(
@@ -361,11 +363,11 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun showPreferenceDialog(titleRes: Int, specs: List<PreferenceSpec>) {
+    private fun showPreferencePage(titleRes: Int, specs: List<PreferenceSpec>) {
         val content =
             LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                setPadding(dp(20), dp(8), dp(20), dp(8))
+                setPadding(dp(16), dp(8), dp(16), dp(24))
             }
         specs.forEach { spec ->
             val row =
@@ -550,12 +552,79 @@ class MainActivity : AppCompatActivity() {
                 }
             )
         }
-        val builder =
-            AlertDialog.Builder(this)
-                .setTitle(titleRes)
-                .setView(content)
-                .setPositiveButton(android.R.string.ok, null)
-        builder.show()
+        val page =
+            FrameLayout(this).apply {
+                setBackgroundColor(getColor(R.color.kb_background))
+                isFocusableInTouchMode = true
+            }
+        val appBar =
+            LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setBackgroundColor(getColor(R.color.kb_surface))
+                setPadding(dp(2), 0, dp(16), 0)
+            }
+        appBar.addView(
+            ImageButton(this).apply {
+                setImageResource(R.drawable.ic_arrow_back)
+                contentDescription = getString(R.string.settings_back)
+                setBackgroundColor(Color.TRANSPARENT)
+                setColorFilter(getColor(R.color.kb_toolbar_icon))
+                minimumWidth = dp(48)
+                minimumHeight = dp(48)
+                setPadding(dp(12), dp(12), dp(12), dp(12))
+                setOnClickListener {
+                    (page.parent as? ViewGroup)?.removeView(page)
+                }
+            },
+            LinearLayout.LayoutParams(dp(52), dp(64)),
+        )
+        appBar.addView(
+            TextView(this).apply {
+                text = getString(titleRes)
+                textSize = 20f
+                setTextColor(getColor(R.color.kb_key_text))
+                typeface = android.graphics.Typeface.DEFAULT
+                gravity = Gravity.CENTER_VERTICAL
+            },
+            LinearLayout.LayoutParams(0, dp(64), 1f),
+        )
+        page.addView(
+            appBar,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                dp(64),
+            ),
+        )
+        page.addView(
+            ScrollView(this).apply {
+                isFillViewport = true
+                addView(content)
+            },
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT,
+            ).apply {
+                topMargin = dp(64)
+            },
+        )
+        page.addView(
+            ImageButton(this).apply {
+                setImageResource(R.drawable.ic_keyboard)
+                contentDescription = getString(R.string.layout_preview)
+                setBackgroundResource(R.drawable.bg_settings_primary)
+                setColorFilter(getColor(R.color.kb_on_accent))
+                minimumWidth = dp(56)
+                minimumHeight = dp(56)
+                setPadding(dp(12), dp(12), dp(12), dp(12))
+                setOnClickListener { showLayoutPreview() }
+            },
+            FrameLayout.LayoutParams(dp(56), dp(56), Gravity.BOTTOM or Gravity.END).apply {
+                setMargins(0, 0, dp(16), dp(16))
+            },
+        )
+        findViewById<FrameLayout>(android.R.id.content).addView(page)
+        page.requestFocus()
     }
 
     private fun showLayoutPreview() {
