@@ -433,28 +433,7 @@ class MainActivity : AppCompatActivity() {
                 .setTitle(titleRes)
                 .setView(content)
                 .setPositiveButton(android.R.string.ok, null)
-        if (titleRes == R.string.emoji) {
-            builder.setNeutralButton(R.string.emoji_font) { _, _ -> showEmojiFontDialog() }
-        }
         builder.show()
-    }
-
-    private fun showEmojiFontDialog() {
-        val values = arrayOf("system", "google")
-        val labels =
-            arrayOf(
-                getString(R.string.system_emoji),
-                getString(R.string.sans_serif_emoji),
-            )
-        val selected = values.indexOf(KeyboardPreferences.getEmojiFont(this)).coerceAtLeast(0)
-        AlertDialog.Builder(this)
-            .setTitle(R.string.emoji_font)
-            .setSingleChoiceItems(labels, selected) { dialog, which ->
-                KeyboardPreferences.setEmojiFont(this, values[which])
-                dialog.dismiss()
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
     }
 
     private fun showLayoutPreview() {

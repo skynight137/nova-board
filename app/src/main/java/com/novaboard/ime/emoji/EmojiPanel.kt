@@ -2,7 +2,6 @@ package com.novaboard.ime.emoji
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.Typeface
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +12,6 @@ import android.widget.TextView
 import android.widget.ImageButton
 import android.widget.FrameLayout
 import com.novaboard.ime.R
-import com.novaboard.ime.settings.KeyboardPreferences
 
 /** Standard emoji set grouped loosely by category; tapping one commits it via [onPick]. */
 object EmojiData {
@@ -74,8 +72,7 @@ object EmojiData {
             "\ud83d\udcf1",
             "\u2615",
         )
-    val symbols = listOf("✅", "❌", "❗", "❓", "💡", "❤️", "🔥", "⭐", "🎉", "💯", "✨", "💦")
-    val all = smileys + gestures + objects + symbols
+    val all = (smileys + gestures + objects).distinct()
 
     private val keywords =
         mapOf(
@@ -119,15 +116,15 @@ class EmojiPanel(private val context: Context, private val onPick: (String) -> U
         val root =
             LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
-                setBackgroundColor(Color.rgb(25, 26, 32))
+                setBackgroundColor(context.getColor(R.color.kb_background))
             }
         root.addView(createHeader())
 
         val scroll = ScrollView(context)
         grid =
             GridLayout(context).apply {
-                columnCount = 7
-                setPadding(6, 8, 6, 12)
+                columnCount = 8
+                setPadding(dp(8), dp(8), dp(8), dp(12))
                 clipChildren = false
             }
         scroll.addView(grid)
@@ -156,10 +153,10 @@ class EmojiPanel(private val context: Context, private val onPick: (String) -> U
             setPadding(dp(12), 0, dp(12), 0)
             addView(
                 TextView(context).apply {
-                    text = "☺  Emoji"
+                    text = "Emoji"
                     textSize = 18f
                     gravity = Gravity.CENTER
-                    setTextColor(Color.WHITE)
+                    setTextColor(context.getColor(R.color.kb_key_text))
                 },
                 FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -171,7 +168,7 @@ class EmojiPanel(private val context: Context, private val onPick: (String) -> U
                     setImageResource(R.drawable.ic_arrow_back)
                     contentDescription = context.getString(R.string.emoji_panel_close)
                     setBackgroundColor(Color.TRANSPARENT)
-                    setColorFilter(Color.WHITE)
+                    setColorFilter(context.getColor(R.color.kb_toolbar_icon))
                     minimumWidth = dp(56)
                     minimumHeight = dp(56)
                     setOnClickListener { dismiss() }
@@ -183,26 +180,20 @@ class EmojiPanel(private val context: Context, private val onPick: (String) -> U
     private fun renderEmojis() {
         val target = grid ?: return
         target.removeAllViews()
-        val emojiTypeface =
-            if (KeyboardPreferences.getEmojiFont(context) == "google") {
-                Typeface.create("sans-serif-emoji", Typeface.NORMAL)
-            } else {
-                Typeface.DEFAULT
-            }
         EmojiData.all.forEach { emoji ->
             target.addView(
                 TextView(context).apply {
                     text = emoji
                     contentDescription = context.getString(R.string.emoji_item, emoji)
-                    typeface = emojiTypeface
                     textSize = 32f
                     gravity = Gravity.CENTER
-                     includeFontPadding = false
-                    setPadding(4, 4, 4, 4)
+                    includeFontPadding = false
+                    setTextColor(context.getColor(R.color.kb_key_text))
+                    setPadding(dp(4), dp(4), dp(4), dp(4))
                     layoutParams =
                         GridLayout.LayoutParams().apply {
                             width = 0
-                            height = 64
+                            height = dp(56)
                             columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                         }
                     setOnClickListener { onPick(emoji) }
