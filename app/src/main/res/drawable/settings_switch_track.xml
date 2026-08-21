@@ -2,15 +2,23 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_checked="true">
         <shape android:shape="rectangle">
-            <size android:width="48dp" android:height="28dp" />
-            <corners android:radius="14dp" />
+            <size android:width="50dp" android:height="32dp" />
+            <corners android:radius="16dp" />
             <solid android:color="@color/kb_switch_on_track" />
+        </shape>
+    </item>
+    <item android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <size android:width="50dp" android:height="32dp" />
+            <corners android:radius="16dp" />
+            <solid android:color="@color/kb_switch_disabled_surface" />
+            <stroke android:width="2dp" android:color="@color/kb_switch_disabled_border" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
-            <size android:width="48dp" android:height="28dp" />
-            <corners android:radius="14dp" />
+            <size android:width="50dp" android:height="32dp" />
+            <corners android:radius="16dp" />
             <solid android:color="@color/kb_switch_off_surface" />
             <stroke android:width="2dp" android:color="@color/kb_switch_off_border" />
         </shape>

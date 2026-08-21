@@ -15,6 +15,9 @@
     <color name="kb_switch_off_thumb">#C4C7CD</color>
     <color name="kb_switch_off_surface">#1B1D21</color>
     <color name="kb_switch_off_border">#C4C7CD</color>
+    <color name="kb_switch_disabled_surface">#25282E</color>
+    <color name="kb_switch_disabled_border">#3A3E46</color>
+    <color name="kb_switch_disabled_thumb">#6F747D</color>
     <color name="kb_suggestion_text">#C4C7CD</color>
     <color name="kb_suggestion_text_highlight">#F4F5F7</color>
     <color name="kb_divider">#343840</color>
