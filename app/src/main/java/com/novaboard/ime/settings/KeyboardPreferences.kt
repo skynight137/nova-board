@@ -34,34 +34,10 @@ object KeyboardPreferences {
     const val DEFAULT_IMAGE_CLIPBOARD_HISTORY = false
     const val DEFAULT_KEYBOARD_HEIGHT_SCALE = 100
 
-    private val defaults =
-        mapOf(
-            SHOW_NUMBER_ROW to true,
-            SHOW_ARROW_KEYS to true,
-            LONG_PRESS_SYMBOLS to false,
-            ACCENTED_CHARACTERS to false,
-            KEY_POPUPS to false,
-            LARGE_KEY_TEXT to false,
-            AUTOCORRECT to false,
-            QUICK_PERIOD to true,
-            AUTO_CAPITALIZE to true,
-            AUTO_SPACE to false,
-            CURSOR_CONTROL to true,
-            QUICK_DELETE to true,
-            EMOJI_PREDICTIONS to true,
-            DEDICATED_EMOJI_KEY to true,
-            EMOJI_ON_ENTER to false,
-            SOUND_ON_KEYPRESS to false,
-            VIBRATION_ON_KEYPRESS to false,
-            UNDO_AUTOCORRECT to false,
-            QUICK_PREDICTION_INSERT to false,
-            IMAGE_CLIPBOARD_HISTORY to DEFAULT_IMAGE_CLIPBOARD_HISTORY,
-        )
-
     fun getBoolean(context: Context, key: String): Boolean =
         context
             .getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .getBoolean(key, defaults[key] as? Boolean ?: false)
+            .getBoolean(key, defaultBooleanPreference(key) ?: false)
 
     fun setBoolean(context: Context, key: String, value: Boolean) {
         context

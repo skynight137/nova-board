@@ -20,7 +20,25 @@ fun previousWordDeletionCount(textBeforeCursor: String): Int {
 }
 
 /**
- * Undo is safe only while the replacement is still the exact suffix immediately before the cursor.
+ * The snapshot captured immediately after an autocorrect replacement.
+ *
+ * Keeping the complete bounded text-before-cursor snapshot prevents undo from
+ * deleting a replacement after another editor mutation changed the text around
+ * it while leaving the replacement itself as a suffix.
  */
-fun canUndoAutocorrect(replacement: String?, textBeforeCursor: String): Boolean =
-    !replacement.isNullOrEmpty() && textBeforeCursor.endsWith(replacement)
+data class AutocorrectState(
+    val original: String,
+    val replacement: String,
+    val textBeforeCursor: String,
+) {
+    init {
+        require(original.isNotEmpty()) { "Original autocorrect text must not be empty" }
+        require(replacement.isNotEmpty()) { "Replacement autocorrect text must not be empty" }
+        require(textBeforeCursor.endsWith(replacement)) {
+            "Snapshot must end with the autocorrect replacement"
+        }
+    }
+}
+
+fun canUndoAutocorrect(state: AutocorrectState?, textBeforeCursor: String): Boolean =
+    state != null && state.textBeforeCursor == textBeforeCursor

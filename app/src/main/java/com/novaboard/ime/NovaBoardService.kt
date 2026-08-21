@@ -31,6 +31,7 @@ import com.novaboard.ime.clipboard.ClipType
 import com.novaboard.ime.clipboard.ClipboardHistoryManager
 import com.novaboard.ime.clipboard.ClipboardItem
 import com.novaboard.ime.clipboard.ClipboardPanel
+import com.novaboard.ime.editing.AutocorrectState
 import com.novaboard.ime.editing.RepeatController
 import com.novaboard.ime.editing.RepeatToken
 import com.novaboard.ime.editing.acceptsInputSessionResult
@@ -77,8 +78,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private var emojiPanel: EmojiPanel? = null
     private var toolsMenuView: View? = null
     private var lastSpaceTime = 0L
-    private var lastAutocorrectOriginal: String? = null
-    private var lastAutocorrectReplacement: String? = null
+    private var lastAutocorrectState: AutocorrectState? = null
     private var speechRecognizer: SpeechRecognizer? = null
     private var listening = false
     private var inputSession = 0L
@@ -235,8 +235,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private fun resetTypingState() {
         currentWord.clear()
         previousWord = null
-        lastAutocorrectOriginal = null
-        lastAutocorrectReplacement = null
+        lastAutocorrectState = null
     }
 
     private fun resetInputSession() {
@@ -695,8 +694,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
 
         when (key.type) {
             KeyType.CHAR -> {
-                lastAutocorrectOriginal = null
-                lastAutocorrectReplacement = null
+                lastAutocorrectState = null
                 ic.commitText(outputChar, 1)
                 currentWord.append(outputChar)
                 maybeAutocorrectLastChar(ic)
@@ -782,8 +780,12 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         }
         ic.deleteSurroundingText(currentWord.length, 0)
         ic.commitText(replacement + suffix, 1)
-        lastAutocorrectOriginal = currentWord.toString()
-        lastAutocorrectReplacement = replacement + suffix
+        lastAutocorrectState =
+            AutocorrectState(
+                original = currentWord.toString(),
+                replacement = replacement + suffix,
+                textBeforeCursor = ic.getTextBeforeCursor(128, 0)?.toString().orEmpty(),
+            )
         learnWordIfAllowed(replacement)
         return true
     }
@@ -812,21 +814,20 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         if (
             KeyboardPreferences.getBoolean(this, KeyboardPreferences.UNDO_AUTOCORRECT) &&
                 canUndoAutocorrect(
-                    lastAutocorrectReplacement,
+                    lastAutocorrectState,
                     ic.getTextBeforeCursor(128, 0)?.toString().orEmpty(),
-                ) &&
-                lastAutocorrectOriginal != null &&
-                lastAutocorrectReplacement != null
+                )
         ) {
-            ic.deleteSurroundingText(lastAutocorrectReplacement!!.length, 0)
-            ic.commitText(lastAutocorrectOriginal, 1)
-            lastAutocorrectOriginal = null
-            lastAutocorrectReplacement = null
+            val state = lastAutocorrectState ?: return
+            ic.deleteSurroundingText(state.replacement.length, 0)
+            ic.commitText(state.original, 1)
+            lastAutocorrectState = null
             scheduleSuggestionsRefresh()
             return
         }
         ic.deleteSurroundingText(1, 0)
         if (currentWord.isNotEmpty()) currentWord.deleteCharAt(currentWord.length - 1)
+        lastAutocorrectState = null
         scheduleSuggestionsRefresh()
     }
 
@@ -885,6 +886,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         if (count > 0) {
             ic.deleteSurroundingText(count, 0)
             currentWord.clear()
+            lastAutocorrectState = null
             refreshSuggestions()
         }
     }
