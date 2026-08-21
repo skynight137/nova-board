@@ -45,8 +45,6 @@
                 android:src="@drawable/ic_clipboard" android:contentDescription="@string/cd_clipboard" />
             <ImageButton android:id="@+id/btnHotkeys" style="@style/NovaBoardToolIcon"
                 android:src="@drawable/ic_hotkeys" android:contentDescription="@string/cd_hotkeys" />
-            <ImageButton android:id="@+id/btnTranslate" style="@style/NovaBoardToolIcon"
-                android:src="@drawable/ic_translate" android:contentDescription="@string/cd_translate" />
             <ImageButton android:id="@+id/btnVoice" style="@style/NovaBoardToolIcon"
                 android:src="@drawable/ic_mic" android:contentDescription="@string/cd_voice" />
             <ImageButton android:id="@+id/btnMore" style="@style/NovaBoardToolIcon"
@@ -125,12 +123,6 @@
     </LinearLayout>
 
     </LinearLayout>
-
-    <FrameLayout
-        android:id="@+id/translationPanelContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
 
     <FrameLayout
         android:id="@+id/emojiPanelContainer"

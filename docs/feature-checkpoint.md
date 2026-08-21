@@ -98,23 +98,18 @@ These behaviors were manually confirmed in the active keyboard:
 - [✓] Expandable tools row
 - [✓] Clipboard panel
 - [✓] Hotkeys panel
-- [✓] Translation panel
 - [✓] Voice panel
 - [✓] Emoji panel
 - [✓] Overflow/tools actions
 - [✓] Outside-tap and editor-change dismissal boundaries
 
-### Voice, emoji, and translation
+### Voice and emoji
 
 - [✓] Android on-device speech recognizer integration
 - [✓] Voice request/session cancellation handling
 - [✓] Scrollable emoji picker
 - [✓] Padded emoji cells
 - [✓] System emoji fallback rendering
-- [✓] Selection-scoped translation Reply
-- [✓] Cursor-safe translation Paste
-- [~] Translation provider is not connected; the composer and editor actions
-  are ready, but live translation is not yet available
 
 ### Appearance and settings
 
@@ -126,8 +121,11 @@ These behaviors were manually confirmed in the active keyboard:
 - [✓] Keyboard enable action
 - [✓] Active input-method switch action
 - [✓] Keyboard preference handling
-- [~] Settings action hierarchy and preference-row styling implemented; device
-  visual verification remains part of the narrow/tall layout pass
+- [~] Settings action hierarchy, typography, and preference-row styling
+  implemented; device visual verification remains part of the narrow/tall
+  layout pass
+- [~] Interactive keyboard preview supports tools, emoji, panels, and keyboard
+  height adjustment; device visual verification remains part of the layout pass
 - [~] Launcher icon remains a placeholder monogram
 - [~] Visual polish should still be checked on narrow, tall, light, and dark
   phone layouts
@@ -150,8 +148,8 @@ These behaviors were manually confirmed in the active keyboard:
 The following project checks passed during the latest review:
 
 ```text
-source .bin/env.sh && ./gradlew :app:testDebugUnitTest --stacktrace
-source .bin/env.sh && ./gradlew :app:assembleDebug --stacktrace
+source .local/env.sh && ./gradlew :app:testDebugUnitTest --stacktrace
+source .local/env.sh && ./gradlew :app:assembleDebug --stacktrace
 bash -n scripts/setup.sh scripts/rewrite-commit-messages.sh .github/release-tooling/*.sh
 git diff --check
 ```
@@ -213,20 +211,7 @@ Recommended scope:
 - improve keyboard height and toolbar overflow behavior
 - replace the placeholder launcher icon
 
-### 5. Connect translation only after the privacy boundary is explicit
-
-**Why:** Translation handles user-entered text and therefore needs a deliberate
-provider, disclosure, error state, and network/privacy decision.
-
-Required before enabling live translation:
-
-- choose and approve a provider
-- document whether text leaves the device
-- add loading, timeout, offline, and provider-error states
-- prevent stale results from entering a newer editor session
-- add provider integration tests without storing credentials in the repository
-
-### 6. Prepare a small closed beta release
+### 5. Prepare a small closed beta release
 
 **Why:** Real keyboard usage exposes issues that scripted tests cannot.
 
@@ -248,3 +233,12 @@ The next recommended checkpoint is complete when all of these are true:
 - [ ] Narrow/tall and light/dark layouts are visually checked
 - [ ] Provider-dependent features are clearly labeled as unavailable
 - [ ] Signed APK installs and launches successfully on beta devices
+
+## Execution note
+
+On 2026-08-21, the remaining device-dependent stages were intentionally
+deferred. This repository environment has no connected Android device or
+emulator, so marking physical-device behavior, visual layout checks, or signed
+beta installation as complete would be unsupported. The next operator should
+resume with the real-device regression matrix above and record observed results
+before changing these checkboxes.

@@ -5,11 +5,14 @@ import android.content.ClipDescription
 import android.content.ClipboardManager as SystemClipboardManager
 import android.content.Context
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import java.io.File
 import java.util.UUID
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import com.novaboard.ime.settings.KeyboardPreferences
 import org.json.JSONArray
-import org.json.JSONObject
 
 enum class ClipType {
     TEXT,
@@ -45,23 +48,13 @@ class ClipboardHistoryManager(private val context: Context) {
         fun clearStoredImageHistory(context: Context): Int {
             val preferences = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             val raw = preferences.getString(KEY_ITEMS, null)
-            var removed = 0
-            val retained = JSONArray()
-            if (raw != null) {
-                runCatching { JSONArray(raw) }.getOrNull()?.let { entries ->
-                    for (index in 0 until entries.length()) {
-                        val entry = entries.optJSONObject(index) ?: continue
-                        if (entry.optString("type") == ClipType.IMAGE.name) {
-                            removed++
-                        } else {
-                            retained.put(entry)
-                        }
-                    }
-                }
+            if (raw == null) return 0
+            val cleanup = ClipboardPersistence.removeImageEntries(raw) ?: return 0
+            preferences.edit().putString(KEY_ITEMS, cleanup.remainingJson).apply()
+            if (cleanup.removedCount > 0) {
+                File(context.filesDir, IMAGE_DIR).listFiles()?.forEach { it.delete() }
             }
-            preferences.edit().putString(KEY_ITEMS, retained.toString()).apply()
-            File(context.filesDir, IMAGE_DIR).listFiles()?.forEach { it.delete() }
-            return removed
+            return cleanup.removedCount
         }
     }
 
@@ -71,20 +64,46 @@ class ClipboardHistoryManager(private val context: Context) {
     private val items = mutableListOf<ClipboardItem>()
     private var nextId = 1L
     private var listener: (() -> Unit)? = null
+    private val worker: ExecutorService = Executors.newSingleThreadExecutor()
+    private val mainHandler = Handler(Looper.getMainLooper())
+    @Volatile private var stopped = false
+    private var captureEnabled = false
 
     private val clipListener = SystemClipboardManager.OnPrimaryClipChangedListener {
-        systemClipboard.primaryClip?.let { addFromClipData(it) }
+        if (!stopped) systemClipboard.primaryClip?.let { clip ->
+            runCatching { worker.execute { addFromClipData(clip) } }
+        }
     }
 
     fun start() {
-        load()
-        systemClipboard.addPrimaryClipChangedListener(clipListener)
-        systemClipboard.primaryClip?.let { addFromClipData(it) }
+        worker.execute {
+            load()
+            setCaptureEnabledInternal(!KeyboardPreferences.isIncognitoMode(context))
+        }
     }
 
     fun stop() {
-        systemClipboard.removePrimaryClipChangedListener(clipListener)
-        save()
+        stopped = true
+        if (captureEnabled) {
+            systemClipboard.removePrimaryClipChangedListener(clipListener)
+            captureEnabled = false
+        }
+        worker.shutdown()
+    }
+
+    fun setCaptureEnabled(enabled: Boolean) {
+        if (captureEnabled == enabled) return
+        runCatching { worker.execute { setCaptureEnabledInternal(enabled) } }
+    }
+
+    private fun setCaptureEnabledInternal(enabled: Boolean) {
+        if (stopped || captureEnabled == enabled) return
+        captureEnabled = enabled
+        if (enabled) {
+            systemClipboard.addPrimaryClipChangedListener(clipListener)
+        } else {
+            systemClipboard.removePrimaryClipChangedListener(clipListener)
+        }
     }
 
     fun setOnChangedListener(l: () -> Unit) {
@@ -96,19 +115,21 @@ class ClipboardHistoryManager(private val context: Context) {
     }
 
     fun getItems(): List<ClipboardItem> =
-        items.sortedWith(
+        synchronized(items) { items.sortedWith(
             compareByDescending<ClipboardItem> { it.pinned }.thenByDescending { it.id }
-        )
+        ) }
 
     private fun addFromClipData(clip: ClipData) {
+        if (!captureEnabled || KeyboardPreferences.isIncognitoMode(context)) return
         if (clip.itemCount == 0) return
         val item = clip.getItemAt(0)
         val desc = clip.description
         val isImage = item.uri != null && desc.hasMimeType("image/*")
         if (
             isImage &&
-                !shouldCaptureClipboardItem(
+                !shouldCaptureClipboard(
                     ClipType.IMAGE,
+                    KeyboardPreferences.isIncognitoMode(context),
                     KeyboardPreferences.getBoolean(
                         context,
                         KeyboardPreferences.IMAGE_CLIPBOARD_HISTORY,
@@ -134,33 +155,44 @@ class ClipboardHistoryManager(private val context: Context) {
                 else -> null
             } ?: return
 
-        // avoid duplicate consecutive entries
-        if (
-            items.firstOrNull()?.let {
-                it.text == newEntry.text && it.imageUri == newEntry.imageUri
-            } == true
-        )
-            return
-
-        items.add(0, newEntry)
-        trim()
-        save()
-        listener?.invoke()
+        synchronized(items) {
+            // avoid duplicate consecutive entries
+            if (
+                items.firstOrNull()?.let {
+                    it.text == newEntry.text && it.imageUri == newEntry.imageUri
+                } == true
+            )
+                return
+            items.add(0, newEntry)
+            trim()
+            save()
+        }
+        notifyChanged()
     }
 
     fun togglePin(id: Long) {
-        val idx = items.indexOfFirst { it.id == id }
-        if (idx == -1) return
-        items[idx] = items[idx].copy(pinned = !items[idx].pinned)
-        save()
-        listener?.invoke()
+        worker.execute {
+            if (stopped) return@execute
+            val idx = items.indexOfFirst { it.id == id }
+            if (idx == -1) return@execute
+            items[idx] = items[idx].copy(pinned = !items[idx].pinned)
+            save()
+            notifyChanged()
+        }
     }
 
     fun delete(id: Long) {
-        items.filter { it.id == id }.forEach(::deleteImageFile)
-        items.removeAll { it.id == id }
-        save()
-        listener?.invoke()
+        worker.execute {
+            if (stopped) return@execute
+            items.filter { it.id == id }.forEach(::deleteImageFile)
+            items.removeAll { it.id == id }
+            save()
+            notifyChanged()
+        }
+    }
+
+    private fun notifyChanged() {
+        mainHandler.post { if (!stopped) listener?.invoke() }
     }
 
     private fun trim() {

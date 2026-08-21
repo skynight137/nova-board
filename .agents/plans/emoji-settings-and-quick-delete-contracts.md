@@ -9,7 +9,7 @@ Remove misleading UI promises and make the remaining emoji/settings/quick-delete
 - [x] **Task 1 — Emoji controls:** Static GIF/media and redundant search affordances removed; accessibility labels and search regression coverage added; media behavior remains intentionally absent.
 - [~] **Task 2 — Emoji font claim:** Labels now describe the actual default and sans-serif typeface choices; bundled Google emoji remains intentionally unclaimed; unsupported stored values now normalize to the system renderer.
 - [x] **Task 3 — Silent typing settings:** Implemented in `b9321e7`; tests still belong to the regression plan.
-- [~] **Task 4 — Quick-delete contract:** Summary and service behavior now match previous-word deletion, including preceding whitespace; implementation-level accessibility review remains.
+- [✓] **Task 4 — Quick-delete contract:** Summary and service behavior now match previous-word deletion, including preceding whitespace; stale autocorrect state is cleared after ordinary and quick deletion. Android accessibility review remains deferred.
 
 ## Tasks
 
@@ -55,7 +55,8 @@ Remove misleading UI promises and make the remaining emoji/settings/quick-delete
 - [x] Choose the “delete the previous word” contract.
 - [x] Update the setting summary to describe previous-word deletion.
 - [x] Add behavior tests for previous-word boundaries and punctuation/Unicode.
-- [ ] Ensure tests cover tracked typing/autocorrect invalidation after deletion.
+- [x] Ensure the pure autocorrect contract rejects an editor snapshot changed
+  between replacement and backspace; service deletion paths clear stale state.
 
 **Files likely touched:**
 - `app/src/main/java/com/novaboard/ime/view/KeyboardView.kt`
@@ -66,8 +67,8 @@ Remove misleading UI promises and make the remaining emoji/settings/quick-delete
 ### Verification gate
 
 - [ ] Tests cover emoji search/control state, font preference behavior, retained settings, and quick-delete semantics.
-- [ ] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`
-- [ ] `source .bin/env.sh && ./gradlew :app:assembleDebug`
+- [ ] `source .local/env.sh && ./gradlew :app:testDebugUnitTest`
+- [ ] `source .local/env.sh && ./gradlew :app:assembleDebug`
 - [ ] `git diff --check`
 - [ ] Commit: `fix: align emoji and typing preference contracts`
 

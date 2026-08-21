@@ -139,8 +139,8 @@ only on the existing JVM seams.
 
 Verification:
 
-- [ ] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`
-- [ ] `source .bin/env.sh && ./gradlew :app:assembleDebug`
+- [ ] `source .local/env.sh && ./gradlew :app:testDebugUnitTest`
+- [ ] `source .local/env.sh && ./gradlew :app:assembleDebug`
 - [ ] `git diff --check`
 - [ ] Each vertical slice uses a Conventional Commit.
 

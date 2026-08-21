@@ -23,7 +23,19 @@ android {
         minSdk = 26
         targetSdk = 37
         versionName = version.toString()
-        versionCode = 1
+        versionCode =
+            version.toString().substringBefore('+').let { releaseVersion ->
+                val parts = releaseVersion.split('-', limit = 2)
+                val stable = parts[0].split('.').map(String::toInt)
+                val prereleaseNumber =
+                    parts.getOrNull(1)
+                        ?.split('.')
+                        ?.lastOrNull()
+                        ?.toIntOrNull()
+                        ?.coerceIn(1, 98)
+                        ?: 99
+                stable[0] * 10_000_000 + stable[1] * 10_000 + stable[2] * 100 + prereleaseNumber
+            }
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "RELEASE_PAGE_URL", "\"$releasePageUrl\"")
         buildConfigField("String", "RELEASE_CHANNEL", "\"$releaseChannel\"")

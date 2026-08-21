@@ -33,6 +33,9 @@ The release workflow uses:
   sign the APK
 - `GPG_PASSPHRASE` — passphrase for the GPG private key
 - `GPG_FINGERPRINT` — repository secret used to select the GPG signing key
+- `ANDROID_CERTIFICATE_SHA256` — SHA-256 fingerprint of the Android release
+  certificate, used to verify the built APK before publication; this is
+  required to preserve Android signing-key continuity
 
 Optional clone settings are read from the environment and default to the
 repository template layout:
@@ -74,6 +77,15 @@ GitHub Releases, where the user chooses an APK and follows Android's installer
 prompts. Release automation still publishes the APK, detached signature, and
 metadata for release tooling and distribution records.
 
+The Android certificate check is intentionally retained even though users
+install APKs manually from GitHub Releases. A GitHub download does not prove
+that the APK was produced with the intended Android release key. The check
+detects an incorrect or replaced keystore before publication, preserving the
+ability to install future updates over the existing app. The APK SHA-256
+digest and detached GPG signature provide artifact integrity and publisher
+verification, respectively, but neither replaces Android's signing identity
+check.
+
 The main screen also provides an explicit **Export app log…** action. The
 resulting plain-text file contains bounded app-owned events and device/APK
 metadata only. It excludes clipboard contents and system-wide logcat, is not
@@ -88,8 +100,9 @@ workflow. In GitHub, open **Settings > Secrets and variables > Actions**:
 - Add `KEYSTORE_B64`, `KEYSTORE_PASSWORD`, `KEYSTORE_ENTRY_ALIAS`,
   `KEYSTORE_ENTRY_PASSWORD`, `GPG_PRIVATE_KEY_B64`, and `GPG_PASSPHRASE` under
   **Repository secrets**.
-- Add `GPG_FINGERPRINT` under **Repository secrets**. The workflow uses it to
-  verify and select the imported GPG signing key.
+- Add `GPG_FINGERPRINT` and `ANDROID_CERTIFICATE_SHA256` under **Repository
+  secrets**. The workflow uses them to verify the imported GPG key and APK
+  certificate.
 - Add `CROWDIN_PROJECT_ID` and `CROWDIN_PERSONAL_TOKEN` under **Repository
   secrets** if the Crowdin workflows are enabled.
 
@@ -108,7 +121,7 @@ root. It generates the keystore without prompts, creates a single-line
 `KEYSTORE_B64`, and uploads the keystore values to GitHub:
 
 ```bash
-source .bin/env.sh
+source .local/env.sh
 export ANDROID_MODULE="${ANDROID_MODULE:-app}"
 export KEYSTORE_PASSWORD="$(openssl rand -hex 32)"
 export KEYSTORE_ENTRY_ALIAS="android-release"
@@ -128,6 +141,39 @@ unset KEYSTORE_PASSWORD KEYSTORE_ENTRY_ALIAS KEYSTORE_ENTRY_PASSWORD
 
 Keep `${ANDROID_MODULE:-app}/keystore.jks` in the local release environment.
 It is ignored by Git and must never be committed.
+
+### Android certificate fingerprint
+
+This setting is required for releases. Do not remove it merely because APKs
+are installed manually: Android uses the signing certificate as the app's
+update identity, and a release signed with a different certificate cannot
+update the existing installation.
+
+`ANDROID_CERTIFICATE_SHA256` must match the certificate in the existing
+release keystore. When the keystore and its credentials are available as
+Replit Secrets, source the repository environment and run:
+
+```bash
+source .local/env.sh
+tmp_keystore="$(mktemp)"
+trap 'rm -f "$tmp_keystore"' EXIT
+printf '%s' "$KEYSTORE_B64" | base64 --decode > "$tmp_keystore"
+fingerprint="$(
+  keytool -list -v \
+    -keystore "$tmp_keystore" \
+    -alias "$KEYSTORE_ENTRY_ALIAS" \
+    -storepass "$KEYSTORE_PASSWORD" \
+    -keypass "${KEYSTORE_ENTRY_PASSWORD:-$KEYSTORE_PASSWORD}" |
+    awk -F': ' '/^[[:space:]]*SHA256:/ {print $2; exit}'
+)"
+gh secret set ANDROID_CERTIFICATE_SHA256 --body "$fingerprint"
+unset fingerprint
+```
+
+This reads the release keystore locally and sends only its public certificate
+fingerprint to GitHub. It does not print or commit the keystore, passwords, or
+private signing material. The GitHub CLI must be authenticated to the
+repository owner before running the final command.
 
 ### GPG signing values
 
@@ -189,7 +235,7 @@ resource change instead of carrying forward a size claim from the source
 template:
 
 ```bash
-source .bin/env.sh
+source .local/env.sh
 ./gradlew :app:assembleRelease
 stat -c '%s bytes' "${ANDROID_MODULE:-app}/build/outputs/apk/release/<ProjectName>-release.apk"
 unzip -lv "${ANDROID_MODULE:-app}/build/outputs/apk/release/<ProjectName>-release.apk" \
@@ -229,6 +275,12 @@ manifest are staged in temporary files; the final paths are replaced only after
 the digest, size, signature, and metadata checks succeed. A failed preparation
 restores the previous `${ANDROID_MODULE:-app}/gradle.properties` version and leaves the previous
 manifest untouched.
+
+Version codes are derived from the semantic version and prerelease number. If a
+legacy or manually published manifest contains a higher version code than that
+calculation, release preparation advances from the manifest's code instead.
+This keeps Android updates monotonic while preserving the normal semantic
+version-derived values whenever they are safe.
 
 Do not hand-edit the release version, push a `v*` tag manually, or rerun an
 old tag to validate a workflow change. A tag checks out the exact commit that
@@ -303,10 +355,14 @@ No shared release script should contain the original clone's name.
 
 ## Local verification
 
+The protected release workflow runs for pushes or manual dispatches on `dev`
+(prereleases) and `main` (stable releases). It uses a single concurrency group,
+so a manual dispatch waits for an active publication rather than racing it.
+
 Run the repository-managed toolchain before opening a release pull request:
 
 ```bash
-source .bin/env.sh
+source .local/env.sh
 ./gradlew :"${ANDROID_MODULE:-app}":testDebugUnitTest \
   :"${ANDROID_MODULE:-app}":compileDebugAndroidTestKotlin \
   :"${ANDROID_MODULE:-app}":assembleDebug
@@ -336,7 +392,7 @@ changelog rendering and release-note output without publishing anything or
 depending on authenticated release access.
 
 For a real signed preparation test, configure the release secrets in the
-environment, source `.bin/env.sh`, and run:
+environment, source `.local/env.sh`, and run:
 
 ```bash
 bash .github/release-tooling/prepare-release.sh 0.1.1

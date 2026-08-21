@@ -4,11 +4,19 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WORKFLOW="${ROOT_DIR}/.github/workflows/release.yml"
-
 fail() {
   echo "FAIL: $*" >&2
   exit 1
 }
+
+pr_workflow="${ROOT_DIR}/.github/workflows/build_pull_request.yml"
+if grep -Eq 'secrets\.(KEYSTORE|GPG)_|KEYSTORE_PASSWORD|KEYSTORE_ENTRY' "${pr_workflow}"; then
+  fail "pull-request workflow must not reference release keystore secrets"
+fi
+grep -Fq './gradlew assembleDebug' "${pr_workflow}" ||
+  fail "pull-request workflow must build the unsigned debug APK"
+grep -Fq 'branches:' "${ROOT_DIR}/.github/workflows/release.yml" ||
+  fail "release workflow branch policy is missing"
 
 validation_line="$(grep -n -- "- name: Validate release inputs" "${WORKFLOW}" | cut -d: -f1)"
 keystore_line="$(grep -n -- "- name: Setup keystore" "${WORKFLOW}" | cut -d: -f1)"
@@ -56,6 +64,15 @@ grep -Fq 'KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}' <<<"${setup_block}" ||
 grep -Fq 'KEYSTORE_PATH="$(release_tooling_keystore_path)"' <<<"${setup_block}" ||
   fail "decoded keystore is not checked for non-empty output"
 
+android_tools_line="$(grep -n -- "- name: Install Android signing tools" "${WORKFLOW}" | cut -d: -f1 || true)"
+setup_keystore_line="$(grep -n -- "- name: Setup keystore" "${WORKFLOW}" | cut -d: -f1 || true)"
+[[ -n "${android_tools_line}" && "${android_tools_line}" -lt "${setup_keystore_line}" ]] ||
+  fail "Android signing tools must be installed before release setup"
+grep -Fq 'sdkmanager "platform-tools" "build-tools;35.0.0"' "${WORKFLOW}" ||
+  fail "release workflow does not install Android signing tools"
+grep -Fq 'build-tools/35.0.0' "${WORKFLOW}" ||
+  fail "release workflow does not add apksigner to PATH"
+
 manifest_validation_line="$(grep -n -- "- name: Validate release manifest" "${WORKFLOW}" | cut -d: -f1 || true)"
 release_action_line="$(grep -n -- "cycjimmy/semantic-release-action@" "${WORKFLOW}" | cut -d: -f1 || true)"
 [[ -n "${manifest_validation_line}" && -n "${release_action_line}" ]] ||
@@ -91,8 +108,9 @@ grep -Fq '.github/release-tooling/test-github-repository.sh' "${WORKFLOW}" ||
 grep -Fq '.github/release-tooling/prepare-release.sh' "${ROOT_DIR}/.releaserc.cjs" ||
   fail "semantic-release config does not use the global release-tooling namespace"
 
-if rg -n --glob '!test-release-workflow.sh' --glob '!test-release-artifacts.sh' \
-  --glob '!test-release-keystore.sh' \
+if grep -REn --exclude='test-release-workflow.sh' \
+  --exclude='test-release-artifacts.sh' \
+  --exclude='test-release-keystore.sh' \
   'Auto ?Click|AutoClick|copy-note' "${ROOT_DIR}/.github/release-tooling" \
   "${ROOT_DIR}/.github/workflows/release.yml" "${ROOT_DIR}/.releaserc.cjs"; then
   fail "global release tooling still contains clone-specific identity"

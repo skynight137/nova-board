@@ -8,7 +8,7 @@
 
 **Project:** NovaBoard
 **Generated:** 2026-08-21 01:52:51
-**Category:** Developer Tool / IDE
+**Category:** Android productivity tool / keyboard
 **Design Dials:** Variance 3/10 (Centered / Minimal) | Motion 2/10 (Subtle) | Density 9/10 (Dense / Dashboard)
 
 ---
@@ -19,24 +19,19 @@
 
 | Role | Hex | CSS Variable |
 |------|-----|--------------|
-| Primary | `#1E293B` | `--color-primary` |
+| Primary | `#4C7CF3` | `--color-primary` |
 | On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#334155` | `--color-secondary` |
-| On Secondary | `#FFFFFF` | `--color-on-secondary` |
-| Accent/CTA | `#22C55E` | `--color-accent` |
-| On Accent/CTA | `#0F172A` | `--color-on-accent` |
-| Background | `#0F172A` | `--color-background` |
-| Foreground | `#F8FAFC` | `--color-foreground` |
-| Card | `#1B2336` | `--color-card` |
-| Card Foreground | `#F8FAFC` | `--color-card-foreground` |
-| Muted | `#272F42` | `--color-muted` |
-| Muted Foreground | `#94A3B8` | `--color-muted-foreground` |
-| Border | `#475569` | `--color-border` |
-| Destructive | `#EF4444` | `--color-destructive` |
-| On Destructive | `#000000` | `--color-on-destructive` |
-| Ring | `#FFFFFF` | `--color-ring` |
+| Accent pressed | `#315FCE` | `--color-accent-pressed` |
+| Light background | `#F4F5F8` | `--color-background-light` |
+| Dark background | `#111317` | `--color-background-dark` |
+| Light surface | `#FFFFFF` | `--color-surface-light` |
+| Dark surface | `#1B1D21` | `--color-surface-dark` |
+| Light foreground | `#15171A` | `--color-foreground-light` |
+| Dark foreground | `#F4F5F7` | `--color-foreground-dark` |
+| Muted foreground | `#4C4F55` / `#C4C7CD` | `--color-muted-foreground` |
+| Divider | `#C7CBD3` / `#343840` | `--color-divider` |
 
-**Color Notes:** Code dark + run green
+**Color Notes:** A calm blue action color over neutral light/dark keyboard surfaces.
 
 ### Typography
 
@@ -145,22 +140,24 @@
 }
 ```
 
-### Modals
+### Settings surface
 
 ```css
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+.settings-app-bar {
+  height: 64dp;
+  background: var(--color-surface-light);
+  display: flex;
+  align-items: center;
+  padding: 0 16dp;
 }
 
-.modal {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: var(--shadow-xl);
-  max-width: 500px;
-  width: 90%;
+.settings-row {
+  min-height: 56dp;
+  background: transparent;
+  padding: 0 16dp 0 68dp;
 }
+
+/* The primary settings menu is a full screen list, not a floating modal. */
 ```
 
 ---

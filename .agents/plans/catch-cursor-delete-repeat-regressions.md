@@ -40,7 +40,7 @@ stop, direction changes, cadence, and session invalidation. Keep Android
 - `app/src/main/java/com/novaboard/ime/editing/`
 - `app/src/test/java/com/novaboard/ime/editing/`
 
-### Task 2: Add held-delete boundary regression coverage `[~]`
+### Task 2: Add held-delete boundary regression coverage `[✓]`
 
 **Description:** Expand pure deletion tests around the service's held-delete
 path and preserve code-point-safe behavior for whitespace, punctuation,
@@ -52,7 +52,7 @@ surrogate pairs, and empty input.
 - [x] Punctuation boundaries remain deterministic.
 - [x] Unicode surrogate pairs are not split.
 - [x] Empty input produces no deletion request.
-- [ ] Repeated deletion clears stale typing/autocorrect state.
+- [x] Repeated deletion clears stale typing/autocorrect state.
 
 **Files likely touched:**
 
@@ -70,7 +70,8 @@ prove that no delayed callback mutates an old editor.
 
 - [x] Release and cancel both stop cursor and delete repeats through the shared stop contract.
 - [x] `onStartInputView` invalidates a prior repeat through the session token contract.
-- [ ] `onFinishInput` and service destruction leave no active repeat callback.
+- [~] `onFinishInput` and service destruction delegate to the shared stop contract;
+  direct Android callback coverage remains deferred.
 - [x] Direction changes cannot leave two active repeat callbacks.
 
 **Files likely touched:**
@@ -89,7 +90,7 @@ workflow in this environment.
 Run each step with the repository environment loaded:
 
 ```bash
-source .bin/env.sh
+source .local/env.sh
 ./gradlew :app:testDebugUnitTest
 ./gradlew :app:assembleDebug
 git diff --check

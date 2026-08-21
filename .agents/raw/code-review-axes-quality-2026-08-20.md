@@ -84,7 +84,7 @@ integrity rather than a performance regression.
 ## Verification
 
 - `git diff HEAD^ HEAD --check` — passed.
-- `source .bin/env.sh && ./gradlew :app:testDebugUnitTest :app:assembleDebug` —
+- `source .local/env.sh && ./gradlew :app:testDebugUnitTest :app:assembleDebug` —
   passed.
 - Compiler reported only existing deprecation/unnecessary-cast warnings in
   `KeyboardPreferences.kt` and `KeyboardView.kt`.

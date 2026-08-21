@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">NovaBoard</string>
+    <string name="settings_title">NovaBoard settings</string>
+    <string name="settings_back">Back</string>
+    <string name="settings_section_app">App</string>
     <string name="enable_keyboard">Enable NovaBoard</string>
     <string name="switch_keyboard">Switch input method</string>
     <string name="theme_label">Theme</string>
@@ -10,12 +13,15 @@
     <string name="clipboard_no_matches">No clipboard items match your search</string>
     <string name="clipboard_search_hint">Search clipboard</string>
     <string name="clipboard_back_to_keyboard">Back to keyboard</string>
+    <string name="clipboard_title">Clipboard</string>
+    <string name="clipboard_search">Search clipboard</string>
+    <string name="clipboard_search_results">Search results</string>
+    <string name="clipboard_image_content_description">Clipboard image</string>
     <string name="cd_tools">Tools</string>
     <string name="cd_expand_tools">Expand tools</string>
     <string name="cd_collapse_tools">Collapse tools</string>
     <string name="cd_clipboard">Clipboard</string>
     <string name="cd_hotkeys">Hotkeys</string>
-    <string name="cd_translate">Translate selected text</string>
     <string name="cd_voice">Voice typing</string>
     <string name="cd_more">More keyboard tools</string>
     <string name="tool_menu_title">Keyboard tools</string>
@@ -30,7 +36,6 @@
     <string name="tool_gif">GIF</string>
     <string name="tool_tips">Tips</string>
     <string name="cd_emoji">Emoji</string>
-    <string name="tool_translate">Translate</string>
     <string name="emoji_panel_close">Close emoji panel</string>
     <string name="emoji_search_hint">Search emojis</string>
     <string name="emoji_item">Emoji %1$s</string>
@@ -52,6 +57,13 @@
     <string name="voice_permission_denied">Microphone access is required for voice typing. Enable it in system app permissions.</string>
     <string name="layout_keys">Layout &amp; keys</string>
     <string name="layout_preview">Preview keyboard</string>
+    <string name="keyboard_height">Keyboard height</string>
+    <string name="keyboard_height_value">%1$d%% height</string>
+    <string name="preview_tools">Preview tools</string>
+    <string name="preview_clipboard">Clipboard preview</string>
+    <string name="preview_voice_ready">Voice typing preview</string>
+    <string name="preview_resize_hint">Drag to resize the keyboard</string>
+    <string name="preview_close_panel">Close panel</string>
     <string name="typing">Typing</string>
     <string name="emoji">Emoji</string>
     <string name="sound_vibration">Sound &amp; vibration</string>
@@ -118,16 +130,4 @@
     <string name="incognito_off">Incognito mode is off</string>
     <string name="incognito_summary">Do not learn new words while typing privately</string>
     <string name="incognito_exit">Exit incognito mode</string>
-    <string name="translation_swap">Swap translation languages</string>
-    <string name="translation_close">Close translation</string>
-    <string name="translation_source_hint">Text to translate</string>
-    <string name="translation_result">Translated result</string>
-    <string name="translation_translate">Translate</string>
-    <string name="translation_clear">Clear</string>
-    <string name="translation_paste">Paste</string>
-    <string name="translation_reply">Reply</string>
-    <string name="translation_loading">Translating…</string>
-    <string name="translation_unavailable">Translation provider unavailable</string>
-    <string name="translation_error">Translation failed</string>
-    <string name="translation_selection_unavailable">The original selection is no longer available</string>
 </resources>

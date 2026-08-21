@@ -35,6 +35,8 @@
     .keyboard { grid-column: 1 / -1; background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
     .toolbar { display: flex; justify-content: space-between; align-items: center; min-height: 32px; color: var(--muted); font-size: 12px; }
     .toolbar strong { color: var(--accent); font: 600 12px monospace; }
+    .toolbar-actions { display: flex; gap: 6px; align-items: center; }
+    .toolbar-actions button { min-width: 36px; min-height: 36px; padding: 6px; border-radius: 6px; }
     .row { display: flex; gap: 4px; margin-top: 4px; }
     .key { flex: 1; min-height: 48px; border: 0; border-radius: var(--radius-key); background: var(--surface); box-shadow: 0 1px 1px #0002; display: grid; place-items: center; font-size: 18px; }
     .key.utility { background: var(--utility); font-size: 12px; font-weight: 600; }
@@ -46,6 +48,11 @@
     .panel-header button { padding: 4px 8px; font-size: 12px; }
     .search { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px; color: var(--text); }
     .incognito { margin-top: 10px; padding: 10px; border-radius: 8px; background: var(--incognito); color: var(--incognito-text); font-size: 13px; }
+    .preview-controls { display: flex; align-items: center; gap: 12px; margin-top: 12px; color: var(--muted); font-size: 12px; }
+    .preview-controls input { flex: 1; accent-color: var(--accent); }
+    .preview-state { margin-top: 10px; color: var(--muted); font-size: 12px; }
+    .emoji-preview { display: none; grid-template-columns: repeat(8, 1fr); gap: 4px; margin-top: 8px; padding: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; font-size: 22px; text-align: center; }
+    .emoji-preview button { min-height: 40px; padding: 4px; border: 0; background: transparent; }
     .type-sample { font-family: monospace; color: var(--muted); }
     @media (max-width: 720px) { header { align-items: start; flex-direction: column; } .grid { grid-template-columns: 1fr; } .keyboard { grid-column: auto; } .swatches { grid-template-columns: repeat(3, 1fr); } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
@@ -78,11 +85,32 @@
         <p class="type-sample" style="font-size:12px;margin-top:8px">CTRL + F5 / shortcut label</p>
       </div>
       <div class="keyboard" aria-label="Keyboard component states">
-        <div class="toolbar"><span>suggestions&nbsp;&nbsp; quick&nbsp;&nbsp; precise</span><strong>● READY</strong></div>
+        <div class="toolbar">
+          <span>suggestions&nbsp;&nbsp; quick&nbsp;&nbsp; precise</span>
+          <div class="toolbar-actions">
+            <button id="emoji" type="button" aria-label="Show emoji">☺</button>
+            <button id="tools" type="button" aria-expanded="false">⌄</button>
+            <strong>● READY</strong>
+          </div>
+        </div>
+        <div id="tools-row" class="toolbar" hidden>
+          <span>clipboard&nbsp;&nbsp; hotkeys&nbsp;&nbsp; voice&nbsp;&nbsp; more</span>
+          <strong>TOOLS</strong>
+        </div>
         <div class="row"><button class="key" type="button">Q</button><button class="key pressed" type="button">W</button><button class="key" type="button">E</button><button class="key" type="button">R</button><button class="key" type="button">T</button><button class="key" type="button">Y</button><button class="key" type="button">U</button><button class="key" type="button">I</button><button class="key" type="button">O</button><button class="key" type="button">P</button></div>
         <div class="row"><button class="key" type="button">A</button><button class="key" type="button">S</button><button class="key" type="button">D</button><button class="key" type="button">F</button><button class="key" type="button">G</button><button class="key" type="button">H</button><button class="key" type="button">J</button><button class="key" type="button">K</button><button class="key" type="button">L</button></div>
         <div class="row"><button class="key utility" type="button" aria-label="Shift">⇧</button><button class="key" type="button">Z</button><button class="key" type="button">X</button><button class="key" type="button">C</button><button class="key" type="button">V</button><button class="key" type="button">B</button><button class="key" type="button">N</button><button class="key" type="button">M</button><button class="key utility" type="button" aria-label="Delete">⌫</button></div>
         <div class="row"><button class="key utility" type="button">123</button><button class="key utility" type="button">●</button><button class="key" type="button" style="flex:4">space</button><button class="key accent" type="button">↵</button></div>
+        <div id="emoji-preview" class="emoji-preview" aria-label="Emoji preview">
+          <button type="button">😀</button><button type="button">😄</button><button type="button">😊</button><button type="button">😍</button>
+          <button type="button">👍</button><button type="button">👏</button><button type="button">🔥</button><button type="button">✨</button>
+        </div>
+        <div class="preview-controls">
+          <label for="height">Keyboard height</label>
+          <input id="height" type="range" min="80" max="120" value="100" />
+          <output id="height-value" for="height">100%</output>
+        </div>
+        <div id="preview-state" class="preview-state">Interactive preview · tools collapsed · emoji closed</div>
       </div>
       <div class="card">
         <h2>Panel / search / privacy</h2>
@@ -105,6 +133,29 @@
       const dark = root.dataset.theme !== "dark";
       root.dataset.theme = dark ? "dark" : "light";
       button.textContent = dark ? "Switch to light" : "Switch to dark";
+    });
+    const toolsButton = document.getElementById("tools");
+    const toolsRow = document.getElementById("tools-row");
+    toolsButton.addEventListener("click", () => {
+      const expanded = toolsButton.getAttribute("aria-expanded") === "true";
+      toolsButton.setAttribute("aria-expanded", String(!expanded));
+      toolsButton.textContent = expanded ? "⌄" : "⌃";
+      toolsRow.hidden = expanded;
+      document.getElementById("preview-state").textContent =
+        `Interactive preview · tools ${expanded ? "collapsed" : "expanded"} · emoji ${document.getElementById("emoji-preview").style.display === "grid" ? "open" : "closed"}`;
+    });
+    document.getElementById("emoji").addEventListener("click", () => {
+      const panel = document.getElementById("emoji-preview");
+      const open = panel.style.display === "grid";
+      panel.style.display = open ? "none" : "grid";
+      document.getElementById("preview-state").textContent =
+        `Interactive preview · tools ${toolsButton.getAttribute("aria-expanded") === "true" ? "expanded" : "collapsed"} · emoji ${open ? "closed" : "open"}`;
+    });
+    const height = document.getElementById("height");
+    const heightValue = document.getElementById("height-value");
+    height.addEventListener("input", () => {
+      heightValue.value = `${height.value}%`;
+      document.querySelector(".keyboard").style.setProperty("--preview-height", `${height.value}%`);
     });
   </script>
 </body>

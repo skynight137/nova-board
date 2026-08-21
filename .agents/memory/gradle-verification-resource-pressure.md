@@ -21,8 +21,8 @@ is genuinely needed, first check `gradle.properties`; document any temporary
 override and report both the original failure and constrained result rather
 than treating daemon loss as a source failure.
 
-The project setup workflow installs Java and Android tooling under `.bin` and
-writes the required shell exports to `.bin/env.sh`; source that file before
+The project setup workflow installs Java and Android tooling under `.local` and
+writes the required shell exports to `.local/env.sh`; source that file before
 running Gradle or `adb` from a fresh shell. Instrumentation also requires an
 explicitly available device or emulator, which may not be present after setup.
 
@@ -30,6 +30,6 @@ explicitly available device or emulator, which may not be present after setup.
 the setup workflow installs SDK command-line tools without guaranteeing a
 running Android target.
 
-**How to apply:** Run `source .bin/env.sh` before targeted Android checks, then
+**How to apply:** Run `source .local/env.sh` before targeted Android checks, then
 confirm `adb devices -l` lists a target. If it is empty, report instrumentation
 as environment-blocked instead of treating the absence as a source failure.

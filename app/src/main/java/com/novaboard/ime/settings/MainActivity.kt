@@ -3,29 +3,40 @@ package com.novaboard.ime.settings
 import android.content.ActivityNotFoundException
 import android.Manifest
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
 import android.provider.Settings
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.GridLayout
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.RadioButton
-import android.widget.RadioGroup
 import android.widget.SeekBar
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SwitchCompat
+import androidx.activity.OnBackPressedCallback
 import com.novaboard.ime.R
 import com.novaboard.ime.clipboard.ClipboardHistoryManager
+import com.novaboard.ime.emoji.EmojiPanel
+import com.novaboard.ime.model.Key
 import com.novaboard.ime.theme.ThemeManager
 import com.novaboard.ime.theme.ThemeMode
 import com.novaboard.ime.util.AppLog
+import com.novaboard.ime.view.KeyboardView
 
 class MainActivity : AppCompatActivity() {
+    private val settingsPageStack = ArrayDeque<View>()
     private val requestMicrophone =
         registerForActivityResult(
             androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
@@ -58,6 +69,17 @@ class MainActivity : AppCompatActivity() {
         ThemeManager.applyStored(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (!closeTopSettingsPage()) finish()
+                }
+            },
+        )
+        findViewById<ImageButton>(R.id.btnBack).setOnClickListener {
+            if (!closeTopSettingsPage()) finish()
+        }
         if (intent.getBooleanExtra(EXTRA_REQUEST_MICROPHONE, false) &&
             android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M &&
             checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED
@@ -79,8 +101,11 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, R.string.app_log_export_failed, Toast.LENGTH_LONG).show()
             }
         }
+        findViewById<Button>(R.id.btnThemeSettings).setOnClickListener {
+            showThemeDialog()
+        }
         findViewById<Button>(R.id.btnLayoutSettings).setOnClickListener {
-            showPreferenceDialog(
+            showPreferencePage(
                 R.string.layout_keys,
                 listOf(
                     PreferenceSpec(
@@ -128,11 +153,11 @@ class MainActivity : AppCompatActivity() {
                 ),
             )
         }
-        findViewById<Button>(R.id.btnLayoutPreview).setOnClickListener {
+        findViewById<ImageButton>(R.id.btnLayoutPreview).setOnClickListener {
             showLayoutPreview()
         }
         findViewById<Button>(R.id.btnTypingSettings).setOnClickListener {
-            showPreferenceDialog(
+            showPreferencePage(
                 R.string.typing,
                 listOf(
                     PreferenceSpec(
@@ -187,7 +212,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
         findViewById<Button>(R.id.btnEmojiSettings).setOnClickListener {
-            showPreferenceDialog(
+            showPreferencePage(
                 R.string.emoji,
                 listOf(
                     PreferenceSpec(
@@ -212,7 +237,7 @@ class MainActivity : AppCompatActivity() {
             )
         }
         findViewById<Button>(R.id.btnSoundSettings).setOnClickListener {
-            showPreferenceDialog(
+            showPreferencePage(
                 R.string.sound_vibration,
                 listOf(
                     PreferenceSpec(
@@ -251,20 +276,49 @@ class MainActivity : AppCompatActivity() {
         }
         updateIncognitoButton()
 
-        val group = findViewById<RadioGroup>(R.id.themeGroup)
-        when (ThemeManager.get(this)) {
-            ThemeMode.SYSTEM -> findViewById<RadioButton>(R.id.radioSystem).isChecked = true
-            ThemeMode.LIGHT -> findViewById<RadioButton>(R.id.radioLight).isChecked = true
-            ThemeMode.DARK -> findViewById<RadioButton>(R.id.radioDark).isChecked = true
+        setSettingsRowIcon(R.id.btnEnable, R.drawable.ic_keyboard)
+        setSettingsRowIcon(R.id.btnSwitch, R.drawable.ic_keyboard)
+        setSettingsRowIcon(R.id.btnLayoutSettings, R.drawable.ic_keyboard)
+        setSettingsRowIcon(R.id.btnTypingSettings, R.drawable.ic_typing)
+        setSettingsRowIcon(R.id.btnEmojiSettings, R.drawable.ic_emoji)
+        setSettingsRowIcon(R.id.btnSoundSettings, R.drawable.ic_mic)
+        setSettingsRowIcon(R.id.btnGestureSettings, R.drawable.ic_typing)
+        setSettingsRowIcon(R.id.btnIncognito, R.drawable.ic_privacy)
+        setSettingsRowIcon(R.id.btnExportLog, R.drawable.ic_info)
+        setSettingsRowIcon(R.id.btnThemeSettings, R.drawable.ic_theme)
+        setSettingsRowIcon(R.id.btnResetSettings, R.drawable.ic_reset)
+    }
+
+    private fun setSettingsRowIcon(buttonId: Int, drawableRes: Int) {
+        findViewById<Button>(buttonId).apply {
+            setCompoundDrawablesWithIntrinsicBounds(drawableRes, 0, 0, 0)
+            compoundDrawablePadding = dp(20)
+            compoundDrawableTintList = ColorStateList.valueOf(getColor(R.color.kb_toolbar_icon))
         }
-        group.setOnCheckedChangeListener { _, checkedId ->
-            val mode =
-                when (checkedId) {
-                    R.id.radioLight -> ThemeMode.LIGHT
-                    R.id.radioDark -> ThemeMode.DARK
+    }
+
+    private fun showThemeDialog() {
+        val labels =
+            arrayOf(
+                getString(R.string.theme_system),
+                getString(R.string.theme_light),
+                getString(R.string.theme_dark),
+            )
+        val selected =
+            when (ThemeManager.get(this)) {
+                ThemeMode.SYSTEM -> 0
+                ThemeMode.LIGHT -> 1
+                ThemeMode.DARK -> 2
+            }
+        showChoicePage(R.string.theme_label, labels, selected) { which ->
+            ThemeManager.set(
+                this,
+                when (which) {
+                    1 -> ThemeMode.LIGHT
+                    2 -> ThemeMode.DARK
                     else -> ThemeMode.SYSTEM
-                }
-            ThemeManager.set(this, mode)
+                },
+            )
             recreate()
         }
     }
@@ -290,28 +344,23 @@ class MainActivity : AppCompatActivity() {
                 getString(R.string.gesture_input_gestures),
             )
         val selected = modes.indexOf(KeyboardPreferences.getGestureMode(this)).coerceAtLeast(0)
-        AlertDialog.Builder(this)
-            .setTitle(R.string.gesture_input)
-            .setSingleChoiceItems(labels, selected) { dialog, which ->
-                KeyboardPreferences.setGestureMode(this, modes[which])
-                dialog.dismiss()
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
+        showChoicePage(R.string.gesture_input, labels, selected) { which ->
+            KeyboardPreferences.setGestureMode(this, modes[which])
+        }
     }
 
-    private fun showPreferenceDialog(titleRes: Int, specs: List<PreferenceSpec>) {
+    private fun showPreferencePage(titleRes: Int, specs: List<PreferenceSpec>) {
         val content =
             LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                setPadding(24, 8, 24, 8)
+                setPadding(dp(16), dp(8), dp(16), dp(24))
             }
         specs.forEach { spec ->
             val row =
                 LinearLayout(this).apply {
                     orientation = LinearLayout.HORIZONTAL
                     gravity = android.view.Gravity.CENTER_VERTICAL
-                    setPadding(0, 10, 0, 10)
+                    setPadding(0, dp(8), 0, dp(8))
                 }
             val labels =
                 LinearLayout(this).apply {
@@ -323,20 +372,22 @@ class MainActivity : AppCompatActivity() {
                 TextView(this).apply {
                     text = getString(spec.titleRes)
                     textSize = 16f
+                    setTextColor(getColor(R.color.kb_key_text))
                 }
             )
             labels.addView(
                 TextView(this).apply {
                     text = getString(spec.summaryRes)
                     textSize = 12f
-                    alpha = 0.7f
+                    setTextColor(getColor(R.color.kb_toolbar_icon))
                 }
             )
             row.addView(labels)
             row.addView(
-                SwitchCompat(this).apply {
-                    isChecked = KeyboardPreferences.getBoolean(this@MainActivity, spec.key)
-                    setOnCheckedChangeListener { _, checked ->
+                SettingsSwitch(this).apply {
+                    checked = KeyboardPreferences.getBoolean(this@MainActivity, spec.key)
+                    layoutParams = LinearLayout.LayoutParams(dp(56), dp(44))
+                    onCheckedChange = { checked ->
                         KeyboardPreferences.setBoolean(this@MainActivity, spec.key, checked)
                     }
                 }
@@ -383,6 +434,44 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
             )
+            val heightLabel =
+                TextView(this).apply {
+                    text =
+                        getString(
+                            R.string.keyboard_height_value,
+                            KeyboardPreferences.getKeyboardHeightScale(this@MainActivity),
+                        )
+                    setPadding(0, 18, 0, 4)
+                }
+            content.addView(heightLabel)
+            content.addView(
+                SeekBar(this).apply {
+                    max = 40
+                    progress =
+                        KeyboardPreferences.getKeyboardHeightScale(this@MainActivity) - 80
+                    contentDescription = getString(R.string.keyboard_height)
+                    setOnSeekBarChangeListener(
+                        object : SeekBar.OnSeekBarChangeListener {
+                            override fun onProgressChanged(
+                                seekBar: SeekBar?,
+                                progress: Int,
+                                fromUser: Boolean,
+                            ) {
+                                KeyboardPreferences.setKeyboardHeightScale(
+                                    this@MainActivity,
+                                    progress + 80,
+                                )
+                                heightLabel.text =
+                                    getString(R.string.keyboard_height_value, progress + 80)
+                            }
+
+                            override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
+
+                            override fun onStopTrackingTouch(seekBar: SeekBar?) = Unit
+                        },
+                    )
+                },
+            )
             content.addView(
                 Button(this).apply {
                     text = getString(R.string.delete_saved_image_clips)
@@ -428,17 +517,139 @@ class MainActivity : AppCompatActivity() {
                 }
             )
         }
-        val builder =
-            AlertDialog.Builder(this)
-                .setTitle(titleRes)
-                .setView(content)
-                .setPositiveButton(android.R.string.ok, null)
-        builder.show()
+        showSettingsContentPage(titleRes, content, includePreview = true)
+    }
+
+    private fun showChoicePage(
+        titleRes: Int,
+        labels: Array<String>,
+        selected: Int,
+        onSelected: (Int) -> Unit,
+    ) {
+        val content =
+            LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(16), dp(8), dp(16), dp(24))
+            }
+        labels.forEachIndexed { index, label ->
+            content.addView(
+                RadioButton(this).apply {
+                    text = label
+                    isChecked = index == selected
+                    setTextColor(getColor(R.color.kb_key_text))
+                    buttonTintList = ColorStateList.valueOf(getColor(R.color.kb_accent))
+                    minHeight = dp(56)
+                    setPadding(0, 0, 0, 0)
+                    setOnClickListener {
+                        onSelected(index)
+                        closeTopSettingsPage()
+                    }
+                },
+            )
+        }
+        showSettingsContentPage(titleRes, content, includePreview = false)
+    }
+
+    private fun showSettingsContentPage(
+        titleRes: Int,
+        content: View,
+        includePreview: Boolean,
+        contentMatchParent: Boolean = false,
+    ) {
+        val page =
+            FrameLayout(this).apply {
+                setBackgroundColor(getColor(R.color.kb_background))
+                isFocusableInTouchMode = true
+            }
+        val appBar =
+            LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setBackgroundColor(getColor(R.color.kb_surface))
+                setPadding(dp(2), 0, dp(16), 0)
+            }
+        appBar.addView(
+            ImageButton(this).apply {
+                setImageResource(R.drawable.ic_arrow_back)
+                contentDescription = getString(R.string.settings_back)
+                setBackgroundColor(Color.TRANSPARENT)
+                setColorFilter(getColor(R.color.kb_toolbar_icon))
+                minimumWidth = dp(48)
+                minimumHeight = dp(48)
+                setPadding(dp(12), dp(12), dp(12), dp(12))
+                setOnClickListener { closeTopSettingsPage() }
+            },
+            LinearLayout.LayoutParams(dp(52), dp(64)),
+        )
+        appBar.addView(
+            TextView(this).apply {
+                text = getString(titleRes)
+                textSize = 20f
+                setTextColor(getColor(R.color.kb_key_text))
+                gravity = Gravity.CENTER_VERTICAL
+            },
+            LinearLayout.LayoutParams(0, dp(64), 1f),
+        )
+        page.addView(
+            appBar,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                dp(64),
+            ),
+        )
+        page.addView(
+            ScrollView(this).apply {
+                isFillViewport = true
+                addView(
+                    content,
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        if (contentMatchParent) {
+                            FrameLayout.LayoutParams.MATCH_PARENT
+                        } else {
+                            FrameLayout.LayoutParams.WRAP_CONTENT
+                        },
+                    ),
+                )
+            },
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT,
+            ).apply {
+                topMargin = dp(64)
+            },
+        )
+        if (includePreview) {
+            page.addView(
+                ImageButton(this).apply {
+                    setImageResource(R.drawable.ic_keyboard)
+                    contentDescription = getString(R.string.layout_preview)
+                    setBackgroundResource(R.drawable.bg_settings_primary)
+                    setColorFilter(getColor(R.color.kb_on_accent))
+                    minimumWidth = dp(56)
+                    minimumHeight = dp(56)
+                    setPadding(dp(12), dp(12), dp(12), dp(12))
+                    setOnClickListener { showLayoutPreview() }
+                },
+                FrameLayout.LayoutParams(dp(56), dp(56), Gravity.BOTTOM or Gravity.END).apply {
+                    setMargins(0, 0, dp(16), dp(16))
+                },
+            )
+        }
+        findViewById<FrameLayout>(android.R.id.content).addView(page)
+        settingsPageStack.addLast(page)
+        page.requestFocus()
+    }
+
+    private fun closeTopSettingsPage(): Boolean {
+        val page = settingsPageStack.removeLastOrNull() ?: return false
+        (page.parent as? ViewGroup)?.removeView(page)
+        return true
     }
 
     private fun showLayoutPreview() {
         val preview = LayoutInflater.from(this).inflate(R.layout.keyboard_container, null)
-        val keyboard = preview.findViewById<com.novaboard.ime.view.KeyboardView>(R.id.keyboardView)
+        val keyboard = preview.findViewById<KeyboardView>(R.id.keyboardView)
         keyboard.applyPreferences()
         keyboard.setPage(
             if (KeyboardPreferences.getBoolean(this, KeyboardPreferences.SHOW_NUMBER_ROW)) {
@@ -447,20 +658,242 @@ class MainActivity : AppCompatActivity() {
                 com.novaboard.ime.model.KeyboardLayouts.lettersWithoutNumberRow
             }
         )
-        preview.findViewById<View>(R.id.toolsBar).visibility = View.GONE
-        preview.findViewById<View>(R.id.suggestionBar).visibility = View.VISIBLE
         preview.findViewById<View>(R.id.cursorRow).visibility =
             if (KeyboardPreferences.getBoolean(this, KeyboardPreferences.SHOW_ARROW_KEYS)) {
                 View.VISIBLE
             } else {
                 View.GONE
             }
-        AlertDialog.Builder(this)
-            .setTitle(R.string.layout_preview)
-            .setView(preview)
-            .setPositiveButton(android.R.string.ok, null)
-            .show()
+        wirePreview(preview, keyboard)
+
+        val content =
+            LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setBackgroundColor(getColor(R.color.kb_background))
+            }
+        val resizeLabel =
+            TextView(this).apply {
+                text =
+                    getString(
+                        R.string.keyboard_height_value,
+                        KeyboardPreferences.getKeyboardHeightScale(this@MainActivity),
+                    )
+                textSize = 13f
+                setTextColor(getColor(R.color.kb_toolbar_icon))
+                setPadding(dp(16), dp(12), dp(16), 0)
+            }
+        val resizeSeekBar =
+            SeekBar(this).apply {
+                max = 40
+                progress = KeyboardPreferences.getKeyboardHeightScale(this@MainActivity) - 80
+                contentDescription = getString(R.string.keyboard_height)
+                setOnSeekBarChangeListener(
+                    object : SeekBar.OnSeekBarChangeListener {
+                        override fun onProgressChanged(
+                            seekBar: SeekBar?,
+                            progress: Int,
+                            fromUser: Boolean,
+                        ) {
+                            val scale = progress + 80
+                            KeyboardPreferences.setKeyboardHeightScale(this@MainActivity, scale)
+                            resizeLabel.text =
+                                getString(R.string.keyboard_height_value, scale)
+                            keyboard.applyPreferences()
+                            keyboard.requestLayout()
+                            preview.requestLayout()
+                        }
+
+                        override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
+
+                        override fun onStopTrackingTouch(seekBar: SeekBar?) = Unit
+                    },
+                )
+            }
+        content.addView(
+            preview,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0,
+            ).apply { weight = 1f },
+        )
+        content.addView(resizeLabel)
+        content.addView(
+            resizeSeekBar,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                dp(48),
+            ).apply {
+                marginStart = dp(8)
+                marginEnd = dp(8)
+            },
+        )
+        showSettingsContentPage(
+            R.string.layout_preview,
+            content,
+            includePreview = false,
+            contentMatchParent = true,
+        )
     }
+
+    private fun wirePreview(root: View, keyboard: KeyboardView) {
+        val toolsBar = root.findViewById<View>(R.id.toolsBar)
+        val toggle = root.findViewById<ImageButton>(R.id.btnToggleStripFromSuggestions)
+        toggle.setOnClickListener {
+            val expanded = toolsBar.visibility != View.VISIBLE
+            toolsBar.visibility = if (expanded) View.VISIBLE else View.GONE
+            toggle.setImageResource(
+                if (expanded) R.drawable.ic_chevron_down else R.drawable.ic_chevron_up,
+            )
+            toggle.contentDescription =
+                getString(if (expanded) R.string.cd_collapse_tools else R.string.cd_expand_tools)
+        }
+        root.findViewById<ImageButton>(R.id.btnMore).setOnClickListener {
+            showPreviewTools(root)
+        }
+        root.findViewById<ImageButton>(R.id.btnClipboard).setOnClickListener {
+            showPreviewPanel(root, R.string.preview_clipboard, "No clipboard items yet")
+        }
+        root.findViewById<ImageButton>(R.id.btnVoice).setOnClickListener {
+            Toast.makeText(this, R.string.preview_voice_ready, Toast.LENGTH_SHORT).show()
+        }
+        root.findViewById<ImageButton>(R.id.btnHotkeys).setOnClickListener {
+            root.findViewById<View>(R.id.hotkeysScroller).visibility = View.VISIBLE
+            root.findViewById<View>(R.id.cursorRow).visibility = View.GONE
+        }
+        keyboard.listener =
+            object : KeyboardView.OnKeyListener {
+                override fun onKey(key: Key, outputChar: String) = Unit
+                override fun onBackspace() = Unit
+                override fun onEnter() = Unit
+                override fun onShiftToggled(shiftOn: Boolean, capsLock: Boolean) = Unit
+                override fun onSwitchToSymbols() = Unit
+                override fun onSwitchToLetters() = Unit
+                override fun onCursorMove(direction: Int) = Unit
+                override fun onQuickDelete() = Unit
+                override fun onGestureWord(path: String) = Unit
+
+                override fun onEmoji() {
+                    val container = root.findViewById<FrameLayout>(R.id.emojiPanelContainer)
+                    EmojiPanel(this@MainActivity) {}.show(container)
+                }
+            }
+    }
+
+    private fun showPreviewTools(root: View) {
+        val overlay = root.findViewById<FrameLayout>(R.id.overlayPanelContainer)
+        overlay.removeAllViews()
+        val panel =
+            LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setBackgroundColor(getColor(R.color.kb_background))
+                setPadding(dp(12), dp(8), dp(12), dp(12))
+            }
+        val header =
+            LinearLayout(this).apply {
+                gravity = Gravity.CENTER_VERTICAL
+            }
+        header.addView(
+            TextView(this).apply {
+                text = getString(R.string.preview_tools)
+                textSize = 18f
+                setTextColor(getColor(R.color.kb_key_text))
+                layoutParams = LinearLayout.LayoutParams(0, dp(56), 1f)
+            },
+        )
+        header.addView(
+            ImageButton(this).apply {
+                setImageResource(R.drawable.ic_arrow_back)
+                contentDescription = getString(R.string.preview_close_panel)
+                setBackgroundColor(Color.TRANSPARENT)
+                setColorFilter(getColor(R.color.kb_toolbar_icon))
+                minimumWidth = dp(48)
+                minimumHeight = dp(48)
+                setOnClickListener { overlay.visibility = View.GONE }
+            },
+            LinearLayout.LayoutParams(dp(48), dp(56)),
+        )
+        panel.addView(header)
+        val grid = GridLayout(this).apply { columnCount = 3 }
+        listOf(
+            R.string.cd_clipboard to R.drawable.ic_clipboard,
+            R.string.cd_hotkeys to R.drawable.ic_hotkeys,
+            R.string.cd_voice to R.drawable.ic_mic,
+            R.string.cd_emoji to R.drawable.ic_keyboard,
+            R.string.tool_resize to R.drawable.ic_more,
+        ).forEach { (labelRes, iconRes) ->
+            val cell =
+                ImageButton(this).apply {
+                    setImageResource(iconRes)
+                    contentDescription = getString(labelRes)
+                    setBackgroundColor(Color.TRANSPARENT)
+                    setColorFilter(getColor(R.color.kb_toolbar_icon))
+                    setOnClickListener {
+                        overlay.visibility = View.GONE
+                        when (labelRes) {
+                            R.string.cd_emoji ->
+                                root.findViewById<KeyboardView>(R.id.keyboardView).listener
+                                    ?.onEmoji()
+                            R.string.cd_clipboard ->
+                                showPreviewPanel(
+                                    root,
+                                    R.string.preview_clipboard,
+                                    "No clipboard items yet",
+                                )
+                        }
+                    }
+                }
+            grid.addView(
+                cell,
+                GridLayout.LayoutParams().apply {
+                    width = 0
+                    height = dp(64)
+                    columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                },
+            )
+        }
+        panel.addView(grid)
+        overlay.addView(panel)
+        overlay.visibility = View.VISIBLE
+    }
+
+    private fun showPreviewPanel(root: View, titleRes: Int, message: String) {
+        val overlay = root.findViewById<FrameLayout>(R.id.overlayPanelContainer)
+        overlay.removeAllViews()
+        val panel =
+            LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setBackgroundColor(getColor(R.color.kb_background))
+                setPadding(dp(16), dp(8), dp(16), dp(16))
+            }
+        panel.addView(
+            TextView(this).apply {
+                text = getString(titleRes)
+                textSize = 18f
+                setTextColor(getColor(R.color.kb_key_text))
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(0, 0, 0, dp(12))
+            },
+        )
+        panel.addView(
+            TextView(this).apply {
+                text = message
+                textSize = 16f
+                setTextColor(getColor(R.color.kb_toolbar_icon))
+                setPadding(0, dp(16), 0, dp(16))
+            },
+        )
+        panel.addView(
+            Button(this).apply {
+                text = getString(R.string.preview_close_panel)
+                setOnClickListener { overlay.visibility = View.GONE }
+            },
+        )
+        overlay.addView(panel)
+        overlay.visibility = View.VISIBLE
+    }
+
+    private fun dp(value: Int): Int =
+        (value * resources.displayMetrics.density).toInt()
 
     private data class PreferenceSpec(
         val titleRes: Int,

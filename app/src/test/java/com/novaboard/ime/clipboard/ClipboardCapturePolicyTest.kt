@@ -24,6 +24,29 @@ class ClipboardCapturePolicyTest {
     }
 
     @Test
+    fun incognitoDisablesTextAndImageCapture() {
+        assertFalse(
+            shouldCaptureClipboard(ClipType.TEXT, incognito = true, imageHistoryEnabled = true),
+        )
+        assertFalse(
+            shouldCaptureClipboard(ClipType.IMAGE, incognito = true, imageHistoryEnabled = true),
+        )
+    }
+
+    @Test
+    fun normalModeStillHonorsImagePreference() {
+        assertTrue(
+            shouldCaptureClipboard(ClipType.TEXT, incognito = false, imageHistoryEnabled = false),
+        )
+        assertFalse(
+            shouldCaptureClipboard(ClipType.IMAGE, incognito = false, imageHistoryEnabled = false),
+        )
+        assertTrue(
+            shouldCaptureClipboard(ClipType.IMAGE, incognito = false, imageHistoryEnabled = true),
+        )
+    }
+
+    @Test
     fun clipboardTextFallsBackToCoercedRepresentation() {
         assertEquals("formatted copy", clipboardText(null, "formatted copy"))
         assertEquals("direct copy", clipboardText("direct copy", "formatted copy"))

@@ -59,7 +59,7 @@ recognition thresholds, repeat timing, and overflow-menu item availability.
 
 **Verification:**
 - [x] Focused JVM tests cover mode defaults, cancellation, thresholds, and menu filtering.
-- [x] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`
+- [x] `source .local/env.sh && ./gradlew :app:testDebugUnitTest`
 
 **Dependencies:** None
 
@@ -99,7 +99,7 @@ toggle/entry point. Keep summaries honest and make the active state visible from
 ### Checkpoint: Contracts and settings
 
 - [ ] Unit tests pass.
-- [ ] `source .bin/env.sh && ./gradlew :app:assembleDebug`
+- [ ] `source .local/env.sh && ./gradlew :app:assembleDebug`
 - [ ] `git diff --check`
 - [ ] Commit: `feat: add gesture and incognito contracts`
 
@@ -184,7 +184,7 @@ deletes the previous word/segment in bounded chunks.
 ### Checkpoint: Gesture interactions
 
 - [ ] Gesture entry, smart delete, and cursor repeat tests pass together.
-- [ ] `source .bin/env.sh && ./gradlew :app:assembleDebug`
+- [ ] `source .local/env.sh && ./gradlew :app:assembleDebug`
 - [ ] `git diff --check`
 - [ ] Commit each vertical slice with Conventional Commit messages:
   - `feat: add gesture word entry`
@@ -241,7 +241,7 @@ reference. Incognito should be obvious but should not make the keyboard unusable
 **Verification:**
 - [ ] Menu-model tests cover ordering, unavailable-item omission, and dismissal state.
 - [ ] Manual check against the attached light/dark references at narrow and tall phone sizes.
-- [ ] `source .bin/env.sh && ./gradlew :app:assembleDebug`
+- [ ] `source .local/env.sh && ./gradlew :app:assembleDebug`
 
 **Dependencies:** Tasks 1-2; may run in parallel with Task 6 after the menu contract exists.
 
@@ -269,7 +269,7 @@ reference. Incognito should be obvious but should not make the keyboard unusable
 **Verification:**
 - [ ] Layout/model tests cover number-row and symbol-page geometry.
 - [ ] Manual visual pass at phone portrait, narrow portrait, and dark theme sizes.
-- [ ] `source .bin/env.sh && ./gradlew :app:assembleDebug`
+- [ ] `source .local/env.sh && ./gradlew :app:assembleDebug`
 
 **Dependencies:** Tasks 5-7
 
@@ -285,8 +285,8 @@ reference. Incognito should be obvious but should not make the keyboard unusable
 ### Checkpoint: Interaction and visual polish
 
 - [ ] All gesture, incognito, menu, and layout acceptance criteria pass.
-- [ ] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`
-- [ ] `source .bin/env.sh && ./gradlew :app:assembleDebug`
+- [ ] `source .local/env.sh && ./gradlew :app:testDebugUnitTest`
+- [ ] `source .local/env.sh && ./gradlew :app:assembleDebug`
 - [ ] `git diff --check`
 - [ ] Each completed slice has its own Conventional Commit.
 - [ ] No generated APKs, screenshots, secrets, or unrelated formatting changes are committed.

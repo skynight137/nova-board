@@ -155,6 +155,9 @@ delete key red.
 - full-row touch target when the row is actionable
 - state is described in text, not color alone
 - destructive/reset actions are separated from normal preferences
+- settings switches use the compact custom switch with a circular knob,
+  outlined rounded track, animated 200ms color/position transitions, and a
+  44dp touch target
 
 ### Feedback
 
@@ -168,8 +171,9 @@ delete key red.
 
 1. Typing always wins over decoration; no animation may block text insertion.
 2. Every async callback is scoped to the active input session.
-3. Every panel can be dismissed with back, outside tap where appropriate, or
-   its explicit close action.
+3. Every settings page is dismissed by the explicit toolbar Back action or the
+   device Back action; device Back exits only from the root settings page.
+   Outside-tap dismissal is reserved for transient keyboard panels.
 4. Focus and selected states must remain visible in light and dark themes.
 5. Avoid web-only hover behavior; Android touch feedback is the primary signal.
 6. Use vector drawables with consistent 24dp optical bounds.

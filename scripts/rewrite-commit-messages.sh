@@ -39,7 +39,7 @@ fi
 normalize_subject() {
   local subject="$1"
   case "$subject" in
-    feat:*|fix:*|docs:*|style:*|refactor:*|perf:*|test:*|build:*|ci:*|chore:*|revert:*)
+    feat*:*|fix*:*|docs*:*|style*:*|refactor*:*|perf*:*|test*:*|build*:*|ci*:*|chore*:*|revert*:*)
       printf '%s\n' "$subject"
       ;;
     "Initial commit")
@@ -99,6 +99,9 @@ normalize_subject() {
     "Remove deprecated translation and editor replacement plan")
       printf '%s\n' "docs: remove deprecated translation plan"
       ;;
+    "Update memory documentation and add theme surfaces settings")
+      printf '%s\n' "docs: document theme surface settings"
+      ;;
     *)
       echo "ERROR: no Conventional Commit mapping for '$subject'" >&2
       return 1
@@ -125,7 +128,7 @@ echo "Rewriting all commits on $branch..."
 git filter-branch -f --msg-filter '
 subject="$(git log -1 --format=%s "$GIT_COMMIT")"
 case "$subject" in
-  feat:*|fix:*|docs:*|style:*|refactor:*|perf:*|test:*|build:*|ci:*|chore:*|revert:*) printf "%s\n" "$subject" ;;
+  feat*:*|fix*:*|docs*:*|style*:*|refactor*:*|perf*:*|test*:*|build*:*|ci*:*|chore*:*|revert*:*) printf "%s\n" "$subject" ;;
   "Initial commit") echo "chore: initialize project" ;;
   "Bump "*) echo "build: update release tooling dependencies" ;;
   "Merge "*) echo "chore: merge dependency update" ;;
@@ -145,6 +148,7 @@ case "$subject" in
   "Extract clipboard persistence logic to a dedicated class and add tests") echo "test: cover clipboard persistence contracts" ;;
   "Implement durable image clipboard persistence and settings support") echo "feat: persist image clipboard history and settings" ;;
   "Remove deprecated translation and editor replacement plan") echo "docs: remove deprecated translation plan" ;;
+  "Update memory documentation and add theme surfaces settings") echo "docs: document theme surface settings" ;;
   *) echo "ERROR: unmapped commit $GIT_COMMIT ($subject)" >&2; exit 1 ;;
 esac
 ' HEAD
@@ -153,4 +157,4 @@ echo
 echo "Rewrite complete. Verify before force-pushing:"
 echo "  git log --reverse --format='%h %s'"
 echo "  git log --format='%s' | grep -Ev '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\\([^)]*\\))?!?: .+'"
-echo "  git push --force-with-lease origin main"
+echo "  git push --force-with-lease origin $branch"

@@ -19,9 +19,9 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
 
 ### Partial
 
-- **Typing/autocorrect:** external selection and insertion invalidation exists, but undo-autocorrect still deletes a string at the current cursor without proving the exact replacement range is unchanged.
+- **Typing/autocorrect:** external selection and insertion invalidation exists; undo-autocorrect now requires the exact bounded post-replacement text snapshot. Android fake-input-connection coverage remains deferred.
 - **Emoji-on-enter:** unsupported email/URI/password variations are excluded, but the policy is still based on input type rather than a clear supported conversation-editor contract.
-- **Settings:** the inactive settings were removed from the dialog and storage defaults; regression tests are still pending.
+- **Settings:** the inactive settings were removed from the dialog and retained boolean defaults now have pure regression coverage; Android reset/UI verification remains deferred.
 - **Emoji controls:** text search and categories work; GIF/media remains intentionally unavailable and needs a product decision if it should return.
 
 ### Open
@@ -32,8 +32,8 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
 - Durable app-private image storage, preference gating, and cleanup semantics
   are complete; Android-context restart, migration, and filesystem verification
   remain open.
-- Quick-delete behavior now has an accurate “delete the previous word” summary and pure boundary coverage; Android lifecycle/persistence regression coverage is still pending.
-- Focused regression coverage is partially complete; remaining work is tracked in `prevent-keyboard-review-regressions-lifecycle-preference.md`.
+- Quick-delete behavior now has an accurate “delete the previous word” summary, pure boundary coverage, and stale autocorrect-state invalidation; Android lifecycle/persistence regression coverage remains deferred.
+- Focused regression coverage is partially complete; remaining Android-only work is tracked in `prevent-keyboard-review-regressions-lifecycle-preference.md`.
 
 ## Progress
 
@@ -78,7 +78,7 @@ compile, verification, diff, and Conventional Commit gates independently.
 Implement each plan as a separate focused round. Resume at the first unchecked task. After each round, run:
 
 ```bash
-source .bin/env.sh
+source .local/env.sh
 ./gradlew :app:testDebugUnitTest
 ./gradlew :app:assembleDebug
 git diff --check

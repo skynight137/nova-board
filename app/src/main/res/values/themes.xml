@@ -1,6 +1,15 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="NovaBoardSettingsTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/kb_accent</item>
+        <item name="colorSecondary">@color/kb_accent</item>
+        <item name="colorSurface">@color/kb_key_bg</item>
+        <item name="colorOnSurface">@color/kb_key_text</item>
+        <item name="colorControlNormal">@color/kb_toolbar_icon</item>
+        <item name="colorControlActivated">@color/kb_accent</item>
         <item name="android:windowBackground">@color/kb_background</item>
+        <item name="android:navigationBarColor">@color/kb_background</item>
+        <item name="android:statusBarColor">@color/kb_background</item>
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>

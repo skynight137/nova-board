@@ -136,8 +136,8 @@ local.properties
 
 
 # Generated skill trees are fully managed by scripts/setup.sh and never committed.
-.agents/skills
-.bin
+.agents/skills/
+.local/
 skills-lock.json
 attached_assets/
 # Local linked worktrees

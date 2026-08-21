@@ -37,7 +37,18 @@ class ClipboardPanel(
     private lateinit var emptyLabel: TextView
     private lateinit var searchField: EditText
     private lateinit var searchKeyboard: KeyboardView
+    private lateinit var title: TextView
+    private lateinit var searchAction: TextView
+    private lateinit var recycler: RecyclerView
+    private var keyboardHeight = 0
     private var searchQuery = ""
+    private var state = PanelState.NORMAL
+
+    private enum class PanelState {
+        NORMAL,
+        SEARCH,
+        RESULTS,
+    }
 
     fun show(target: ViewGroup) {
         dismiss()
@@ -46,17 +57,32 @@ class ClipboardPanel(
             LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
+                setBackgroundColor(context.getColor(R.color.kb_background))
             }
         val backButton =
             TextView(context).apply {
-                text = "‹  Keyboard"
+                text = "‹"
                 textSize = 16f
                 gravity = Gravity.CENTER
                 setTextColor(context.getColor(R.color.kb_key_text))
                 minHeight = dp(56)
-                setPadding(dp(16), 0, dp(16), 0)
+                setPadding(dp(16), 0, dp(12), 0)
                 contentDescription = context.getString(R.string.clipboard_back_to_keyboard)
-                setOnClickListener { onClose() }
+                setOnClickListener {
+                    if (state == PanelState.NORMAL) {
+                        onClose()
+                    } else {
+                        state = PanelState.NORMAL
+                        updatePanelState()
+                    }
+                }
+            }
+        title =
+            TextView(context).apply {
+                text = context.getString(R.string.clipboard_title)
+                textSize = 20f
+                gravity = Gravity.CENTER_VERTICAL
+                setTextColor(context.getColor(R.color.kb_key_text))
             }
         searchField =
             EditText(context).apply {
@@ -68,6 +94,20 @@ class ClipboardPanel(
                 isFocusable = true
                 isFocusableInTouchMode = true
                 showSoftInputOnFocus = false
+                visibility = View.GONE
+            }
+        searchAction =
+            TextView(context).apply {
+                text = "⌕"
+                textSize = 30f
+                gravity = Gravity.CENTER
+                setTextColor(context.getColor(R.color.kb_key_text))
+                contentDescription = context.getString(R.string.clipboard_search)
+                setPadding(dp(8), 0, dp(16), 0)
+                setOnClickListener {
+                    state = PanelState.SEARCH
+                    updatePanelState()
+                }
             }
         searchKeyboard =
             KeyboardView(context).apply {
@@ -81,7 +121,12 @@ class ClipboardPanel(
                             handleBackspace()
                         }
 
-                        override fun onEnter() = Unit
+                        override fun onEnter() {
+                            if (state == PanelState.SEARCH) {
+                                state = PanelState.RESULTS
+                                updatePanelState()
+                            }
+                        }
 
                         override fun onShiftToggled(shiftOn: Boolean, capsLock: Boolean) {
                             setShiftState(shiftOn, capsLock)
@@ -141,15 +186,25 @@ class ClipboardPanel(
             }
         header.addView(
             backButton,
-            LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(56)),
+            LinearLayout.LayoutParams(dp(52), dp(56)),
+        )
+        header.addView(
+            title,
+            LinearLayout.LayoutParams(0, dp(56), 1f),
         )
         header.addView(
             searchField,
             LinearLayout.LayoutParams(0, dp(56), 1f),
         )
-        val recycler =
+        header.addView(
+            searchAction,
+            LinearLayout.LayoutParams(dp(64), dp(56)),
+        )
+        recycler =
             RecyclerView(context).apply {
                 layoutManager = LinearLayoutManager(context)
+                setPadding(dp(4), dp(8), dp(4), dp(8))
+                clipToPadding = false
             }
         emptyLabel =
             TextView(context).apply {
@@ -197,9 +252,9 @@ class ClipboardPanel(
             } else {
                 4
             }
-        val keyboardHeight = dp(keyboardRows * 58)
+        keyboardHeight = dp(keyboardRows * 58)
         (recycler.layoutParams as FrameLayout.LayoutParams).apply {
-            bottomMargin = keyboardHeight
+            bottomMargin = 0
         }.also { recycler.layoutParams = it }
         (emptyLabel.layoutParams as FrameLayout.LayoutParams).apply {
             bottomMargin = keyboardHeight
@@ -263,11 +318,11 @@ class ClipboardPanel(
         target.visibility = View.VISIBLE
         panel = root
         this.target = target
-        focusSearchField()
+        updatePanelState()
     }
 
     fun handleKey(key: Key, outputChar: String): Boolean {
-        if (!searchField.hasFocus()) {
+        if (state != PanelState.SEARCH || !searchField.hasFocus()) {
             focusSearchField()
         }
         when (key.type) {
@@ -288,7 +343,47 @@ class ClipboardPanel(
 
     fun handleBackspace(): Boolean = handleKey(Key(KeyType.BACKSPACE, ""), "")
 
+    fun handleEnter(): Boolean {
+        if (state != PanelState.SEARCH) return false
+        state = PanelState.RESULTS
+        updatePanelState()
+        return true
+    }
+
     private fun focusSearchField() {
+        state = PanelState.SEARCH
+        searchField.requestFocus()
+        searchField.setSelection(searchField.length())
+    }
+
+    private fun updatePanelState() {
+        if (!::searchField.isInitialized) return
+        val searching = state == PanelState.SEARCH
+        val results = state == PanelState.RESULTS
+        title.visibility = if (searching) View.GONE else View.VISIBLE
+        title.text =
+            context.getString(
+                if (results) R.string.clipboard_search_results else R.string.clipboard_title,
+            )
+        searchField.visibility = if (searching) View.VISIBLE else View.GONE
+        searchAction.visibility = if (searching) View.GONE else View.VISIBLE
+        searchKeyboard.visibility = if (searching) View.VISIBLE else View.GONE
+        val bottomMargin = if (searching) keyboardHeight else 0
+        (recycler.layoutParams as FrameLayout.LayoutParams).apply {
+            this.bottomMargin = bottomMargin
+        }.also { recycler.layoutParams = it }
+        (emptyLabel.layoutParams as FrameLayout.LayoutParams).apply {
+            this.bottomMargin = bottomMargin
+        }.also { emptyLabel.layoutParams = it }
+        if (searching) {
+            focusSearchFieldWithoutChangingState()
+        } else {
+            searchField.clearFocus()
+        }
+        refresh()
+    }
+
+    private fun focusSearchFieldWithoutChangingState() {
         searchField.requestFocus()
         searchField.setSelection(searchField.length())
     }

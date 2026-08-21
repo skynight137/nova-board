@@ -4,7 +4,12 @@ on:
   push:
     branches:
       - main
+      - dev
   workflow_dispatch:
+
+concurrency:
+  group: release-publication
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -33,6 +38,7 @@ jobs:
           GPG_PRIVATE_KEY_B64: ${{ secrets.GPG_PRIVATE_KEY_B64 }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
+          ANDROID_CERTIFICATE_SHA256: ${{ secrets.ANDROID_CERTIFICATE_SHA256 }}
         run: |
           for name in \
             KEYSTORE_B64 \
@@ -47,6 +53,10 @@ jobs:
               exit 1
             fi
           done
+          if [[ ! "${ANDROID_CERTIFICATE_SHA256}" =~ ^[A-Fa-f0-9:]{32,95}$ ]]; then
+            echo "::error::ANDROID_CERTIFICATE_SHA256 must contain the expected SHA-256 certificate fingerprint"
+            exit 1
+          fi
           if [[ "${KEYSTORE_PASSWORD}" != "${KEYSTORE_ENTRY_PASSWORD}" ]]; then
             echo "::error::PKCS12 keystores require KEYSTORE_PASSWORD and KEYSTORE_ENTRY_PASSWORD to match"
             exit 1
@@ -71,6 +81,14 @@ jobs:
           distribution: 'temurin'
           java-version: '24'
           cache: gradle
+
+      - name: Setup Android build tools
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android signing tools
+        run: |
+          sdkmanager "platform-tools" "build-tools;35.0.0"
+          echo "${ANDROID_HOME}/build-tools/35.0.0" >> "${GITHUB_PATH}"
 
       - name: Setup keystore
         env:
@@ -141,6 +159,7 @@ jobs:
           GPG_PRIVATE_KEY_B64: ${{ secrets.GPG_PRIVATE_KEY_B64 }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
+          ANDROID_CERTIFICATE_SHA256: ${{ secrets.ANDROID_CERTIFICATE_SHA256 }}
         run: |
           test -n "${GPG_PRIVATE_KEY_B64}" || {
             echo "::error::GPG_PRIVATE_KEY_B64 is not configured"
@@ -154,6 +173,10 @@ jobs:
             echo "::error::No fingerprint was returned for the imported GPG key"
             exit 1
           }
+          test -n "${ANDROID_CERTIFICATE_SHA256}" || {
+            echo "::error::ANDROID_CERTIFICATE_SHA256 is not configured"
+            exit 1
+          }
 
       - name: Release
         uses: cycjimmy/semantic-release-action@v6
@@ -164,6 +187,7 @@ jobs:
           GPG_FINGERPRINT: ${{ secrets.GPG_FINGERPRINT }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_PRIVATE_KEY_B64: ${{ secrets.GPG_PRIVATE_KEY_B64 }}
+          ANDROID_CERTIFICATE_SHA256: ${{ secrets.ANDROID_CERTIFICATE_SHA256 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEYSTORE_ENTRY_ALIAS: ${{ secrets.KEYSTORE_ENTRY_ALIAS }}
           KEYSTORE_ENTRY_PASSWORD: ${{ secrets.KEYSTORE_ENTRY_PASSWORD }}

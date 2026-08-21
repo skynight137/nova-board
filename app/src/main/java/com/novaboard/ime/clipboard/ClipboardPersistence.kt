@@ -8,6 +8,11 @@ data class ClipboardLoadResult(
     val nextId: Long,
 )
 
+data class ImageCleanupResult(
+    val remainingJson: String,
+    val removedCount: Int,
+)
+
 internal object ClipboardPersistence {
     fun decode(raw: String): ClipboardLoadResult {
         val array = runCatching { JSONArray(raw) }.getOrNull() ?: return ClipboardLoadResult(emptyList(), 1L)
@@ -34,6 +39,21 @@ internal object ClipboardPersistence {
                 )
             }
         }.toString()
+
+    fun removeImageEntries(raw: String): ImageCleanupResult? {
+        val array = runCatching { JSONArray(raw) }.getOrNull() ?: return null
+        var removed = 0
+        val retained = JSONArray()
+        for (index in 0 until array.length()) {
+            val entry = array.opt(index)
+            if (entry is org.json.JSONObject && entry.optString("type") == ClipType.IMAGE.name) {
+                removed++
+            } else {
+                retained.put(entry)
+            }
+        }
+        return ImageCleanupResult(retained.toString(), removed)
+    }
 
     private fun decodeItem(entry: JSONObject): ClipboardItem? =
         runCatching {

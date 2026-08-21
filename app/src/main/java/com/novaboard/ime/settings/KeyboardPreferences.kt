@@ -30,36 +30,14 @@ object KeyboardPreferences {
     const val GESTURE_MODE = "gesture_mode"
     const val INCOGNITO_MODE = "incognito_mode"
     const val IMAGE_CLIPBOARD_HISTORY = "image_clipboard_history"
+    const val KEYBOARD_HEIGHT_SCALE = "keyboard_height_scale"
     const val DEFAULT_IMAGE_CLIPBOARD_HISTORY = false
-
-    private val defaults =
-        mapOf(
-            SHOW_NUMBER_ROW to true,
-            SHOW_ARROW_KEYS to true,
-            LONG_PRESS_SYMBOLS to false,
-            ACCENTED_CHARACTERS to false,
-            KEY_POPUPS to false,
-            LARGE_KEY_TEXT to false,
-            AUTOCORRECT to false,
-            QUICK_PERIOD to true,
-            AUTO_CAPITALIZE to true,
-            AUTO_SPACE to false,
-            CURSOR_CONTROL to true,
-            QUICK_DELETE to true,
-            EMOJI_PREDICTIONS to true,
-            DEDICATED_EMOJI_KEY to true,
-            EMOJI_ON_ENTER to false,
-            SOUND_ON_KEYPRESS to false,
-            VIBRATION_ON_KEYPRESS to false,
-            UNDO_AUTOCORRECT to false,
-            QUICK_PREDICTION_INSERT to false,
-            IMAGE_CLIPBOARD_HISTORY to DEFAULT_IMAGE_CLIPBOARD_HISTORY,
-        )
+    const val DEFAULT_KEYBOARD_HEIGHT_SCALE = 100
 
     fun getBoolean(context: Context, key: String): Boolean =
         context
             .getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .getBoolean(key, defaults[key] as? Boolean ?: false)
+            .getBoolean(key, defaultBooleanPreference(key) ?: false)
 
     fun setBoolean(context: Context, key: String, value: Boolean) {
         context
@@ -77,6 +55,18 @@ object KeyboardPreferences {
             .getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putInt(LONG_PRESS_DURATION, value.coerceIn(200, 800))
+            .apply()
+    }
+
+    fun getKeyboardHeightScale(context: Context): Int =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getInt(KEYBOARD_HEIGHT_SCALE, DEFAULT_KEYBOARD_HEIGHT_SCALE)
+            .coerceIn(80, 120)
+
+    fun setKeyboardHeightScale(context: Context, value: Int) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putInt(KEYBOARD_HEIGHT_SCALE, value.coerceIn(80, 120))
             .apply()
     }
 

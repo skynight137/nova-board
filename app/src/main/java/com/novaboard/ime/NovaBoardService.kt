@@ -31,6 +31,7 @@ import com.novaboard.ime.clipboard.ClipType
 import com.novaboard.ime.clipboard.ClipboardHistoryManager
 import com.novaboard.ime.clipboard.ClipboardItem
 import com.novaboard.ime.clipboard.ClipboardPanel
+import com.novaboard.ime.editing.AutocorrectState
 import com.novaboard.ime.editing.RepeatController
 import com.novaboard.ime.editing.RepeatToken
 import com.novaboard.ime.editing.acceptsInputSessionResult
@@ -49,10 +50,6 @@ import com.novaboard.ime.settings.MainActivity
 import com.novaboard.ime.suggestion.SuggestionEngine
 import com.novaboard.ime.suggestion.shouldLearnWord
 import com.novaboard.ime.theme.ThemeManager
-import com.novaboard.ime.translation.TranslationComposerState
-import com.novaboard.ime.translation.TranslationCommit
-import com.novaboard.ime.translation.TranslationPanel
-import com.novaboard.ime.translation.UnavailableTranslationProvider
 import com.novaboard.ime.tools.ToolMenuItem
 import com.novaboard.ime.tools.visibleToolMenuItems
 import com.novaboard.ime.util.AppLog
@@ -72,7 +69,6 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private lateinit var cursorRow: LinearLayout
     private lateinit var emojiPanelContainer: android.widget.FrameLayout
     private lateinit var overlayPanelContainer: android.widget.FrameLayout
-    private lateinit var translationPanelContainer: android.widget.FrameLayout
     private lateinit var incognitoBanner: TextView
 
     private lateinit var clipboardHistory: ClipboardHistoryManager
@@ -82,14 +78,11 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private var emojiPanel: EmojiPanel? = null
     private var toolsMenuView: View? = null
     private var lastSpaceTime = 0L
-    private var lastAutocorrectOriginal: String? = null
-    private var lastAutocorrectReplacement: String? = null
+    private var lastAutocorrectState: AutocorrectState? = null
     private var speechRecognizer: SpeechRecognizer? = null
     private var listening = false
     private var inputSession = 0L
     private var voiceRecognizerGeneration = 0L
-    private var translationPanel: TranslationPanel? = null
-    private val translationProvider = UnavailableTranslationProvider()
     private var selectionStart = -1
     private var selectionEnd = -1
     private val cursorRepeatHandler = Handler(Looper.getMainLooper())
@@ -113,6 +106,9 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 previousWord = null
                 refreshSuggestionsIfReady()
                 return@OnSharedPreferenceChangeListener
+            }
+            if (key == KeyboardPreferences.INCOGNITO_MODE && ::clipboardHistory.isInitialized) {
+                clipboardHistory.setCaptureEnabled(!KeyboardPreferences.isIncognitoMode(this))
             }
             if (::keyboardView.isInitialized) {
                 keyboardView.post { applyKeyboardPreferences() }
@@ -157,7 +153,6 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         hotkeysScroller = root.findViewById(R.id.hotkeysScroller)
         hotkeysRow = root.findViewById(R.id.hotkeysRow)
         cursorRow = root.findViewById(R.id.cursorRow)
-        translationPanelContainer = root.findViewById(R.id.translationPanelContainer)
         emojiPanelContainer = root.findViewById(R.id.emojiPanelContainer)
         overlayPanelContainer = root.findViewById(R.id.overlayPanelContainer)
         incognitoBanner = root.findViewById(R.id.incognitoBanner)
@@ -219,9 +214,6 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             candidatesStart,
             candidatesEnd,
         )
-        if (selectionStart != newSelStart || selectionEnd != newSelEnd) {
-            dismissTranslationPanel()
-        }
         selectionStart = newSelStart
         selectionEnd = newSelEnd
         val textBeforeCursor = currentInputConnection?.getTextBeforeCursor(128, 0)?.toString().orEmpty()
@@ -243,8 +235,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private fun resetTypingState() {
         currentWord.clear()
         previousWord = null
-        lastAutocorrectOriginal = null
-        lastAutocorrectReplacement = null
+        lastAutocorrectState = null
     }
 
     private fun resetInputSession() {
@@ -256,7 +247,6 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         clipboardPanel = null
         emojiPanel?.dismiss()
         emojiPanel = null
-        dismissTranslationPanel()
         dismissToolsMenu()
         if (::overlayPanelContainer.isInitialized) {
             overlayPanelContainer.removeAllViews()
@@ -332,9 +322,6 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private fun wireToolsBar(root: View) {
         root.findViewById<ImageButton>(R.id.btnClipboard).setOnClickListener { openClipboard(root) }
         root.findViewById<ImageButton>(R.id.btnHotkeys).setOnClickListener { toggleHotkeys() }
-        root.findViewById<ImageButton>(R.id.btnTranslate).setOnClickListener {
-            openTranslation()
-        }
         root.findViewById<ImageButton>(R.id.btnVoice).setOnClickListener { toggleVoiceInput() }
         root.findViewById<ImageButton>(R.id.btnMore).setOnClickListener {
             showToolsMenu(root)
@@ -374,7 +361,6 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 listOf(
                     ToolMenuItem("clipboard", getString(R.string.cd_clipboard)),
                     ToolMenuItem("hotkeys", getString(R.string.cd_hotkeys)),
-                    ToolMenuItem("translate", getString(R.string.tool_translate)),
                     ToolMenuItem("voice", getString(R.string.cd_voice)),
                     ToolMenuItem("emoji", getString(R.string.cd_emoji)),
                     ToolMenuItem("settings", getString(R.string.tool_settings)),
@@ -423,7 +409,6 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 when (item.id) {
                     "clipboard" -> openClipboard(anchor)
                     "hotkeys" -> toggleHotkeys()
-                    "translate" -> openTranslation()
                     "voice" -> toggleVoiceInput()
                     "emoji" -> onEmoji()
                     "settings" ->
@@ -437,6 +422,9 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                             !KeyboardPreferences.isIncognitoMode(this),
                         )
                         updateIncognitoBanner()
+                        clipboardHistory.setCaptureEnabled(
+                            !KeyboardPreferences.isIncognitoMode(this),
+                        )
                     }
                 }
             }
@@ -479,7 +467,6 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         when (id) {
             "clipboard" -> "▣"
             "hotkeys" -> "⌨"
-            "translate" -> "文"
             "voice" -> "♩"
             "emoji", "stickers", "gif" -> "☺"
             "settings" -> "⚙"
@@ -554,97 +541,6 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             }
     }
 
-    private fun openTranslation() {
-        val ic = currentInputConnection
-        val text = ic?.getSelectedText(0)?.toString()?.takeIf { it.isNotBlank() }
-        val start = selectionStart
-        val end = selectionEnd
-        dismissTranslationPanel()
-        val state =
-            TranslationComposerState(
-                session = inputSession,
-                selectedStart = start.takeIf { text != null && it >= 0 } ?: -1,
-                selectedEnd = end.takeIf { text != null && it > start } ?: -1,
-                sourceText = text.orEmpty(),
-                insertionCursor = end.takeIf { it >= 0 } ?: -1,
-            )
-        translationPanel =
-            TranslationPanel(
-                this,
-                state,
-                provider = translationProvider,
-                onDismiss = { dismissTranslationPanel() },
-                onPaste = { panelState, cursor ->
-                    commitTranslation(
-                        TranslationCommit.Paste(panelState.translatedText.orEmpty(), cursor),
-                    )
-                },
-                onReply = { panelState, selectedStart, selectedEnd ->
-                    commitTranslation(
-                        TranslationCommit.Reply(
-                            panelState.translatedText.orEmpty(),
-                            selectedStart,
-                            selectedEnd,
-                        ),
-                    )
-                },
-            )
-        translationPanelContainer.removeAllViews()
-        translationPanelContainer.addView(
-            translationPanel!!.view,
-            ViewGroup.LayoutParams.MATCH_PARENT,
-        )
-        translationPanelContainer.visibility = View.VISIBLE
-        toolsBar.visibility = View.GONE
-        suggestionBar.visibility = View.GONE
-        hotkeysScroller.visibility = View.GONE
-    }
-
-    private fun dismissTranslationPanel() {
-        if (!::translationPanelContainer.isInitialized) return
-        translationPanelContainer.removeAllViews()
-        translationPanelContainer.visibility = View.GONE
-        translationPanel = null
-        if (::suggestionBar.isInitialized) showSuggestionStrip()
-    }
-
-    private fun commitTranslation(commit: TranslationCommit) {
-        val ic = currentInputConnection ?: return
-        when (commit) {
-            is TranslationCommit.Paste -> {
-                if (commit.cursor >= 0) {
-                    ic.setSelection(commit.cursor, commit.cursor)
-                }
-                ic.commitText(commit.text, 1)
-                selectionStart =
-                    if (commit.cursor >= 0) commit.cursor + commit.text.length else -1
-                selectionEnd = selectionStart
-            }
-            is TranslationCommit.Reply -> {
-                if (
-                    commit.selectionStart != selectionStart ||
-                    commit.selectionEnd != selectionEnd ||
-                    commit.selectionStart < 0 ||
-                    commit.selectionEnd <= commit.selectionStart
-                ) {
-                    Toast.makeText(
-                        this,
-                        getString(R.string.translation_selection_unavailable),
-                        Toast.LENGTH_SHORT,
-                    ).show()
-                    return
-                }
-                ic.setSelection(commit.selectionStart, commit.selectionEnd)
-                ic.commitText(commit.text, 1)
-                selectionStart = commit.selectionStart + commit.text.length
-                selectionEnd = selectionStart
-            }
-        }
-        resetTypingState()
-        refreshSuggestionsIfReady()
-        dismissTranslationPanel()
-    }
-
     private fun toggleHotkeys() {
         hotkeysScroller.visibility =
             if (hotkeysScroller.visibility == View.VISIBLE) View.GONE else View.VISIBLE
@@ -660,6 +556,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     }
 
     private fun wireCursorButton(button: ImageButton, code: Int) {
+        button.setOnClickListener { sendDpad(code) }
         button.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 android.view.MotionEvent.ACTION_DOWN -> {
@@ -669,6 +566,9 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 android.view.MotionEvent.ACTION_UP,
                 android.view.MotionEvent.ACTION_CANCEL -> {
                     stopCursorRepeat()
+                    if (event.actionMasked == android.view.MotionEvent.ACTION_UP) {
+                        button.performClick()
+                    }
                     true
                 }
                 else -> true
@@ -794,8 +694,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
 
         when (key.type) {
             KeyType.CHAR -> {
-                lastAutocorrectOriginal = null
-                lastAutocorrectReplacement = null
+                lastAutocorrectState = null
                 ic.commitText(outputChar, 1)
                 currentWord.append(outputChar)
                 maybeAutocorrectLastChar(ic)
@@ -881,8 +780,12 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         }
         ic.deleteSurroundingText(currentWord.length, 0)
         ic.commitText(replacement + suffix, 1)
-        lastAutocorrectOriginal = currentWord.toString()
-        lastAutocorrectReplacement = replacement + suffix
+        lastAutocorrectState =
+            AutocorrectState(
+                original = currentWord.toString(),
+                replacement = replacement + suffix,
+                textBeforeCursor = ic.getTextBeforeCursor(128, 0)?.toString().orEmpty(),
+            )
         learnWordIfAllowed(replacement)
         return true
     }
@@ -911,25 +814,25 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         if (
             KeyboardPreferences.getBoolean(this, KeyboardPreferences.UNDO_AUTOCORRECT) &&
                 canUndoAutocorrect(
-                    lastAutocorrectReplacement,
+                    lastAutocorrectState,
                     ic.getTextBeforeCursor(128, 0)?.toString().orEmpty(),
-                ) &&
-                lastAutocorrectOriginal != null &&
-                lastAutocorrectReplacement != null
+                )
         ) {
-            ic.deleteSurroundingText(lastAutocorrectReplacement!!.length, 0)
-            ic.commitText(lastAutocorrectOriginal, 1)
-            lastAutocorrectOriginal = null
-            lastAutocorrectReplacement = null
+            val state = lastAutocorrectState ?: return
+            ic.deleteSurroundingText(state.replacement.length, 0)
+            ic.commitText(state.original, 1)
+            lastAutocorrectState = null
             scheduleSuggestionsRefresh()
             return
         }
         ic.deleteSurroundingText(1, 0)
         if (currentWord.isNotEmpty()) currentWord.deleteCharAt(currentWord.length - 1)
+        lastAutocorrectState = null
         scheduleSuggestionsRefresh()
     }
 
     override fun onEnter() {
+        if (clipboardPanel?.handleEnter() == true) return
         if (KeyboardPreferences.getBoolean(this, KeyboardPreferences.EMOJI_ON_ENTER) &&
             isConversationEditor(currentInputEditorInfo)
         ) {
@@ -983,6 +886,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         if (count > 0) {
             ic.deleteSurroundingText(count, 0)
             currentWord.clear()
+            lastAutocorrectState = null
             refreshSuggestions()
         }
     }

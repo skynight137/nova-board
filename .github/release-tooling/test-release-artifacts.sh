@@ -211,6 +211,22 @@ test_prepare_generates_description_from_project_name() {
     fail "development release description did not use the project name"
 }
 
+test_prepare_adjusts_version_code_after_legacy_manifest() {
+  local fixture
+  fixture="$(create_fixture legacy-version-code one)"
+  node - "${fixture}/app-release.json" <<'NODE'
+const fs = require("fs");
+const path = process.argv[2];
+const manifest = JSON.parse(fs.readFileSync(path, "utf8"));
+manifest.version_code = 10001099;
+fs.writeFileSync(path, `${JSON.stringify(manifest, null, 2)}\n`);
+NODE
+
+  run_prepare "${fixture}" 1.0.0-dev.2 >"${fixture}/stdout"
+  grep -q '"version_code": 10001100' "${fixture}/app-release.json" ||
+    fail "release preparation did not advance beyond the previous version code"
+}
+
 test_prepare_includes_signature_fingerprint() {
   local fixture
   fixture="$(create_fixture signature-fingerprint one)"
@@ -297,6 +313,7 @@ test_prepare_is_atomic_when_signing_fails
 test_prepare_is_atomic_when_manifest_is_malformed
 test_prepare_publishes_only_after_signing
 test_prepare_generates_description_from_project_name
+test_prepare_adjusts_version_code_after_legacy_manifest
 test_prepare_includes_signature_fingerprint
 test_prepare_supports_first_release_without_existing_manifest
 test_prepare_supports_generic_android_module_and_manifest

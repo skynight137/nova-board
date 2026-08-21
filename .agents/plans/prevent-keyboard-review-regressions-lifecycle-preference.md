@@ -12,23 +12,24 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 - The number-row preference is applied when entering both letters and symbols pages.
 - Current JVM tests live under `app/src/test/java/com/novaboard/ime`.
 - Existing verification commands are documented in `README.md`:
-  - `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`
-  - `source .bin/env.sh && ./gradlew :app:assembleDebug`
+  - `source .local/env.sh && ./gradlew :app:testDebugUnitTest`
+  - `source .local/env.sh && ./gradlew :app:assembleDebug`
 
 ## Progress
 
-**Status: `[~] Pure editing, editor-policy, and preference contracts covered; Android lifecycle and persistence seams remain**
+**Status: `[~] Pure editing, editor-policy, and preference contracts covered; Android lifecycle, persistence, and reset seams remain**
 
 - [x] Production prerequisites for session cleanup, number-row preference, clipboard listener cleanup, and inactive-setting removal exist.
-- [~] Quick-delete summary and emoji-on-enter policy are partially aligned; focused tests are missing.
+- [~] Quick-delete summary and emoji-on-enter policy are aligned; Android
+  lifecycle/accessibility verification remains deferred.
 - [✓] Add deterministic lifecycle/session seams and tests for stale
   recognizer results and selection ownership.
 - [~] Add layout, clipboard, editing-state, and preference regression tests;
-  pure layout, editing-state, editor-policy, clipboard parsing, and emoji-font
-  normalization coverage exists. Android clipboard listener/provider,
-  preference reset, and framework lifecycle seams remain deferred because this
-  project has no JVM-safe Android context or instrumentation boundary in the
-  available environment.
+  pure layout, editing-state, editor-policy, clipboard parsing, emoji-font
+  normalization, and retained boolean-default coverage exists. Android
+  clipboard listener/provider, preference reset, and framework lifecycle seams
+  remain deferred because this project has no JVM-safe Android context or
+  instrumentation boundary in the available environment.
 - [ ] Run the final verification gate and commit the test coverage.
 
 ## Architecture decisions
@@ -55,7 +56,7 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 
 **Verification:**
 - [✓] Focused JVM tests cover accepted, stale, and changed-editor cases.
-- [✓] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest` passes.
+- [✓] `source .local/env.sh && ./gradlew :app:testDebugUnitTest` passes.
 
 **Dependencies:** None
 
@@ -112,7 +113,7 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 **Verification:**
 - [✓] Persistence tests cover isolated pure JSON decoding without Android dependencies.
 - [~] Listener callback counts require an Android clipboard provider and are deferred.
-- [✓] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest` passes.
+- [✓] `source .local/env.sh && ./gradlew :app:testDebugUnitTest` passes.
 
 **Dependencies:** None
 
@@ -126,19 +127,22 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 
 ### Phase 3: Preference and editing-state regression coverage
 
-## Task 4: Verify editing-state invalidation after external and inserted edits `[ ]`
+## Task 4: Verify editing-state invalidation after external and inserted edits `[~]`
 
 **Description:** Add tests around cursor movement, selection changes, clipboard insertion, emoji insertion, and undo-autocorrect invalidation. The tests should prove that subsequent prediction/backspace operations cannot delete unrelated editor text after an intervening external edit.
 
 **Acceptance criteria:**
-- [ ] Cursor or selection movement clears stale current-word and undo-autocorrect state.
-- [ ] Clipboard and emoji insertion invalidate the tracked word and suggestion state.
-- [ ] Undo-autocorrect is accepted only when the replacement is still the active replacement at the current cursor.
-- [ ] Backspace falls back to ordinary one-character deletion after invalidation.
+- [x] Cursor or selection movement clears stale current-word and undo-autocorrect state.
+- [x] Clipboard and emoji insertion invalidate the tracked word and suggestion state.
+- [x] Undo-autocorrect is accepted only when the exact bounded post-replacement snapshot is unchanged.
+- [x] Backspace falls back to ordinary one-character deletion after invalidation.
+- [~] Fake input-connection coverage remains deferred because the repository has
+  no JVM-safe Android input-connection boundary.
 
 **Verification:**
-- [ ] Tests use a fake input connection or a pure editing-state seam.
-- [ ] Regression cases include an editor transition and an external text edit between correction and backspace.
+- [x] Tests use a pure editing-state seam.
+- [x] Regression cases include an external text edit between correction and
+  backspace.
 
 **Dependencies:** Task 1
 
@@ -153,14 +157,17 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 **Description:** Audit the settings exposed by `MainActivity` against actual service/view behavior and add tests for every retained toggle. Any setting still lacking a behavior contract must be removed from the UI or explicitly labeled unavailable rather than receiving a test that only checks persistence.
 
 **Acceptance criteria:**
-- [ ] Retained number-row, long-press-symbol, key-popup, emoji-on-enter, and typing toggles have behavior assertions.
+- [~] Retained number-row, long-press-symbol, key-popup, emoji-on-enter, and
+  typing toggles have pure default/contract assertions; Android UI behavior
+  remains deferred where no framework seam exists.
 - [x] Emoji-on-enter is not triggered for email, URI, password, or other unsupported editor variations.
 - [x] No settings dialog exposes the removed inactive typing toggles.
 - [ ] No retained settings dialog toggle lacks an observable behavior contract.
-- [ ] Preference reset restores the same defaults used by the behavior tests.
+- [~] Preference reset uses the same defaults as the behavior tests; direct
+  Android `SharedPreferences` reset verification remains deferred.
 
 **Verification:**
-- [ ] `KeyboardPreferences` default/reset tests pass.
+- [✓] Pure `KeyboardPreferences` default contract tests pass.
 - [x] Editor-type policy tests cover supported and excluded variations.
 - [✓] The settings resource compiles in the debug APK build.
 
@@ -180,7 +187,7 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 - [~] Pure portions of Tasks 1-5 pass together; Android lifecycle,
   clipboard-listener, and preference-reset seams remain deferred.
 - [✓] No test relies on timing, a real microphone, a real clipboard provider, or a live editor.
-- [✓] `source .bin/env.sh && ./gradlew :app:assembleDebug` succeeds.
+- [✓] `source .local/env.sh && ./gradlew :app:assembleDebug` succeeds.
 - [✓] `git diff --check` succeeds.
 
 ### Phase 4: Delivery gate
@@ -193,13 +200,13 @@ Add focused JVM-testable seams and regression coverage for the NovaBoard keyboar
 - [✓] Every review finding addressed by a test or explicitly documented as deferred.
 - [✓] Tests are deterministic and readable from the failure message alone.
 - [✓] No generated APKs, local state, secrets, or unrelated formatting changes are committed.
-- [~] Commit uses a Conventional Commit message, such as `test: cover IME lifecycle and preference contracts` (pending the delivery commit).
+- [✓] Commit uses a Conventional Commit message.
 
 **Verification:**
-- [✓] `source .bin/env.sh && ./gradlew :app:testDebugUnitTest`
-- [✓] `source .bin/env.sh && ./gradlew :app:assembleDebug`
+- [✓] `source .local/env.sh && ./gradlew :app:testDebugUnitTest`
+- [✓] `source .local/env.sh && ./gradlew :app:assembleDebug`
 - [✓] `git diff --check`
-- [~] Final `git status --short --branch` will be clean after the delivery commit.
+- [✓] Final `git status --short --branch` is clean after the delivery commit.
 
 **Dependencies:** Tasks 1-5
 

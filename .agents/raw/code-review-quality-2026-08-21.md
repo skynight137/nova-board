@@ -70,8 +70,8 @@ review.
 Passed:
 
 ```text
-source .bin/env.sh && ./gradlew :app:testDebugUnitTest --stacktrace
-source .bin/env.sh && ./gradlew :app:assembleDebug --stacktrace
+source .local/env.sh && ./gradlew :app:testDebugUnitTest --stacktrace
+source .local/env.sh && ./gradlew :app:assembleDebug --stacktrace
 bash -n scripts/setup.sh scripts/rewrite-commit-messages.sh .github/release-tooling/*.sh
 git diff --check
 ```

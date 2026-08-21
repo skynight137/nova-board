@@ -18,8 +18,13 @@
 - [Durable clipboard storage](durable-clipboard-storage.md) — copy image bytes privately and expose them through the app-owned content provider, migrating legacy URIs on load.
 - [Conventional history rewrite](conventional-history-rewrite.md) — preview legacy subject mappings with a clean worktree before applying a commit-history rewrite.
 - [Verification before commit](verification-before-commit.md) — use fail-fast gates so failed checks never fall through to a release-style commit.
-- [Translation and image clipboard direction](translation-and-image-clipboard-direction.md) — translation stays in-keyboard; image retention is opt-in and disabled by default.
+- [Image clipboard retention](translation-and-image-clipboard-direction.md) — image retention is opt-in and disabled by default; translation UI is not part of the product.
 - [Spotless baseline](spotless-baseline.md) — repository-wide formatting currently has unrelated pre-existing Kotlin violations; avoid broad formatter churn.
 - [Symbol layout switcher alignment](symbol-layout-switcher-alignment.md) — primary and secondary symbol switchers share a row based on the number-row preference.
 - [Clipboard search input](clipboard-search-input.md) — the clipboard overlay needs an embedded NovaBoard keyboard because the app is already the active IME.
 - [System emoji menu](system-emoji-menu.md) — keep emoji selection minimal and rendered with the device’s system emoji fallback.
+- [Settings theme surfaces](settings-theme-surfaces.md) — Material dialogs need explicit NovaBoard surface and text roles in light and dark themes.
+- [Settings switch styling](native-settings-switches.md) — settings preferences use the approved compact custom switch with animated outlined states.
+- [PR release secret boundary](pr-release-secret-boundary.md) — PR validation must never expose signing or publication credentials to PR-controlled code.
+- [APK certificate formatting](apk-certificate-formatting.md) — normalize colon-separated and unseparated SHA-256 output before comparing release identities.
+- [Android certificate verification](android-certificate-verification.md) — retain the release fingerprint check because manual GitHub installation does not replace Android signing identity verification.

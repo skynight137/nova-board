@@ -26,9 +26,12 @@ class EditingContractsTest {
 
     @Test
     fun undoRequiresTheReplacementToRemainAtCursor() {
-        assertTrue(canUndoAutocorrect("teh ", "write teh "))
-        assertFalse(canUndoAutocorrect("teh ", "write that "))
-        assertFalse(canUndoAutocorrect(null, "write teh "))
+        val state = AutocorrectState("teh", "the ", "write the ")
+
+        assertTrue(canUndoAutocorrect(state, "write the "))
+        assertFalse(canUndoAutocorrect(state, "changed the "))
+        assertFalse(canUndoAutocorrect(state, "write the later "))
+        assertFalse(canUndoAutocorrect(null, "write the "))
     }
 
     @Test
