@@ -114,9 +114,13 @@ echo "Preparing ${APK_NAME}..."
 VERSION_CODE="$(version_code_for "${VERSION}")"
 if [[ -f "${RELEASE_JSON}" ]]; then
   PREVIOUS_VERSION_CODE="$(node -e 'const fs=require("fs"); const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8")); process.stdout.write(String(m.version_code ?? 0))' "${RELEASE_JSON}")"
-  if [[ ! "${PREVIOUS_VERSION_CODE}" =~ ^[0-9]+$ ]] || (( VERSION_CODE <= PREVIOUS_VERSION_CODE )); then
+  if [[ ! "${PREVIOUS_VERSION_CODE}" =~ ^[0-9]+$ ]]; then
     echo "ERROR: version code ${VERSION_CODE} must be greater than previous release code ${PREVIOUS_VERSION_CODE}" >&2
     exit 1
+  fi
+  if (( VERSION_CODE <= PREVIOUS_VERSION_CODE )); then
+    VERSION_CODE=$((PREVIOUS_VERSION_CODE + 1))
+    echo "Adjusted version code to ${VERSION_CODE} to preserve monotonic Android updates"
   fi
 fi
 

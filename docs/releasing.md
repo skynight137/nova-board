@@ -261,6 +261,12 @@ the digest, size, signature, and metadata checks succeed. A failed preparation
 restores the previous `${ANDROID_MODULE:-app}/gradle.properties` version and leaves the previous
 manifest untouched.
 
+Version codes are derived from the semantic version and prerelease number. If a
+legacy or manually published manifest contains a higher version code than that
+calculation, release preparation advances from the manifest's code instead.
+This keeps Android updates monotonic while preserving the normal semantic
+version-derived values whenever they are safe.
+
 Do not hand-edit the release version, push a `v*` tag manually, or rerun an
 old tag to validate a workflow change. A tag checks out the exact commit that
 created it.

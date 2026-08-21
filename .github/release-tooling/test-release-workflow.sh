@@ -99,8 +99,9 @@ grep -Fq '.github/release-tooling/test-github-repository.sh' "${WORKFLOW}" ||
 grep -Fq '.github/release-tooling/prepare-release.sh' "${ROOT_DIR}/.releaserc.cjs" ||
   fail "semantic-release config does not use the global release-tooling namespace"
 
-if rg -n --glob '!test-release-workflow.sh' --glob '!test-release-artifacts.sh' \
-  --glob '!test-release-keystore.sh' \
+if grep -REn --exclude='test-release-workflow.sh' \
+  --exclude='test-release-artifacts.sh' \
+  --exclude='test-release-keystore.sh' \
   'Auto ?Click|AutoClick|copy-note' "${ROOT_DIR}/.github/release-tooling" \
   "${ROOT_DIR}/.github/workflows/release.yml" "${ROOT_DIR}/.releaserc.cjs"; then
   fail "global release tooling still contains clone-specific identity"
