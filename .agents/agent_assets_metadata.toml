@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "xQxJezqYZZoTRtxFkp2Ye"
+uri = "file://design-system/novaboard/design-preview.html"
+type = "text"
+title = "NovaBoard Design System Preview"
+description = "Interactive light/dark preview of the approved NovaBoard design system: semantic palette, typography, keyboard states, panels, privacy state, and accessibility gates."
+logical_id = "576e46f5-e338-420a-9061-51f8834e82bf"
+content_hash = "sha256:cec606a47d30dccf06f4308ac8716666f9c9722730c9eb0138517d8dfe42686f"
+size = 7968
+mtime_ms = 1787277218867
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:6d39b34f-99c5-4e25-a4d7-a2c0729e3fb3/576e46f5-e338-420a-9061-51f8834e82bf/437233a2-0259-4c9c-99dc-bf8dfad901d1"
+storage_version_token = "1787277242287913"
+content_type = "text/html"
