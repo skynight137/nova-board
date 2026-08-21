@@ -38,7 +38,8 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:paddingStart="8dp"
-            android:paddingEnd="8dp">
+            android:paddingEnd="8dp"
+            android:visibility="gone">
 
             <ImageButton android:id="@+id/btnToggleStrip" style="@style/NovaBoardToolIcon"
                 android:src="@drawable/ic_chevron_down" android:contentDescription="@string/cd_tools" />
@@ -59,11 +60,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <ImageButton android:id="@+id/btnToggleStripFromSuggestions" style="@style/NovaBoardToolIcon"
                 android:layout_width="40dp"
-                android:src="@drawable/ic_chevron_down" android:contentDescription="@string/cd_tools" />
+                android:src="@drawable/ic_chevron_up" android:contentDescription="@string/cd_tools" />
 
             <TextView android:id="@+id/suggestion1" style="@style/NovaBoardSuggestion" />
             <TextView android:id="@+id/suggestion2" style="@style/NovaBoardSuggestionHighlighted" />
