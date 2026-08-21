@@ -41,8 +41,6 @@
             android:paddingEnd="8dp"
             android:visibility="gone">
 
-            <ImageButton android:id="@+id/btnToggleStrip" style="@style/NovaBoardToolIcon"
-                android:src="@drawable/ic_chevron_down" android:contentDescription="@string/cd_collapse_tools" />
             <ImageButton android:id="@+id/btnClipboard" style="@style/NovaBoardToolIcon"
                 android:src="@drawable/ic_clipboard" android:contentDescription="@string/cd_clipboard" />
             <ImageButton android:id="@+id/btnHotkeys" style="@style/NovaBoardToolIcon"

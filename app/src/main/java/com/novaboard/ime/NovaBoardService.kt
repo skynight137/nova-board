@@ -299,25 +299,32 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     // ---- expandable tools row above the always-visible prediction strip ----
 
     private fun wireToggleChevrons(root: View) {
-        val toChevron = root.findViewById<ImageButton>(R.id.btnToggleStrip)
         val fromChevron = root.findViewById<ImageButton>(R.id.btnToggleStripFromSuggestions)
         toolsToggleFromSuggestions = fromChevron
-        toChevron.contentDescription = getString(R.string.cd_collapse_tools)
         fromChevron.contentDescription = getString(R.string.cd_expand_tools)
-        toChevron.setOnClickListener { showSuggestionStrip() }
-        fromChevron.setOnClickListener { showToolsStrip() }
+        fromChevron.setOnClickListener {
+            if (toolsBar.visibility == View.VISIBLE) {
+                showSuggestionStrip()
+            } else {
+                showToolsStrip()
+            }
+        }
     }
 
     private fun showSuggestionStrip() {
         toolsBar.visibility = View.GONE
         suggestionBar.visibility = View.VISIBLE
         toolsToggleFromSuggestions.visibility = View.VISIBLE
+        toolsToggleFromSuggestions.setImageResource(R.drawable.ic_chevron_up)
+        toolsToggleFromSuggestions.contentDescription = getString(R.string.cd_expand_tools)
     }
 
     private fun showToolsStrip() {
         toolsBar.visibility = View.VISIBLE
         suggestionBar.visibility = View.VISIBLE
-        toolsToggleFromSuggestions.visibility = View.GONE
+        toolsToggleFromSuggestions.visibility = View.VISIBLE
+        toolsToggleFromSuggestions.setImageResource(R.drawable.ic_chevron_down)
+        toolsToggleFromSuggestions.contentDescription = getString(R.string.cd_collapse_tools)
     }
 
     // ---- tools row ----
