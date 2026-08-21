@@ -6,11 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
-<LinearLayout
+    <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-     android:padding="@dimen/nb_space_6">
+        android:background="@color/kb_background"
+        android:padding="@dimen/nb_space_6">
 
     <TextView
         android:layout_width="wrap_content"
@@ -24,23 +25,23 @@
 
     <Button
         android:id="@+id/btnEnable"
+        style="@style/NovaBoardSettingsPrimaryButton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-         android:layout_marginBottom="@dimen/nb_space_4"
+        android:layout_marginBottom="@dimen/nb_space_4"
         android:text="@string/enable_keyboard" />
 
     <Button
         android:id="@+id/btnSwitch"
+        style="@style/NovaBoardSettingsPrimaryButton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-         android:layout_marginBottom="@dimen/nb_space_7"
+        android:layout_marginBottom="@dimen/nb_space_7"
         android:text="@string/switch_keyboard" />
 
     <Button
         android:id="@+id/btnExportLog"
+        style="@style/NovaBoardSettingsRow"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-         android:layout_marginBottom="@dimen/nb_space_6"
+        android:layout_marginBottom="@dimen/nb_space_6"
         android:text="@string/export_app_log" />
 
     <TextView
@@ -48,56 +49,56 @@
         android:layout_height="wrap_content"
         android:text="@string/keyboard_preferences"
         android:textStyle="bold"
-         android:layout_marginBottom="@dimen/nb_space_4"
-         android:textSize="16sp"
-         android:textColor="@color/kb_key_text" />
+        android:layout_marginBottom="@dimen/nb_space_4"
+        android:textSize="16sp"
+        android:textColor="@color/kb_key_text" />
 
     <Button
         android:id="@+id/btnLayoutSettings"
+        style="@style/NovaBoardSettingsRow"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
         android:text="@string/layout_keys" />
 
     <Button
         android:id="@+id/btnTypingSettings"
+        style="@style/NovaBoardSettingsRow"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
         android:text="@string/typing" />
 
     <Button
         android:id="@+id/btnEmojiSettings"
+        style="@style/NovaBoardSettingsRow"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
         android:text="@string/emoji" />
 
     <Button
         android:id="@+id/btnSoundSettings"
+        style="@style/NovaBoardSettingsRow"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:text="@string/sound_vibration" />
 
     <Button
         android:id="@+id/btnGestureSettings"
+        style="@style/NovaBoardSettingsRow"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
         android:text="@string/gesture_input" />
 
     <Button
         android:id="@+id/btnIncognito"
+        style="@style/NovaBoardSettingsRow"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:text="@string/incognito_mode" />
 
     <Button
         android:id="@+id/btnResetSettings"
+        style="@style/NovaBoardSettingsReset"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:text="@string/reset_settings" />
 
     <TextView
@@ -105,8 +106,10 @@
         android:layout_height="wrap_content"
         android:text="@string/theme_label"
         android:textStyle="bold"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginTop="@dimen/nb_space_6"
+        android:layout_marginBottom="@dimen/nb_space_4"
+        android:textSize="@dimen/nb_supporting_text"
+        android:textColor="@color/kb_toolbar_icon" />
 
     <RadioGroup
         android:id="@+id/themeGroup"
@@ -123,11 +126,12 @@
 <Button
     android:id="@+id/btnLayoutPreview"
     android:layout_width="64dp"
-    android:layout_height="64dp"
+         android:layout_height="64dp"
     android:layout_gravity="bottom|end"
     android:layout_margin="16dp"
     android:contentDescription="@string/layout_preview"
     android:text="⌨"
     android:textSize="24sp"
-    android:backgroundTint="@color/kb_accent" />
+     android:background="@drawable/bg_settings_primary"
+     android:textColor="@color/kb_on_accent" />
 </FrameLayout>

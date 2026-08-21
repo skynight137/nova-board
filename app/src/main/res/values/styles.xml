@@ -49,4 +49,37 @@
         <item name="android:textSize">@dimen/nb_utility_label</item>
         <item name="android:textAllCaps">true</item>
     </style>
+
+    <style name="NovaBoardSettingsPrimaryButton">
+        <item name="android:layout_height">56dp</item>
+        <item name="android:minHeight">@dimen/nb_settings_row_min_height</item>
+        <item name="android:background">@drawable/bg_settings_primary</item>
+        <item name="android:textColor">@color/kb_on_accent</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0.04</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:paddingStart">@dimen/nb_space_6</item>
+        <item name="android:paddingEnd">@dimen/nb_space_6</item>
+    </style>
+
+    <style name="NovaBoardSettingsRow">
+        <item name="android:layout_height">56dp</item>
+        <item name="android:minHeight">@dimen/nb_settings_row_min_height</item>
+        <item name="android:background">@drawable/bg_settings_row</item>
+        <item name="android:textColor">@color/kb_key_text</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0.02</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:paddingStart">@dimen/nb_space_6</item>
+        <item name="android:paddingEnd">@dimen/nb_space_6</item>
+    </style>
+
+    <style name="NovaBoardSettingsReset" parent="NovaBoardSettingsRow">
+        <item name="android:background">@drawable/bg_settings_reset</item>
+        <item name="android:textColor">@color/kb_danger</item>
+    </style>
 </resources>

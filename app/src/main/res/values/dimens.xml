@@ -16,4 +16,5 @@
     <dimen name="nb_key_label">20sp</dimen>
     <dimen name="nb_utility_label">12sp</dimen>
     <dimen name="nb_supporting_text">13sp</dimen>
+    <dimen name="nb_settings_row_min_height">56dp</dimen>
 </resources>
