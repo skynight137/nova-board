@@ -1,11 +1,12 @@
 {
-  "created_at": "2026-08-19T08:46:32.813Z",
-  "version": "1.0.1",
-  "version_code": 10001099,
-  "description": "NovaBoard 1.0.1 stable release.",
-  "download_url": "https://github.com/skynight137/nova-board/releases/download/v1.0.1/NovaBoard-1.0.1.apk",
-  "signature_download_url": "https://github.com/skynight137/nova-board/releases/download/v1.0.1/NovaBoard-1.0.1.apk.asc",
+  "created_at": "2026-08-21T15:40:18.248Z",
+  "version": "1.0.0-dev.2",
+  "version_code": 10001100,
+  "description": "NovaBoard 1.0.0-dev.2 development release.",
+  "download_url": "https://github.com/skynight137/nova-board/releases/download/v1.0.0-dev.2/NovaBoard-1.0.0-dev.2.apk",
+  "signature_download_url": "https://github.com/skynight137/nova-board/releases/download/v1.0.0-dev.2/NovaBoard-1.0.0-dev.2.apk.asc",
   "signature_key_fingerprint": "384AF0D568380F237C0C4813E43BF7291B1BBB90",
-  "sha256": "6d21043d55ca9f27436696334eb4bf7677b0e6786fb20626c8a1e55f6acd4fe1",
-  "size_bytes": 1607593
+  "sha256": "769fce226ad652ae3613b23acdad59a75c3e9e3b10ee6e294a0ba24863fd0d3d",
+  "size_bytes": 1271911,
+  "certificate_sha256": "80F3F5E4E350B311C550E9669F2116B03F6B6316DBDFD4323769C53C84C24F8E"
 }
