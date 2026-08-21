@@ -22,7 +22,7 @@ SKILL_REPOS=(
 #  "blader/humanizer"
 #  "JuliusBrussee/caveman"
 #  "forrestchang/andrej-karpathy-skills"
-#  "nextlevelbuilder/ui-ux-pro-max-skill"
+  "nextlevelbuilder/ui-ux-pro-max-skill"
 #  "obra/superpowers"
   "addyosmani/agent-skills"
   "affaan-m/everything-claude-code"
