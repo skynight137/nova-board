@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity() {
         ThemeManager.applyStored(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        findViewById<ImageButton>(R.id.btnBack).setOnClickListener { finish() }
         if (intent.getBooleanExtra(EXTRA_REQUEST_MICROPHONE, false) &&
             android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M &&
             checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED
@@ -87,6 +88,9 @@ class MainActivity : AppCompatActivity() {
             } catch (_: ActivityNotFoundException) {
                 Toast.makeText(this, R.string.app_log_export_failed, Toast.LENGTH_LONG).show()
             }
+        }
+        findViewById<Button>(R.id.btnThemeSettings).setOnClickListener {
+            showThemeDialog()
         }
         findViewById<Button>(R.id.btnLayoutSettings).setOnClickListener {
             showPreferenceDialog(
@@ -276,6 +280,54 @@ class MainActivity : AppCompatActivity() {
             ThemeManager.set(this, mode)
             recreate()
         }
+
+        setSettingsRowIcon(R.id.btnEnable, R.drawable.ic_keyboard)
+        setSettingsRowIcon(R.id.btnSwitch, R.drawable.ic_translate)
+        setSettingsRowIcon(R.id.btnLayoutSettings, R.drawable.ic_keyboard)
+        setSettingsRowIcon(R.id.btnTypingSettings, R.drawable.ic_hotkeys)
+        setSettingsRowIcon(R.id.btnEmojiSettings, R.drawable.ic_keyboard)
+        setSettingsRowIcon(R.id.btnSoundSettings, R.drawable.ic_mic)
+        setSettingsRowIcon(R.id.btnGestureSettings, R.drawable.ic_translate)
+        setSettingsRowIcon(R.id.btnIncognito, R.drawable.ic_more)
+        setSettingsRowIcon(R.id.btnExportLog, R.drawable.ic_more)
+        setSettingsRowIcon(R.id.btnThemeSettings, R.drawable.ic_keyboard)
+        setSettingsRowIcon(R.id.btnResetSettings, R.drawable.ic_more)
+    }
+
+    private fun setSettingsRowIcon(buttonId: Int, drawableRes: Int) {
+        findViewById<Button>(buttonId).setCompoundDrawablesWithIntrinsicBounds(drawableRes, 0, 0, 0)
+        findViewById<Button>(buttonId).compoundDrawablePadding = dp(20)
+    }
+
+    private fun showThemeDialog() {
+        val labels =
+            arrayOf(
+                getString(R.string.theme_system),
+                getString(R.string.theme_light),
+                getString(R.string.theme_dark),
+            )
+        val selected =
+            when (ThemeManager.get(this)) {
+                ThemeMode.SYSTEM -> 0
+                ThemeMode.LIGHT -> 1
+                ThemeMode.DARK -> 2
+            }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.theme_label)
+            .setSingleChoiceItems(labels, selected) { dialog, which ->
+                ThemeManager.set(
+                    this,
+                    when (which) {
+                        1 -> ThemeMode.LIGHT
+                        2 -> ThemeMode.DARK
+                        else -> ThemeMode.SYSTEM
+                    },
+                )
+                dialog.dismiss()
+                recreate()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun updateIncognitoButton() {

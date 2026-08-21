@@ -1,6 +1,7 @@
 <resources>
     <!-- NovaBoard design tokens: dark semantic roles. -->
     <color name="kb_background">#111317</color>
+    <color name="kb_surface">#1B1D21</color>
     <color name="kb_key_bg">#262A31</color>
     <color name="kb_key_bg_special">#1D2026</color>
     <color name="kb_key_text">#F4F5F7</color>

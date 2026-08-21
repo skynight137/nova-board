@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">NovaBoard</string>
+    <string name="settings_title">NovaBoard settings</string>
+    <string name="settings_back">Back</string>
+    <string name="settings_section_app">App</string>
     <string name="enable_keyboard">Enable NovaBoard</string>
     <string name="switch_keyboard">Switch input method</string>
     <string name="theme_label">Theme</string>
