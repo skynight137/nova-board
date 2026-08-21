@@ -388,8 +388,12 @@ class MainActivity : AppCompatActivity() {
                 SwitchCompat(this).apply {
                     isChecked = KeyboardPreferences.getBoolean(this@MainActivity, spec.key)
                     showText = false
+                    layoutParams = LinearLayout.LayoutParams(dp(48), dp(44))
+                    switchMinWidth = dp(48)
                     minimumWidth = dp(48)
                     minimumHeight = dp(44)
+                    splitTrack = false
+                    thumbTextPadding = 0
                     setPadding(0, 0, 0, 0)
                     setThumbResource(R.drawable.settings_switch_thumb)
                     setTrackResource(R.drawable.settings_switch_track)
