@@ -155,9 +155,9 @@ delete key red.
 - full-row touch target when the row is actionable
 - state is described in text, not color alone
 - destructive/reset actions are separated from normal preferences
-- settings switches use the native Android switch control with a circular
-  thumb, platform track, and a 44dp touch target; do not replace it with a
-  custom pill-shaped drawable
+- settings switches use the compact custom switch with a circular knob,
+  outlined rounded track, animated 200ms color/position transitions, and a
+  44dp touch target
 
 ### Feedback
 

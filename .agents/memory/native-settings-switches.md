@@ -1,14 +1,16 @@
 ---
-name: Native settings switches
-description: The settings preference toggle uses the platform Android switch appearance.
+name: Settings switch styling
+description: The settings preference toggle uses the approved compact custom switch appearance.
 ---
 
-Settings preference toggles should use the platform `android.widget.Switch` with
-the native circular thumb and track rather than custom pill-shaped drawables.
+Settings preference toggles should use the compact custom switch with a circular
+knob, outlined rounded track, and animated state transitions. The implementation
+should remain a native Android View because NovaBoard's settings UI is
+View-based.
 
-**Why:** The native control matches the expected Android switch appearance and
-avoids maintaining custom state-specific track and thumb assets.
+**Why:** The supplied design uses an outlined dark off-state track and animated
+color/position changes that the platform switch does not provide directly.
 
 **How to apply:** Preserve the native switch for settings preferences and keep
-the surrounding row as the touch-target container; only customize dimensions
-when needed to retain the minimum 44dp touch target.
+the surrounding row as the touch-target container. Keep the visual control at
+52dp × 30dp and its touch target at 44dp high.

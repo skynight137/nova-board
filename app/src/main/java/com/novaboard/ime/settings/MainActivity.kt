@@ -21,7 +21,6 @@ import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.SeekBar
 import android.widget.ScrollView
-import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -385,16 +384,10 @@ class MainActivity : AppCompatActivity() {
             )
             row.addView(labels)
             row.addView(
-                Switch(this).apply {
-                    isChecked = KeyboardPreferences.getBoolean(this@MainActivity, spec.key)
-                    showText = false
-                    layoutParams =
-                        LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
-                            dp(44),
-                        )
-                    minimumHeight = dp(44)
-                    setOnCheckedChangeListener { _, checked ->
+                SettingsSwitch(this).apply {
+                    checked = KeyboardPreferences.getBoolean(this@MainActivity, spec.key)
+                    layoutParams = LinearLayout.LayoutParams(dp(52), dp(44))
+                    onCheckedChange = { checked ->
                         KeyboardPreferences.setBoolean(this@MainActivity, spec.key, checked)
                     }
                 }

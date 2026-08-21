@@ -9,6 +9,12 @@
     <color name="kb_accent">#8AB4FF</color>
     <color name="kb_accent_pressed">#B7D0FF</color>
     <color name="kb_on_accent">#15171A</color>
+    <color name="settings_switch_on_track">#9DB9F9</color>
+    <color name="settings_switch_on_border">#9DB9F9</color>
+    <color name="settings_switch_on_knob">#000000</color>
+    <color name="settings_switch_off_track">#2B2B2B</color>
+    <color name="settings_switch_off_border">#6E6E73</color>
+    <color name="settings_switch_off_knob">#8E8E93</color>
     <color name="kb_suggestion_text">#C4C7CD</color>
     <color name="kb_suggestion_text_highlight">#F4F5F7</color>
     <color name="kb_divider">#343840</color>
