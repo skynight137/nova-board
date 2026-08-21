@@ -48,4 +48,41 @@ class ClipboardPersistenceTest {
         assertTrue(result.items.isEmpty())
         assertEquals(1L, result.nextId)
     }
+
+    @Test
+    fun imageCleanupRetainsTextEntries() {
+        val raw = ClipboardPersistence.encode(
+            listOf(
+                ClipboardItem(1L, ClipType.TEXT, text = "keep me"),
+                ClipboardItem(2L, ClipType.IMAGE, imageUri = "content://image"),
+            ),
+        )
+
+        val cleanup = ClipboardPersistence.removeImageEntries(raw)
+
+        assertEquals(1, cleanup?.removedCount)
+        assertEquals(
+            listOf("keep me"),
+            ClipboardPersistence.decode(cleanup!!.remainingJson).items.map { it.text },
+        )
+    }
+
+    @Test
+    fun malformedImageCleanupDoesNotProduceReplacementHistory() {
+        assertEquals(null, ClipboardPersistence.removeImageEntries("not json"))
+    }
+
+    @Test
+    fun repeatedImageCleanupIsIdempotent() {
+        val raw = ClipboardPersistence.encode(
+            listOf(ClipboardItem(1L, ClipType.TEXT, text = "keep me")),
+        )
+
+        val first = ClipboardPersistence.removeImageEntries(raw)!!
+        val second = ClipboardPersistence.removeImageEntries(first.remainingJson)!!
+
+        assertEquals(0, first.removedCount)
+        assertEquals(0, second.removedCount)
+        assertEquals(first.remainingJson, second.remainingJson)
+    }
 }

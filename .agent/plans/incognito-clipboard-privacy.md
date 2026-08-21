@@ -15,6 +15,12 @@ input-related data.
 - Toggling Incognito does not leave a listener or stale capture path active.
 - Regression tests cover text and image capture in both modes.
 
+## Status
+
+Implemented: capture follows Incognito mode, existing history is retained, and
+policy regression coverage covers text and image capture. Device-level listener
+behavior still requires manual verification on a physical Android device.
+
 ## Relevant files
 
 - `app/src/main/java/com/novaboard/ime/NovaBoardService.kt`

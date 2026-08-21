@@ -9,7 +9,6 @@ import java.io.File
 import java.util.UUID
 import com.novaboard.ime.settings.KeyboardPreferences
 import org.json.JSONArray
-import org.json.JSONObject
 
 enum class ClipType {
     TEXT,
@@ -45,23 +44,13 @@ class ClipboardHistoryManager(private val context: Context) {
         fun clearStoredImageHistory(context: Context): Int {
             val preferences = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             val raw = preferences.getString(KEY_ITEMS, null)
-            var removed = 0
-            val retained = JSONArray()
-            if (raw != null) {
-                runCatching { JSONArray(raw) }.getOrNull()?.let { entries ->
-                    for (index in 0 until entries.length()) {
-                        val entry = entries.optJSONObject(index) ?: continue
-                        if (entry.optString("type") == ClipType.IMAGE.name) {
-                            removed++
-                        } else {
-                            retained.put(entry)
-                        }
-                    }
-                }
+            if (raw == null) return 0
+            val cleanup = ClipboardPersistence.removeImageEntries(raw) ?: return 0
+            preferences.edit().putString(KEY_ITEMS, cleanup.remainingJson).apply()
+            if (cleanup.removedCount > 0) {
+                File(context.filesDir, IMAGE_DIR).listFiles()?.forEach { it.delete() }
             }
-            preferences.edit().putString(KEY_ITEMS, retained.toString()).apply()
-            File(context.filesDir, IMAGE_DIR).listFiles()?.forEach { it.delete() }
-            return removed
+            return cleanup.removedCount
         }
     }
 
@@ -71,6 +60,7 @@ class ClipboardHistoryManager(private val context: Context) {
     private val items = mutableListOf<ClipboardItem>()
     private var nextId = 1L
     private var listener: (() -> Unit)? = null
+    private var captureEnabled = false
 
     private val clipListener = SystemClipboardManager.OnPrimaryClipChangedListener {
         systemClipboard.primaryClip?.let { addFromClipData(it) }
@@ -78,13 +68,26 @@ class ClipboardHistoryManager(private val context: Context) {
 
     fun start() {
         load()
-        systemClipboard.addPrimaryClipChangedListener(clipListener)
-        systemClipboard.primaryClip?.let { addFromClipData(it) }
+        setCaptureEnabled(!KeyboardPreferences.isIncognitoMode(context))
     }
 
     fun stop() {
-        systemClipboard.removePrimaryClipChangedListener(clipListener)
+        if (captureEnabled) {
+            systemClipboard.removePrimaryClipChangedListener(clipListener)
+            captureEnabled = false
+        }
         save()
+    }
+
+    fun setCaptureEnabled(enabled: Boolean) {
+        if (captureEnabled == enabled) return
+        captureEnabled = enabled
+        if (enabled) {
+            systemClipboard.addPrimaryClipChangedListener(clipListener)
+            systemClipboard.primaryClip?.let { addFromClipData(it) }
+        } else {
+            systemClipboard.removePrimaryClipChangedListener(clipListener)
+        }
     }
 
     fun setOnChangedListener(l: () -> Unit) {
@@ -101,14 +104,16 @@ class ClipboardHistoryManager(private val context: Context) {
         )
 
     private fun addFromClipData(clip: ClipData) {
+        if (!captureEnabled || KeyboardPreferences.isIncognitoMode(context)) return
         if (clip.itemCount == 0) return
         val item = clip.getItemAt(0)
         val desc = clip.description
         val isImage = item.uri != null && desc.hasMimeType("image/*")
         if (
             isImage &&
-                !shouldCaptureClipboardItem(
+                !shouldCaptureClipboard(
                     ClipType.IMAGE,
+                    KeyboardPreferences.isIncognitoMode(context),
                     KeyboardPreferences.getBoolean(
                         context,
                         KeyboardPreferences.IMAGE_CLIPBOARD_HISTORY,

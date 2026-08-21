@@ -16,6 +16,7 @@
     <string name="clipboard_title">Clipboard</string>
     <string name="clipboard_search">Search clipboard</string>
     <string name="clipboard_search_results">Search results</string>
+    <string name="clipboard_image_content_description">Clipboard image</string>
     <string name="cd_tools">Tools</string>
     <string name="cd_expand_tools">Expand tools</string>
     <string name="cd_collapse_tools">Collapse tools</string>

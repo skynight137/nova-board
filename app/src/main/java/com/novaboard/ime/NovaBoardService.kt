@@ -107,6 +107,9 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 refreshSuggestionsIfReady()
                 return@OnSharedPreferenceChangeListener
             }
+            if (key == KeyboardPreferences.INCOGNITO_MODE && ::clipboardHistory.isInitialized) {
+                clipboardHistory.setCaptureEnabled(!KeyboardPreferences.isIncognitoMode(this))
+            }
             if (::keyboardView.isInitialized) {
                 keyboardView.post { applyKeyboardPreferences() }
             }
@@ -420,6 +423,9 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                             !KeyboardPreferences.isIncognitoMode(this),
                         )
                         updateIncognitoBanner()
+                        clipboardHistory.setCaptureEnabled(
+                            !KeyboardPreferences.isIncognitoMode(this),
+                        )
                     }
                 }
             }
@@ -551,6 +557,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     }
 
     private fun wireCursorButton(button: ImageButton, code: Int) {
+        button.setOnClickListener { sendDpad(code) }
         button.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 android.view.MotionEvent.ACTION_DOWN -> {
@@ -560,6 +567,9 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 android.view.MotionEvent.ACTION_UP,
                 android.view.MotionEvent.ACTION_CANCEL -> {
                     stopCursorRepeat()
+                    if (event.actionMasked == android.view.MotionEvent.ACTION_UP) {
+                        button.performClick()
+                    }
                     true
                 }
                 else -> true

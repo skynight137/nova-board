@@ -16,6 +16,11 @@ history.
   the UI needs to report it.
 - Tests cover malformed JSON, mixed text/image entries, and repeated cleanup.
 
+## Status
+
+Implemented: malformed cleanup fails closed, valid text entries are retained,
+and JVM tests cover malformed, mixed, and repeated cleanup.
+
 ## Relevant files
 
 - `app/src/main/java/com/novaboard/ime/clipboard/ClipboardHistory.kt`

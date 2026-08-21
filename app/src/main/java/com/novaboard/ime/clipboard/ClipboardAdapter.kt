@@ -33,9 +33,12 @@ class ClipboardAdapter(
         if (item.type == ClipType.IMAGE) {
             holder.image.visibility = View.VISIBLE
             holder.text.visibility = View.GONE
+            holder.image.contentDescription =
+                holder.itemView.context.getString(R.string.clipboard_image_content_description)
             runCatching { holder.image.setImageURI(Uri.parse(item.imageUri)) }
         } else {
             holder.image.visibility = View.GONE
+            holder.image.contentDescription = null
             holder.text.visibility = View.VISIBLE
             holder.text.text = item.text
         }

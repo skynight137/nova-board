@@ -131,6 +131,12 @@ constructor(
     }
     private var toneGenerator: ToneGenerator? = null
 
+    override fun performClick(): Boolean {
+        super.performClick()
+        pressedHit?.key?.takeIf { it.type != KeyType.BACKSPACE }?.let(::handleKeyUp)
+        return true
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val width = MeasureSpec.getSize(widthMeasureSpec)
         val heightMode = MeasureSpec.getMode(heightMeasureSpec)

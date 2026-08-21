@@ -17,6 +17,13 @@ accessibility services may not be able to activate these controls consistently.
 - Accessibility-focused regression coverage or a documented manual verification
   path is added.
 
+## Status
+
+Implemented: cursor controls expose click activation and clipboard images have
+content descriptions. The custom canvas keyboard has a safe `performClick`
+contract, but individual key activation is skipped because full support needs a
+virtual accessibility-node layer; device verification remains required.
+
 ## Relevant files
 
 - `app/src/main/java/com/novaboard/ime/view/KeyboardView.kt`
