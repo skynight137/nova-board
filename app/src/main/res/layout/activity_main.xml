@@ -2,136 +2,139 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-<ScrollView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
-    <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-        android:background="@color/kb_background"
-        android:padding="@dimen/nb_space_6">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-         android:layout_marginTop="@dimen/nb_space_4"
-         android:layout_marginBottom="@dimen/nb_space_6"
-        android:text="@string/app_name"
-         android:textSize="24sp"
-         android:textColor="@color/kb_key_text"
-        android:textStyle="bold" />
-
-    <Button
-        android:id="@+id/btnEnable"
-        style="@style/NovaBoardSettingsPrimaryButton"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_marginBottom="@dimen/nb_space_4"
-        android:text="@string/enable_keyboard" />
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-    <Button
-        android:id="@+id/btnSwitch"
-        style="@style/NovaBoardSettingsPrimaryButton"
-        android:layout_width="match_parent"
-        android:layout_marginBottom="@dimen/nb_space_7"
-        android:text="@string/switch_keyboard" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/kb_background"
+            android:orientation="vertical"
+            android:padding="@dimen/nb_space_6">
 
-    <Button
-        android:id="@+id/btnExportLog"
-        style="@style/NovaBoardSettingsRow"
-        android:layout_width="match_parent"
-        android:layout_marginBottom="@dimen/nb_space_6"
-        android:text="@string/export_app_log" />
+            <TextView
+                style="@style/NovaBoardSettingsTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nb_space_4"
+                android:layout_marginBottom="@dimen/nb_space_6"
+                android:text="@string/app_name" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/keyboard_preferences"
-        android:textStyle="bold"
-        android:layout_marginBottom="@dimen/nb_space_4"
-        android:textSize="16sp"
-        android:textColor="@color/kb_key_text" />
+            <Button
+                android:id="@+id/btnEnable"
+                style="@style/NovaBoardSettingsPrimaryButton"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="@dimen/nb_space_4"
+                android:text="@string/enable_keyboard" />
 
-    <Button
-        android:id="@+id/btnLayoutSettings"
-        style="@style/NovaBoardSettingsRow"
-        android:layout_width="match_parent"
-        android:layout_marginBottom="4dp"
-        android:text="@string/layout_keys" />
+            <Button
+                android:id="@+id/btnSwitch"
+                style="@style/NovaBoardSettingsPrimaryButton"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="@dimen/nb_space_7"
+                android:text="@string/switch_keyboard" />
 
-    <Button
-        android:id="@+id/btnTypingSettings"
-        style="@style/NovaBoardSettingsRow"
-        android:layout_width="match_parent"
-        android:layout_marginBottom="4dp"
-        android:text="@string/typing" />
+            <Button
+                android:id="@+id/btnExportLog"
+                style="@style/NovaBoardSettingsRow"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="@dimen/nb_space_6"
+                android:text="@string/export_app_log" />
 
-    <Button
-        android:id="@+id/btnEmojiSettings"
-        style="@style/NovaBoardSettingsRow"
-        android:layout_width="match_parent"
-        android:layout_marginBottom="4dp"
-        android:text="@string/emoji" />
+            <TextView
+                style="@style/NovaBoardSettingsSectionTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/nb_space_4"
+                android:text="@string/keyboard_preferences" />
 
-    <Button
-        android:id="@+id/btnSoundSettings"
-        style="@style/NovaBoardSettingsRow"
-        android:layout_width="match_parent"
-        android:layout_marginBottom="16dp"
-        android:text="@string/sound_vibration" />
+            <Button
+                android:id="@+id/btnLayoutSettings"
+                style="@style/NovaBoardSettingsRow"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="@dimen/nb_space_2"
+                android:text="@string/layout_keys" />
 
-    <Button
-        android:id="@+id/btnGestureSettings"
-        style="@style/NovaBoardSettingsRow"
-        android:layout_width="match_parent"
-        android:layout_marginBottom="4dp"
-        android:text="@string/gesture_input" />
+            <Button
+                android:id="@+id/btnTypingSettings"
+                style="@style/NovaBoardSettingsRow"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="@dimen/nb_space_2"
+                android:text="@string/typing" />
 
-    <Button
-        android:id="@+id/btnIncognito"
-        style="@style/NovaBoardSettingsRow"
-        android:layout_width="match_parent"
-        android:layout_marginBottom="16dp"
-        android:text="@string/incognito_mode" />
+            <Button
+                android:id="@+id/btnEmojiSettings"
+                style="@style/NovaBoardSettingsRow"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="@dimen/nb_space_2"
+                android:text="@string/emoji" />
 
-    <Button
-        android:id="@+id/btnResetSettings"
-        style="@style/NovaBoardSettingsReset"
-        android:layout_width="match_parent"
-        android:text="@string/reset_settings" />
+            <Button
+                android:id="@+id/btnSoundSettings"
+                style="@style/NovaBoardSettingsRow"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="@dimen/nb_space_7"
+                android:text="@string/sound_vibration" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/theme_label"
-        android:textStyle="bold"
-        android:layout_marginTop="@dimen/nb_space_6"
-        android:layout_marginBottom="@dimen/nb_space_4"
-        android:textSize="@dimen/nb_supporting_text"
-        android:textColor="@color/kb_toolbar_icon" />
+            <Button
+                android:id="@+id/btnGestureSettings"
+                style="@style/NovaBoardSettingsRow"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="@dimen/nb_space_2"
+                android:text="@string/gesture_input" />
 
-    <RadioGroup
-        android:id="@+id/themeGroup"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/btnIncognito"
+                style="@style/NovaBoardSettingsRow"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="@dimen/nb_space_7"
+                android:text="@string/incognito_mode" />
 
-        <RadioButton android:id="@+id/radioSystem" android:text="@string/theme_system" />
-        <RadioButton android:id="@+id/radioLight" android:text="@string/theme_light" />
-        <RadioButton android:id="@+id/radioDark" android:text="@string/theme_dark" />
-    </RadioGroup>
+            <Button
+                android:id="@+id/btnResetSettings"
+                style="@style/NovaBoardSettingsReset"
+                android:layout_width="match_parent"
+                android:text="@string/reset_settings" />
 
-</LinearLayout>
-</ScrollView>
-<Button
-    android:id="@+id/btnLayoutPreview"
-    android:layout_width="64dp"
-         android:layout_height="64dp"
-    android:layout_gravity="bottom|end"
-    android:layout_margin="16dp"
-    android:contentDescription="@string/layout_preview"
-    android:text="⌨"
-    android:textSize="24sp"
-     android:background="@drawable/bg_settings_primary"
-     android:textColor="@color/kb_on_accent" />
+            <TextView
+                style="@style/NovaBoardSettingsThemeLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/nb_space_6"
+                android:layout_marginBottom="@dimen/nb_space_4"
+                android:text="@string/theme_label" />
+
+            <RadioGroup
+                android:id="@+id/themeGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:id="@+id/radioSystem"
+                    style="@style/NovaBoardSettingsRadio"
+                    android:text="@string/theme_system" />
+
+                <RadioButton
+                    android:id="@+id/radioLight"
+                    style="@style/NovaBoardSettingsRadio"
+                    android:text="@string/theme_light" />
+
+                <RadioButton
+                    android:id="@+id/radioDark"
+                    style="@style/NovaBoardSettingsRadio"
+                    android:text="@string/theme_dark" />
+            </RadioGroup>
+        </LinearLayout>
+    </ScrollView>
+
+    <ImageButton
+        android:id="@+id/btnLayoutPreview"
+        style="@style/NovaBoardSettingsFab"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/nb_fab_margin"
+        android:contentDescription="@string/layout_preview"
+        android:src="@drawable/ic_keyboard" />
 </FrameLayout>

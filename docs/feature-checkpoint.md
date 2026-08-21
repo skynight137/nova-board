@@ -126,8 +126,9 @@ These behaviors were manually confirmed in the active keyboard:
 - [✓] Keyboard enable action
 - [✓] Active input-method switch action
 - [✓] Keyboard preference handling
-- [~] Settings action hierarchy and preference-row styling implemented; device
-  visual verification remains part of the narrow/tall layout pass
+- [~] Settings action hierarchy, typography, and preference-row styling
+  implemented; device visual verification remains part of the narrow/tall
+  layout pass
 - [~] Launcher icon remains a placeholder monogram
 - [~] Visual polish should still be checked on narrow, tall, light, and dark
   phone layouts
