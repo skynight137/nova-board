@@ -7,14 +7,22 @@ input without a third-party keyboard SDK.
 
 ## Features
 
-- Tools row with clipboard, hotkeys, translation, voice, and an
-  in-keyboard four-column overflow tools grid
+- SwiftKey-inspired toolbar layout with a prediction bar always visible directly
+  above the number row
+- Expandable tools row: the up chevron opens clipboard, hotkeys, translation,
+  voice, and overflow tools above the prediction bar; the down chevron collapses
+  it without hiding predictions
 - Suggestions, small grammar/autocorrect helpers, and next-word prediction
 - QWERTY, number, symbol, and cursor-arrow layouts
-- Long-press accented characters and symbol popups
-- Clipboard history for text and image references with pinning and deletion
-- Clipboard stays open after paste so history and pin controls remain available
+- Key pop-ups for accented characters and symbols on long press
+- Per-touch key previews: pressing multiple keys in parallel displays a preview
+  for every pressed character instead of replacing earlier previews
 - Multi-touch letter input for pressing more than one key together
+- Clipboard history for text and image references with pinning and deletion
+- Case-insensitive clipboard search with a no-results state; an empty search
+  restores the complete history
+- Clipboard stays open after paste so history, search, and pin controls remain
+  available
 - Scrollable, compact emoji picker with padded, uncropped emoji cells
 - System, light, and dark themes
 - Voice typing through Android's on-device `SpeechRecognizer`
