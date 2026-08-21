@@ -7,7 +7,7 @@ the repository-wide review on 2026-08-21.
 ## HI-001 — Make Android version codes increase for every release
 
 **Severity:** High  
-**Status:** Open  
+**Status:** Resolved
 **Files:** `app/build.gradle.kts:21-27`, `.releaserc.cjs:9-10,40-53`,
 `docs/releasing.md:212-219`
 
@@ -31,10 +31,16 @@ compares the new code with the previous published code.
   the previous release.
 - The generated APK and release metadata expose the same release identity.
 
+### Resolution
+
+Android version codes are derived from semantic versions and release
+pre-release numbers; release preparation rejects non-increasing codes and
+stores the code in release metadata.
+
 ## HI-002 — Stop importing the existing system clipboard without consent
 
 **Severity:** High  
-**Status:** Open  
+**Status:** Resolved
 **Files:** `app/src/main/java/com/novaboard/ime/clipboard/ClipboardHistory.kt:65-89`,
 `app/src/main/java/com/novaboard/ime/NovaBoardService.kt:118-124`
 
@@ -58,10 +64,15 @@ importing the existing content.
 - Exiting incognito does not silently import stale clipboard content.
 - Text and image behavior are both covered by JVM and device-level checks.
 
+### Resolution
+
+Enabling capture now listens only for future clipboard changes and no longer
+imports the existing primary clip.
+
 ## HI-003 — Move clipboard copying and persistence off the IME main path
 
 **Severity:** High  
-**Status:** Open  
+**Status:** Resolved
 **Files:** `app/src/main/java/com/novaboard/ime/clipboard/ClipboardHistory.kt:65-67,106-212`
 
 ### Finding
@@ -85,10 +96,16 @@ image files.
 - Service teardown cancels or drains pending work safely.
 - Failed image copies remove temporary files.
 
+### Resolution
+
+Clipboard capture, image copying, persistence, pinning, and deletion are
+serialized on a dedicated worker; UI notifications are posted to the main
+thread and teardown stops new work while draining queued operations.
+
 ## HI-004 — Align the documented prerelease workflow with GitHub Actions
 
 **Severity:** High  
-**Status:** Open  
+**Status:** Resolved
 **Files:** `README.md:100-107`, `docs/releasing.md`, `.releaserc.cjs:12-18`,
 `.github/workflows/release.yml:3-7`
 
@@ -116,10 +133,15 @@ Document how a manual `dev` dispatch differs from a stable `main` release.
 - Stable releases remain restricted to `main`.
 - Release documentation, semantic-release branches, and workflow triggers agree.
 
+### Resolution
+
+The release workflow now runs on both `dev` and `main`, while semantic-release
+continues to classify `dev` as prerelease and `main` as stable.
+
 ## HI-005 — Verify the Android certificate identity after release builds
 
 **Severity:** High  
-**Status:** Open  
+**Status:** Resolved
 **Files:** `app/build.gradle.kts:42-66,165-180`,
 `.github/release-tooling/prepare-release.sh`
 
@@ -141,10 +163,15 @@ fingerprint with the configured release identity before publication.
 - The expected fingerprint is recorded without exposing private key material.
 - Verification runs before GPG signing, upload, and attestation.
 
+### Resolution
+
+Release preparation verifies the built APK certificate with `apksigner` before
+calculating publication metadata or signing the artifact.
+
 ## HI-006 — Protect release runs from concurrent publication
 
 **Severity:** High  
-**Status:** Open  
+**Status:** Resolved
 **Files:** `.github/workflows/release.yml:9-19`,
 `.releaserc.cjs:40-78`
 
@@ -165,3 +192,8 @@ mutate release state at a time.
 - Concurrent release triggers cannot publish the same version twice.
 - A manual dispatch while a release is running is queued or clearly rejected.
 - Release logs identify the active concurrency policy.
+
+### Resolution
+
+The release workflow uses the `release-publication` concurrency group with
+queued duplicate runs.

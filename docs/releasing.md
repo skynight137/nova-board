@@ -33,6 +33,8 @@ The release workflow uses:
   sign the APK
 - `GPG_PASSPHRASE` — passphrase for the GPG private key
 - `GPG_FINGERPRINT` — repository secret used to select the GPG signing key
+- `ANDROID_CERTIFICATE_SHA256` — SHA-256 fingerprint of the Android release
+  certificate, used to verify the built APK before publication
 
 Optional clone settings are read from the environment and default to the
 repository template layout:
@@ -88,8 +90,9 @@ workflow. In GitHub, open **Settings > Secrets and variables > Actions**:
 - Add `KEYSTORE_B64`, `KEYSTORE_PASSWORD`, `KEYSTORE_ENTRY_ALIAS`,
   `KEYSTORE_ENTRY_PASSWORD`, `GPG_PRIVATE_KEY_B64`, and `GPG_PASSPHRASE` under
   **Repository secrets**.
-- Add `GPG_FINGERPRINT` under **Repository secrets**. The workflow uses it to
-  verify and select the imported GPG signing key.
+- Add `GPG_FINGERPRINT` and `ANDROID_CERTIFICATE_SHA256` under **Repository
+  secrets**. The workflow uses them to verify the imported GPG key and APK
+  certificate.
 - Add `CROWDIN_PROJECT_ID` and `CROWDIN_PERSONAL_TOKEN` under **Repository
   secrets** if the Crowdin workflows are enabled.
 
@@ -302,6 +305,10 @@ and manifest filename only where its application configuration requires it.
 No shared release script should contain the original clone's name.
 
 ## Local verification
+
+The protected release workflow runs for pushes or manual dispatches on `dev`
+(prereleases) and `main` (stable releases). It uses a single concurrency group,
+so a manual dispatch waits for an active publication rather than racing it.
 
 Run the repository-managed toolchain before opening a release pull request:
 

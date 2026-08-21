@@ -102,8 +102,8 @@ For resource, dependency, or packaging changes:
 Releases use Conventional Commits and semantic-release:
 
 ```text
-dev  ──> prerelease
-main ──> stable release
+dev  ──> prerelease (automatic push or manual dispatch)
+main ──> stable release (automatic push or manual dispatch)
 ```
 
 The pipeline calculates the next version, updates `app/gradle.properties`,
@@ -112,6 +112,8 @@ signature, and release metadata to GitHub. The release page is opened manually
 from the app; there is no automatic updater.
 
 See [docs/releasing.md](docs/releasing.md) for signing and release details.
+The release workflow serializes publication. A `dev` run publishes a
+semantic-release prerelease; a `main` run publishes a stable release.
 
 ## Contributing
 

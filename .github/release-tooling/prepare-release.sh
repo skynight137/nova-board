@@ -7,6 +7,20 @@ if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]]; then
   echo "ERROR: release version must be a semantic version" >&2
   exit 1
 fi
+version_code_for() {
+  local version="$1" base prerelease
+  base="${version%%-*}"
+  IFS=. read -r major minor patch <<<"${base}"
+  prerelease="${version##*-}"
+  if [[ "${prerelease}" == "${version}" ]]; then
+    prerelease=99
+  else
+    prerelease="${prerelease##*.}"
+    [[ "${prerelease}" =~ ^[0-9]+$ ]] || prerelease=1
+    (( prerelease = prerelease < 99 ? prerelease : 98 ))
+  fi
+  echo $((major * 10000000 + minor * 10000 + patch * 100 + prerelease))
+}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=release-config.sh
 source "${SCRIPT_DIR}/release-config.sh"
@@ -97,6 +111,14 @@ if [[ ! "${GPG_FINGERPRINT:-}" =~ ^[A-Fa-f0-9]{40}$ ]]; then
 fi
 
 echo "Preparing ${APK_NAME}..."
+VERSION_CODE="$(version_code_for "${VERSION}")"
+if [[ -f "${RELEASE_JSON}" ]]; then
+  PREVIOUS_VERSION_CODE="$(node -e 'const fs=require("fs"); const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8")); process.stdout.write(String(m.version_code ?? 0))' "${RELEASE_JSON}")"
+  if [[ ! "${PREVIOUS_VERSION_CODE}" =~ ^[0-9]+$ ]] || (( VERSION_CODE <= PREVIOUS_VERSION_CODE )); then
+    echo "ERROR: version code ${VERSION_CODE} must be greater than previous release code ${PREVIOUS_VERSION_CODE}" >&2
+    exit 1
+  fi
+fi
 
 VERSION_BACKUP="$(mktemp)"
 cp "${VERSION_FILE}" "${VERSION_BACKUP}"
@@ -129,6 +151,24 @@ fi
 APK_TEMP="$(mktemp "${RELEASE_DIR}/.${APK_NAME}.XXXXXX")"
 cp "${APK_SOURCE}" "${APK_TEMP}"
 echo "Staged APK at ${APK_TEMP}"
+
+if [[ -n "${ANDROID_CERTIFICATE_SHA256:-}" ]]; then
+  command -v apksigner >/dev/null 2>&1 || {
+    echo "ERROR: apksigner is required for certificate verification" >&2
+    exit 1
+  }
+  ACTUAL_CERTIFICATE_SHA256="$(
+    apksigner verify --print-certs "${APK_TEMP}" 2>/dev/null |
+      sed -n 's/.*Signer #1 certificate SHA-256 digest: //p' | head -n1 |
+      tr -d '[:space:]' | tr '[:lower:]' '[:upper:]'
+  )"
+  EXPECTED_CERTIFICATE_SHA256="$(printf '%s' "${ANDROID_CERTIFICATE_SHA256}" | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')"
+  [[ "${ACTUAL_CERTIFICATE_SHA256}" == "${EXPECTED_CERTIFICATE_SHA256}" ]] || {
+    echo "ERROR: APK certificate fingerprint does not match the configured release identity" >&2
+    exit 1
+  }
+  echo "Verified APK certificate fingerprint ${ACTUAL_CERTIFICATE_SHA256}"
+fi
 
 APK_SHA256="$(sha256sum "${APK_TEMP}" | awk '{print $1}')"
 if [[ ! "${APK_SHA256}" =~ ^[0-9a-f]{64}$ ]]; then
@@ -185,18 +225,20 @@ fi
 
 mkdir -p "$(dirname "${RELEASE_JSON}")"
 MANIFEST_TEMP="$(mktemp "${RELEASE_JSON}.XXXXXX")"
-node - "${RELEASE_JSON}" "${MANIFEST_TEMP}" "${VERSION}" "${REPOSITORY}" "${APK_NAME}" "${APK_SHA256}" "${APK_SIZE_BYTES}" "${GPG_FINGERPRINT}" "${ROOT_PROJECT_NAME}" <<'NODE'
+node - "${RELEASE_JSON}" "${MANIFEST_TEMP}" "${VERSION}" "${VERSION_CODE}" "${REPOSITORY}" "${APK_NAME}" "${APK_SHA256}" "${APK_SIZE_BYTES}" "${GPG_FINGERPRINT}" "${ANDROID_CERTIFICATE_SHA256:-}" "${ROOT_PROJECT_NAME}" <<'NODE'
 const fs = require("fs");
 
 const [
   manifestPath,
   outputPath,
   version,
+  versionCode,
   repository,
   apkName,
   sha256,
   sizeBytes,
   signatureKeyFingerprint,
+  certificateFingerprint,
   projectName,
 ] =
   process.argv.slice(2);
@@ -215,6 +257,7 @@ if (!/^[A-Fa-f0-9]{40}$/.test(signatureKeyFingerprint)) {
 
 manifest.created_at = new Date().toISOString();
 manifest.version = version;
+manifest.version_code = Number(versionCode);
 const isDevelopment = version.includes("-");
 manifest.description = `${projectName} ${version} ${
   isDevelopment ? "development" : "stable"
@@ -222,6 +265,7 @@ manifest.description = `${projectName} ${version} ${
 manifest.download_url = `${releaseBase}/${apkName}`;
 manifest.signature_download_url = `${releaseBase}/${apkName}.asc`;
 manifest.signature_key_fingerprint = signatureKeyFingerprint.toUpperCase();
+if (certificateFingerprint) manifest.certificate_sha256 = certificateFingerprint.replace(/:/g, "").toUpperCase();
 manifest.sha256 = sha256;
 manifest.size_bytes = numericSize;
 

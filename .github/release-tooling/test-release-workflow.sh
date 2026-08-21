@@ -4,11 +4,19 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WORKFLOW="${ROOT_DIR}/.github/workflows/release.yml"
-
 fail() {
   echo "FAIL: $*" >&2
   exit 1
 }
+
+pr_workflow="${ROOT_DIR}/.github/workflows/build_pull_request.yml"
+if grep -Eq 'secrets\.(KEYSTORE|GPG)_|KEYSTORE_PASSWORD|KEYSTORE_ENTRY' "${pr_workflow}"; then
+  fail "pull-request workflow must not reference release keystore secrets"
+fi
+grep -Fq './gradlew assembleDebug' "${pr_workflow}" ||
+  fail "pull-request workflow must build the unsigned debug APK"
+grep -Fq 'branches:' "${ROOT_DIR}/.github/workflows/release.yml" ||
+  fail "release workflow branch policy is missing"
 
 validation_line="$(grep -n -- "- name: Validate release inputs" "${WORKFLOW}" | cut -d: -f1)"
 keystore_line="$(grep -n -- "- name: Setup keystore" "${WORKFLOW}" | cut -d: -f1)"
