@@ -1,15 +1,17 @@
 <resources>
-    <!-- Light theme (SwiftKey-style) -->
-    <color name="kb_background">#E9EAEE</color>
+    <!-- NovaBoard design tokens: light semantic roles. -->
+    <color name="kb_background">#F4F5F8</color>
     <color name="kb_key_bg">#FFFFFF</color>
-    <color name="kb_key_bg_special">#D3D6DC</color>
-    <color name="kb_key_text">#1B1C1E</color>
-    <color name="kb_key_pressed">#C7CBD1</color>
+    <color name="kb_key_bg_special">#DDE1E8</color>
+    <color name="kb_key_text">#15171A</color>
+    <color name="kb_key_pressed">#C9CED8</color>
     <color name="kb_accent">#4C7CF3</color>
-    <color name="kb_suggestion_text">#4C4E52</color>
-    <color name="kb_suggestion_text_highlight">#1B1C1E</color>
-    <color name="kb_divider">#C7CBD1</color>
-    <color name="kb_toolbar_icon">#5A5D63</color>
+    <color name="kb_accent_pressed">#315FCE</color>
+    <color name="kb_suggestion_text">#4C4F55</color>
+    <color name="kb_suggestion_text_highlight">#15171A</color>
+    <color name="kb_divider">#C7CBD3</color>
+    <color name="kb_toolbar_icon">#4C4F55</color>
     <color name="kb_incognito_background">#DCE8FF</color>
     <color name="kb_incognito_text">#183A75</color>
+    <color name="kb_danger">#B3261E</color>
 </resources>

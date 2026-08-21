@@ -1,15 +1,17 @@
 <resources>
-    <!-- Dark theme (matches the attached screenshot) -->
-    <color name="kb_background">#101114</color>
-    <color name="kb_key_bg">#3A3C42</color>
-    <color name="kb_key_bg_special">#26282C</color>
-    <color name="kb_key_text">#F2F2F3</color>
-    <color name="kb_key_pressed">#4E5158</color>
+    <!-- NovaBoard design tokens: dark semantic roles. -->
+    <color name="kb_background">#111317</color>
+    <color name="kb_key_bg">#262A31</color>
+    <color name="kb_key_bg_special">#1D2026</color>
+    <color name="kb_key_text">#F4F5F7</color>
+    <color name="kb_key_pressed">#414650</color>
     <color name="kb_accent">#8AB4FF</color>
-    <color name="kb_suggestion_text">#B5B7BC</color>
-    <color name="kb_suggestion_text_highlight">#FFFFFF</color>
-    <color name="kb_divider">#2B2D31</color>
-    <color name="kb_toolbar_icon">#E4E4E6</color>
+    <color name="kb_accent_pressed">#B7D0FF</color>
+    <color name="kb_suggestion_text">#C4C7CD</color>
+    <color name="kb_suggestion_text_highlight">#F4F5F7</color>
+    <color name="kb_divider">#343840</color>
+    <color name="kb_toolbar_icon">#C4C7CD</color>
     <color name="kb_incognito_background">#263B61</color>
     <color name="kb_incognito_text">#D9E7FF</color>
+    <color name="kb_danger">#FFB4AB</color>
 </resources>

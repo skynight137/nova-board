@@ -121,6 +121,8 @@ These behaviors were manually confirmed in the active keyboard:
 - [✓] System theme
 - [✓] Light theme
 - [✓] Dark theme
+- [✓] Android resources normalized to the approved NovaBoard design tokens
+- [✓] Keyboard toolbar and cursor controls use the minimum touch-target contract
 - [✓] Keyboard enable action
 - [✓] Active input-method switch action
 - [✓] Keyboard preference handling

@@ -1,12 +1,12 @@
 <resources>
     <style name="NovaBoardToolIcon">
-        <item name="android:layout_width">48dp</item>
-        <item name="android:layout_height">48dp</item>
-        <item name="android:minWidth">48dp</item>
-        <item name="android:minHeight">48dp</item>
+        <item name="android:layout_width">@dimen/nb_touch_target_min</item>
+        <item name="android:layout_height">@dimen/nb_touch_target_min</item>
+        <item name="android:minWidth">@dimen/nb_touch_target_min</item>
+        <item name="android:minHeight">@dimen/nb_touch_target_min</item>
         <item name="android:layout_margin">0dp</item>
         <item name="android:background">@android:color/transparent</item>
-        <item name="android:padding">8dp</item>
+        <item name="android:padding">@dimen/nb_space_4</item>
         <item name="android:tint">@color/kb_toolbar_icon</item>
     </style>
 
@@ -16,7 +16,7 @@
         <item name="android:layout_height">match_parent</item>
         <item name="android:gravity">center</item>
         <item name="android:textColor">@color/kb_suggestion_text</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:singleLine">true</item>
         <item name="android:ellipsize">end</item>
         <item name="android:background">@android:color/transparent</item>
@@ -29,11 +29,11 @@
 
     <style name="NovaBoardCursorArrow">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">48dp</item>
-        <item name="android:minHeight">48dp</item>
+        <item name="android:layout_height">@dimen/nb_cursor_row_height</item>
+        <item name="android:minHeight">@dimen/nb_touch_target_min</item>
         <item name="android:layout_weight">1</item>
         <item name="android:background">@android:color/transparent</item>
-        <item name="android:padding">8dp</item>
+        <item name="android:padding">@dimen/nb_space_4</item>
         <item name="android:tint">@color/kb_toolbar_icon</item>
     </style>
 
@@ -46,7 +46,7 @@
         <item name="android:paddingEnd">10dp</item>
         <item name="android:background">@drawable/bg_key_special</item>
         <item name="android:textColor">@color/kb_key_text</item>
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">@dimen/nb_utility_label</item>
         <item name="android:textAllCaps">true</item>
     </style>
 </resources>

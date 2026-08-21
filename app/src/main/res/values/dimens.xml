@@ -1,0 +1,19 @@
+<resources>
+    <!-- NovaBoard design tokens. Keep touch targets independent from visual padding. -->
+    <dimen name="nb_space_1">2dp</dimen>
+    <dimen name="nb_space_2">4dp</dimen>
+    <dimen name="nb_space_3">6dp</dimen>
+    <dimen name="nb_space_4">8dp</dimen>
+    <dimen name="nb_space_5">12dp</dimen>
+    <dimen name="nb_space_6">16dp</dimen>
+    <dimen name="nb_space_7">24dp</dimen>
+    <dimen name="nb_space_8">32dp</dimen>
+    <dimen name="nb_key_radius">6dp</dimen>
+    <dimen name="nb_panel_radius">10dp</dimen>
+    <dimen name="nb_touch_target_min">44dp</dimen>
+    <dimen name="nb_toolbar_height">48dp</dimen>
+    <dimen name="nb_cursor_row_height">48dp</dimen>
+    <dimen name="nb_key_label">20sp</dimen>
+    <dimen name="nb_utility_label">12sp</dimen>
+    <dimen name="nb_supporting_text">13sp</dimen>
+</resources>

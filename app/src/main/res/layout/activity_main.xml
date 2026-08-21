@@ -10,36 +10,37 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="24dp">
+     android:padding="@dimen/nb_space_6">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="24dp"
+         android:layout_marginTop="@dimen/nb_space_4"
+         android:layout_marginBottom="@dimen/nb_space_6"
         android:text="@string/app_name"
-        android:textSize="24sp"
+         android:textSize="24sp"
+         android:textColor="@color/kb_key_text"
         android:textStyle="bold" />
 
     <Button
         android:id="@+id/btnEnable"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
+         android:layout_marginBottom="@dimen/nb_space_4"
         android:text="@string/enable_keyboard" />
 
     <Button
         android:id="@+id/btnSwitch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+         android:layout_marginBottom="@dimen/nb_space_7"
         android:text="@string/switch_keyboard" />
 
     <Button
         android:id="@+id/btnExportLog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="18dp"
+         android:layout_marginBottom="@dimen/nb_space_6"
         android:text="@string/export_app_log" />
 
     <TextView
@@ -47,7 +48,9 @@
         android:layout_height="wrap_content"
         android:text="@string/keyboard_preferences"
         android:textStyle="bold"
-        android:layout_marginBottom="8dp" />
+         android:layout_marginBottom="@dimen/nb_space_4"
+         android:textSize="16sp"
+         android:textColor="@color/kb_key_text" />
 
     <Button
         android:id="@+id/btnLayoutSettings"
