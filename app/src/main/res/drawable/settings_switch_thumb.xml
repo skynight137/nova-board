@@ -2,19 +2,19 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_checked="true">
         <shape android:shape="oval">
-            <size android:width="22dp" android:height="22dp" />
+            <size android:width="20dp" android:height="20dp" />
             <solid android:color="@color/kb_switch_on_thumb" />
         </shape>
     </item>
     <item android:state_enabled="false">
         <shape android:shape="oval">
-            <size android:width="22dp" android:height="22dp" />
+            <size android:width="20dp" android:height="20dp" />
             <solid android:color="@color/kb_switch_disabled_thumb" />
         </shape>
     </item>
     <item>
         <shape android:shape="oval">
-            <size android:width="22dp" android:height="22dp" />
+            <size android:width="20dp" android:height="20dp" />
             <solid android:color="@color/kb_switch_off_thumb" />
         </shape>
     </item>
