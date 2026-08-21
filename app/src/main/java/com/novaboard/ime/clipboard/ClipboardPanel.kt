@@ -1,6 +1,8 @@
 package com.novaboard.ime.clipboard
 
 import android.content.Context
+import android.content.Context.INPUT_METHOD_SERVICE
+import android.view.inputmethod.InputMethodManager
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -162,10 +164,13 @@ class ClipboardPanel(
         target.visibility = View.VISIBLE
         panel = root
         this.target = target
-        searchField.requestFocus()
+        focusSearchField()
     }
 
     fun handleKey(key: Key, outputChar: String): Boolean {
+        if (!searchField.hasFocus()) {
+            focusSearchField()
+        }
         when (key.type) {
             KeyType.CHAR, KeyType.COMMA, KeyType.PERIOD, KeyType.SPACE -> searchField.append(outputChar)
             KeyType.BACKSPACE -> {
@@ -183,6 +188,17 @@ class ClipboardPanel(
     }
 
     fun handleBackspace(): Boolean = handleKey(Key(KeyType.BACKSPACE, ""), "")
+
+    private fun focusSearchField() {
+        searchField.requestFocus()
+        searchField.setSelection(searchField.length())
+        searchField.post {
+            if (!searchField.hasFocus()) return@post
+            val inputMethodManager =
+                context.getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
+            inputMethodManager?.showSoftInput(searchField, InputMethodManager.SHOW_IMPLICIT)
+        }
+    }
 
     private fun refresh() {
         val list = filterClipboardItems(history.getItems(), searchQuery)
