@@ -19,7 +19,6 @@ import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.RadioButton
-import android.widget.RadioGroup
 import android.widget.SeekBar
 import android.widget.ScrollView
 import android.widget.TextView
@@ -277,23 +276,6 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, R.string.settings_reset, Toast.LENGTH_SHORT).show()
         }
         updateIncognitoButton()
-
-        val group = findViewById<RadioGroup>(R.id.themeGroup)
-        when (ThemeManager.get(this)) {
-            ThemeMode.SYSTEM -> findViewById<RadioButton>(R.id.radioSystem).isChecked = true
-            ThemeMode.LIGHT -> findViewById<RadioButton>(R.id.radioLight).isChecked = true
-            ThemeMode.DARK -> findViewById<RadioButton>(R.id.radioDark).isChecked = true
-        }
-        group.setOnCheckedChangeListener { _, checkedId ->
-            val mode =
-                when (checkedId) {
-                    R.id.radioLight -> ThemeMode.LIGHT
-                    R.id.radioDark -> ThemeMode.DARK
-                    else -> ThemeMode.SYSTEM
-                }
-            ThemeManager.set(this, mode)
-            recreate()
-        }
 
         setSettingsRowIcon(R.id.btnEnable, R.drawable.ic_keyboard)
         setSettingsRowIcon(R.id.btnSwitch, R.drawable.ic_translate)
@@ -594,6 +576,7 @@ class MainActivity : AppCompatActivity() {
         titleRes: Int,
         content: View,
         includePreview: Boolean,
+        contentMatchParent: Boolean = false,
     ) {
         val page =
             FrameLayout(this).apply {
@@ -639,7 +622,17 @@ class MainActivity : AppCompatActivity() {
         page.addView(
             ScrollView(this).apply {
                 isFillViewport = true
-                addView(content)
+                addView(
+                    content,
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        if (contentMatchParent) {
+                            FrameLayout.LayoutParams.MATCH_PARENT
+                        } else {
+                            FrameLayout.LayoutParams.WRAP_CONTENT
+                        },
+                    ),
+                )
             },
             FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
@@ -756,7 +749,12 @@ class MainActivity : AppCompatActivity() {
                 marginEnd = dp(8)
             },
         )
-        showSettingsContentPage(R.string.layout_preview, content, includePreview = false)
+        showSettingsContentPage(
+            R.string.layout_preview,
+            content,
+            includePreview = false,
+            contentMatchParent = true,
+        )
     }
 
     private fun wirePreview(root: View, keyboard: KeyboardView) {

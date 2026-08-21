@@ -168,8 +168,9 @@ delete key red.
 
 1. Typing always wins over decoration; no animation may block text insertion.
 2. Every async callback is scoped to the active input session.
-3. Every panel can be dismissed with back, outside tap where appropriate, or
-   its explicit close action.
+3. Every settings page is dismissed by the explicit toolbar Back action or the
+   device Back action; device Back exits only from the root settings page.
+   Outside-tap dismissal is reserved for transient keyboard panels.
 4. Focus and selected states must remain visible in light and dark themes.
 5. Avoid web-only hover behavior; Android touch feedback is the primary signal.
 6. Use vector drawables with consistent 24dp optical bounds.

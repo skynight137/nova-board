@@ -132,24 +132,6 @@
         <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="NovaBoardSettingsThemeLabel">
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textColor">@color/kb_toolbar_icon</item>
-        <item name="android:textSize">@dimen/nb_supporting_text</item>
-    </style>
-
-    <style name="NovaBoardSettingsRadio">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/nb_radio_button_height</item>
-        <item name="android:minHeight">@dimen/nb_touch_target_min</item>
-        <item name="android:buttonTint">@color/kb_accent</item>
-        <item name="android:fontFamily">sans-serif</item>
-        <item name="android:textColor">@color/kb_key_text</item>
-        <item name="android:textSize">@dimen/nb_settings_label</item>
-        <item name="android:paddingStart">@dimen/nb_space_2</item>
-        <item name="android:paddingEnd">@dimen/nb_space_2</item>
-    </style>
-
     <style name="NovaBoardSettingsFab">
         <item name="android:layout_width">@dimen/nb_fab_size</item>
         <item name="android:layout_height">@dimen/nb_fab_size</item>

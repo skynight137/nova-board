@@ -122,36 +122,6 @@
                 android:layout_width="match_parent"
                 android:text="@string/reset_settings" />
 
-            <TextView
-                style="@style/NovaBoardSettingsThemeLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/nb_space_6"
-                android:layout_marginTop="@dimen/nb_space_5"
-                android:text="@string/theme_label"
-                android:visibility="gone" />
-
-            <RadioGroup
-                android:id="@+id/themeGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone">
-
-                <RadioButton
-                    android:id="@+id/radioSystem"
-                    style="@style/NovaBoardSettingsRadio"
-                    android:text="@string/theme_system" />
-
-                <RadioButton
-                    android:id="@+id/radioLight"
-                    style="@style/NovaBoardSettingsRadio"
-                    android:text="@string/theme_light" />
-
-                <RadioButton
-                    android:id="@+id/radioDark"
-                    style="@style/NovaBoardSettingsRadio"
-                    android:text="@string/theme_dark" />
-            </RadioGroup>
         </LinearLayout>
     </ScrollView>
 
