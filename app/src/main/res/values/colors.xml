@@ -9,15 +9,6 @@
     <color name="kb_accent">#4C7CF3</color>
     <color name="kb_accent_pressed">#315FCE</color>
     <color name="kb_on_accent">#FFFFFF</color>
-    <color name="kb_switch_on_track">#4C7CF3</color>
-    <color name="kb_switch_on_thumb">#FFFFFF</color>
-    <color name="kb_switch_off_track">#E1E3E8</color>
-    <color name="kb_switch_off_thumb">#777B84</color>
-    <color name="kb_switch_off_surface">#F4F5F8</color>
-    <color name="kb_switch_off_border">#777B84</color>
-    <color name="kb_switch_disabled_surface">#F8F8F8</color>
-    <color name="kb_switch_disabled_border">#E1E1E1</color>
-    <color name="kb_switch_disabled_thumb">#BDBDBD</color>
     <color name="kb_suggestion_text">#4C4F55</color>
     <color name="kb_suggestion_text_highlight">#15171A</color>
     <color name="kb_divider">#C7CBD3</color>

@@ -155,10 +155,9 @@ delete key red.
 - full-row touch target when the row is actionable
 - state is described in text, not color alone
 - destructive/reset actions are separated from normal preferences
-- enabled switches use a compact 50dp × 32dp blue pill with a light thumb;
-  active off switches use a white bordered pill with a darker thumb; disabled
-  switches use a lighter neutral pill with a lighter thumb while retaining a
-  44dp touch target
+- settings switches use the native Android switch control with a circular
+  thumb, platform track, and a 44dp touch target; do not replace it with a
+  custom pill-shaped drawable
 
 ### Feedback
 

@@ -21,11 +21,11 @@ import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.SeekBar
 import android.widget.ScrollView
+import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SwitchCompat
 import androidx.activity.OnBackPressedCallback
 import com.novaboard.ime.R
 import com.novaboard.ime.clipboard.ClipboardHistoryManager
@@ -385,20 +385,15 @@ class MainActivity : AppCompatActivity() {
             )
             row.addView(labels)
             row.addView(
-                SwitchCompat(this).apply {
+                Switch(this).apply {
                     isChecked = KeyboardPreferences.getBoolean(this@MainActivity, spec.key)
                     showText = false
-                    layoutParams = LinearLayout.LayoutParams(dp(50), dp(44))
-                    switchMinWidth = dp(50)
-                    minimumWidth = dp(50)
+                    layoutParams =
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            dp(44),
+                        )
                     minimumHeight = dp(44)
-                    splitTrack = false
-                    thumbTextPadding = 0
-                    setPadding(0, 0, 0, 0)
-                    setThumbResource(R.drawable.settings_switch_thumb)
-                    setTrackResource(R.drawable.settings_switch_track)
-                    thumbTintList = null
-                    trackTintList = null
                     setOnCheckedChangeListener { _, checked ->
                         KeyboardPreferences.setBoolean(this@MainActivity, spec.key, checked)
                     }
