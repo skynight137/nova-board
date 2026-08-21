@@ -132,6 +132,34 @@ unset KEYSTORE_PASSWORD KEYSTORE_ENTRY_ALIAS KEYSTORE_ENTRY_PASSWORD
 Keep `${ANDROID_MODULE:-app}/keystore.jks` in the local release environment.
 It is ignored by Git and must never be committed.
 
+### Android certificate fingerprint
+
+`ANDROID_CERTIFICATE_SHA256` must match the certificate in the existing
+release keystore. When the keystore and its credentials are available as
+Replit Secrets, source the repository environment and run:
+
+```bash
+source .bin/env.sh
+tmp_keystore="$(mktemp)"
+trap 'rm -f "$tmp_keystore"' EXIT
+printf '%s' "$KEYSTORE_B64" | base64 --decode > "$tmp_keystore"
+fingerprint="$(
+  keytool -list -v \
+    -keystore "$tmp_keystore" \
+    -alias "$KEYSTORE_ENTRY_ALIAS" \
+    -storepass "$KEYSTORE_PASSWORD" \
+    -keypass "${KEYSTORE_ENTRY_PASSWORD:-$KEYSTORE_PASSWORD}" |
+    awk -F': ' '/^[[:space:]]*SHA256:/ {print $2; exit}'
+)"
+gh secret set ANDROID_CERTIFICATE_SHA256 --body "$fingerprint"
+unset fingerprint
+```
+
+This reads the release keystore locally and sends only its public certificate
+fingerprint to GitHub. It does not print or commit the keystore, passwords, or
+private signing material. The GitHub CLI must be authenticated to the
+repository owner before running the final command.
+
 ### GPG signing values
 
 Use one dedicated release signing key. If the key already exists, keep its
