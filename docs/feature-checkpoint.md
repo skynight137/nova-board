@@ -233,3 +233,12 @@ The next recommended checkpoint is complete when all of these are true:
 - [ ] Narrow/tall and light/dark layouts are visually checked
 - [ ] Provider-dependent features are clearly labeled as unavailable
 - [ ] Signed APK installs and launches successfully on beta devices
+
+## Execution note
+
+On 2026-08-21, the remaining device-dependent stages were intentionally
+deferred. This repository environment has no connected Android device or
+emulator, so marking physical-device behavior, visual layout checks, or signed
+beta installation as complete would be unsupported. The next operator should
+resume with the real-device regression matrix above and record observed results
+before changing these checkboxes.
