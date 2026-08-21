@@ -295,7 +295,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         }
     }
 
-    // ---- tools/suggestion strip toggle (the chevron in the reference screenshot) ----
+    // ---- expandable tools row above the always-visible prediction strip ----
 
     private fun wireToggleChevrons(root: View) {
         val toChevron = root.findViewById<ImageButton>(R.id.btnToggleStrip)
@@ -310,8 +310,8 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     }
 
     private fun showToolsStrip() {
-        suggestionBar.visibility = View.GONE
         toolsBar.visibility = View.VISIBLE
+        suggestionBar.visibility = View.VISIBLE
     }
 
     // ---- tools row ----
@@ -591,7 +591,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         translationPanelContainer.removeAllViews()
         translationPanelContainer.visibility = View.GONE
         translationPanel = null
-        if (::toolsBar.isInitialized) showToolsStrip()
+        if (::suggestionBar.isInitialized) showSuggestionStrip()
     }
 
     private fun commitTranslation(commit: TranslationCommit) {

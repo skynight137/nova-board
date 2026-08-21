@@ -25,16 +25,16 @@
         android:textSize="13sp"
         android:visibility="gone" />
 
-    <!-- Row 1/2: toggles between the tools icon strip and the suggestion strip,
-         exactly like the "v" chevron behavior in SwiftKey -->
-    <FrameLayout
+    <!-- Tools row expands above the always-visible prediction row. -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/toolsBar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="48dp"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:paddingStart="8dp"
@@ -58,7 +58,7 @@
         <LinearLayout
             android:id="@+id/suggestionBar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="48dp"
             android:orientation="horizontal"
             android:visibility="visible">
 
@@ -70,7 +70,7 @@
             <TextView android:id="@+id/suggestion2" style="@style/NovaBoardSuggestionHighlighted" />
             <TextView android:id="@+id/suggestion3" style="@style/NovaBoardSuggestion" />
         </LinearLayout>
-    </FrameLayout>
+    </LinearLayout>
 
     <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/kb_divider" />
 
