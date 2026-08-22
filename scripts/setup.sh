@@ -30,7 +30,7 @@ SKILL_REPOS=(
 #  "remotion-dev/skills"
 #  "skynight137/agent-skills"
 #  "spillwavesolutions/design-doc-mermaid" # "cathrynlavery/diagram-design"
-#  "github/awesome-copilot"
+  "github/awesome-copilot"
 #  "coreyhaines31/marketingskills"
 )
 
