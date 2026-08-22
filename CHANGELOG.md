@@ -1,3 +1,12 @@
+# [1.1.0-dev.5](https://github.com/skynight137/nova-board/compare/v1.1.0-dev.4...v1.1.0-dev.5) (2026-08-22)
+
+
+### Bug Fixes
+
+* **gif:** enrich Android share handoff ([2455906](https://github.com/skynight137/nova-board/commit/24559064b51826ccb19f7503f8626bfe7284408b))
+* **gif:** insert attachments into active editor ([c0e0168](https://github.com/skynight137/nova-board/commit/c0e01688e8f4c585889c91e3d82af417bc94f35a))
+* **gif:** share downloaded attachments ([c6ddc7f](https://github.com/skynight137/nova-board/commit/c6ddc7f543012644b044feec3c8ba1e9cf86a301))
+
 # [1.1.0-dev.4](https://github.com/skynight137/nova-board/compare/v1.1.0-dev.3...v1.1.0-dev.4) (2026-08-22)
 
 
