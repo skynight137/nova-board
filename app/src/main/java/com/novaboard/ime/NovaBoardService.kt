@@ -335,7 +335,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         root.findViewById<ImageButton>(R.id.btnHotkeys).setOnClickListener { toggleHotkeys() }
         root.findViewById<ImageButton>(R.id.btnVoice).setOnClickListener { toggleVoiceInput() }
         root.findViewById<ImageButton>(R.id.btnMore).setOnClickListener {
-            showToolsMenu(root)
+            showToolsMenu(it)
         }
     }
 
@@ -348,6 +348,20 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 setBackgroundColor(themedContext.getColor(R.color.kb_key_bg_special))
                 setPadding(8, 6, 8, 8)
             }
+        val anchorLocation = IntArray(2)
+        val overlayLocation = IntArray(2)
+        anchor.getLocationInWindow(anchorLocation)
+        overlayPanelContainer.getLocationInWindow(overlayLocation)
+        val headerTop =
+            (anchorLocation[1] - overlayLocation[1] - (6 * resources.displayMetrics.density).toInt())
+                .coerceAtLeast(0)
+        menu.addView(
+            View(themedContext),
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                headerTop,
+            ),
+        )
         val header =
             LinearLayout(themedContext).apply {
                 orientation = LinearLayout.HORIZONTAL
@@ -490,6 +504,13 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         )
         overlayPanelContainer.visibility = View.VISIBLE
         toolsMenuView = menu
+        menu.alpha = 0f
+        menu.translationY = (6 * resources.displayMetrics.density)
+        menu.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(160L)
+            .start()
     }
 
     private fun dismissToolsMenu() {
