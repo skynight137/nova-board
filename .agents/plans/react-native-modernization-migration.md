@@ -2,7 +2,8 @@
 
 ## Status
 
-**Phase 1 preview foundation complete — device validation remains pending.**
+**Phase 2 native adapter foundation complete — provider-specific bridge
+operations, instrumentation coverage, and device validation remain pending.**
 
 The preview foundation is intentionally independent from the Android/IME
 workflow. No production UI migration or native bridge changes are included.
@@ -135,6 +136,14 @@ Verification:
 - [x] Focused JVM contract tests pass.
 - [x] Native bridge tests pass without requiring a live keyboard.
 - [x] A preview mock implements the same contracts for deterministic UI states.
+
+Remaining before Phase 2 is fully complete:
+
+- [ ] Clipboard, GIF, and voice request families are connected to their
+  provider lifecycles inside `AndroidNativeBridge` (they currently return an
+  explicit runtime-unavailable error).
+- [ ] Instrumentation coverage for the service-owned adapter across input
+  session changes.
 
 ### Phase 3: Migrate settings and non-IME surfaces `[ ]`
 

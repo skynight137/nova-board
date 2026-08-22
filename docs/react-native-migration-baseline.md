@@ -1,6 +1,7 @@
 # React Native Migration Baseline
 
-Status: Phase 1 preview foundation complete; device validation remains pending.
+Status: Phase 2 native adapter foundation complete; provider-specific bridge
+operations, instrumentation coverage, and device validation remain pending.
 
 ## Architecture baseline
 
