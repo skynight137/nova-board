@@ -261,21 +261,26 @@ constructor(
                 hit.key.type != KeyType.CHAR &&
                     hit.key.type != KeyType.COMMA &&
                     hit.key.type != KeyType.PERIOD
+            val isKeycap = hit.key.type == KeyType.CHAR || hit.key.type == KeyType.SPACE
+            val isPressed = hit == pressedHit || pointerHits.values.any { it === hit }
             val paint =
                 when {
-                    hit == pressedHit || pointerHits.values.any { it === hit } -> pressedPaint
+                    isPressed -> pressedPaint
                     isSpecial -> specialKeyPaint
                     else -> keyPaint
                 }
             val radius = 7 * resources.displayMetrics.density
-            canvas.drawRoundRect(hit.rect, radius, radius, paint)
-            keyBorderPaint.color =
-                if (paint === pressedPaint) {
-                    themeColor(R.color.kb_key_border_pressed)
-                } else {
-                    themeColor(R.color.kb_key_border)
-                }
-            canvas.drawRoundRect(hit.rect, radius, radius, keyBorderPaint)
+            // Action keys keep their full touch targets but stay visually open like SwiftKey.
+            if (isKeycap || isPressed) {
+                canvas.drawRoundRect(hit.rect, radius, radius, paint)
+                keyBorderPaint.color =
+                    if (isPressed) {
+                        themeColor(R.color.kb_key_border_pressed)
+                    } else {
+                        themeColor(R.color.kb_key_border)
+                    }
+                canvas.drawRoundRect(hit.rect, radius, radius, keyBorderPaint)
+            }
 
             val label = displayLabel(hit.key)
             if (label.isNotEmpty()) {
