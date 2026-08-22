@@ -17,6 +17,8 @@ grep -Fq './gradlew assembleDebug' "${pr_workflow}" ||
   fail "pull-request workflow must build the unsigned debug APK"
 grep -Fq 'branches:' "${ROOT_DIR}/.github/workflows/release.yml" ||
   fail "release workflow branch policy is missing"
+grep -Fq 'issues: read' "${WORKFLOW}" ||
+  fail "release workflow must allow semantic-release to read repository issues"
 
 validation_line="$(grep -n -- "- name: Validate release inputs" "${WORKFLOW}" | cut -d: -f1)"
 keystore_line="$(grep -n -- "- name: Setup keystore" "${WORKFLOW}" | cut -d: -f1)"

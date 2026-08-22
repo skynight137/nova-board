@@ -17,6 +17,7 @@ jobs:
       ANDROID_MODULE: ${{ vars.ANDROID_MODULE || 'app' }}
     permissions:
       contents: write
+      issues: read
       id-token: write
       attestations: write
     runs-on: ubuntu-latest
