@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import rawTokens from "../../design-system/novaboard/design-tokens.json";
 import { createPreviewBridge, previewSession } from "./bridgeMock";
 import "./styles.css";
@@ -290,6 +290,86 @@ function KeyboardSurface({ theme }) {
   );
 }
 
+function EmojiScreen({ theme }) {
+  const bridge = useMemo(() => createPreviewBridge(), []);
+  const [status, setStatus] = useState("loading");
+  const [items, setItems] = useState([]);
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    setStatus("loading");
+    const timer = setTimeout(() => {
+      if (cancelled) return;
+      const result = executeBridge(bridge, {
+        requestId: nextRequestId("emoji-list"),
+        family: "emoji",
+        operation: "list",
+      });
+      if (!result.ok) {
+        setStatus("error");
+        return;
+      }
+      setItems(result.response.value);
+      setStatus("ready");
+    }, 350);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [bridge]);
+
+  const runSearch = (text) => {
+    setQuery(text);
+    const result = executeBridge(bridge, {
+      requestId: nextRequestId("emoji-search"),
+      family: "emoji",
+      operation: "search",
+      query: text,
+    });
+    if (result.ok) {
+      setItems(result.response.value);
+      setStatus("ready");
+    }
+  };
+
+  return (
+    <View style={[styles.settingsCard, { backgroundColor: theme.surface, borderColor: theme.divider }]}>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>Emoji</Text>
+      <TextInput
+        accessibilityLabel="Search emoji"
+        placeholder="Search emoji"
+        placeholderTextColor={theme.secondary}
+        value={query}
+        onChangeText={runSearch}
+        style={[
+          styles.searchInput,
+          { backgroundColor: theme.background, borderColor: theme.divider, color: theme.text },
+        ]}
+      />
+      {status === "loading" ? (
+        <Text style={{ color: theme.secondary, marginTop: 12 }}>Loading emoji…</Text>
+      ) : status === "error" ? (
+        <Text style={{ color: theme.secondary, marginTop: 12 }}>Emoji unavailable from the bridge.</Text>
+      ) : items.length === 0 ? (
+        <Text style={{ color: theme.secondary, marginTop: 12 }}>No emoji match this search.</Text>
+      ) : (
+        <View style={styles.emojiGrid}>
+          {items.map((item, index) => (
+            <Pressable
+              key={`${item.emoji}-${index}`}
+              accessibilityLabel={`Emoji ${item.emoji}`}
+              style={[styles.emojiCell, { backgroundColor: theme.utility }]}
+            >
+              <Text style={[styles.emojiGlyph, { color: theme.text }]}>{item.emoji}</Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
 function App() {
   const [dark, setDark] = useState(false);
   const [surface, setSurface] = useState("keyboard");
@@ -309,7 +389,11 @@ function App() {
         <View>
           <Text style={[styles.eyebrow, { color: theme.accent }]}>NOVABOARD / PREVIEW</Text>
           <Text style={[styles.title, { color: theme.text }]}>
-            {surface === "keyboard" ? "Keyboard surface" : "Settings surface"}
+            {surface === "keyboard"
+              ? "Keyboard surface"
+              : surface === "emoji"
+                ? "Emoji surface"
+                : "Settings surface"}
           </Text>
           <Text style={[styles.supporting, { color: theme.secondary }]}>
             React Native Web · token-backed component
@@ -330,6 +414,7 @@ function App() {
         {[
           ["keyboard", "Keyboard"],
           ["settings", "Settings"],
+          ["emoji", "Emoji"],
         ].map(([id, label]) => (
           <Pressable
             key={id}
@@ -382,6 +467,8 @@ function App() {
       <View style={narrow ? styles.narrowFrame : null}>
         {surface === "keyboard" ? (
           <KeyboardSurface theme={theme} />
+        ) : surface === "emoji" ? (
+          <EmojiScreen theme={theme} />
         ) : (
           <SettingsScreen theme={theme} failNative={failNative} />
         )}
@@ -431,6 +518,10 @@ const styles = StyleSheet.create({
   switchThumb: { width: 22, height: 22, borderRadius: 11 },
   switchThumbOn: { alignSelf: "flex-end" },
   skeletonRow: { height: 40, borderRadius: 8, marginTop: 10 },
+  searchInput: { width: "100%", minHeight: 44, borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, marginTop: 8, fontSize: 14 },
+  emojiGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
+  emojiCell: { width: 44, height: 44, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+  emojiGlyph: { fontSize: 24 },
 });
 
 createRoot(document.getElementById("root")).render(<App />);
