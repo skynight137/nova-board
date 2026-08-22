@@ -44,17 +44,19 @@ class GifPanel(
         dismiss()
         executor = Executors.newFixedThreadPool(3)
         this.target = target
-        val panel = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
+        val panel = FrameLayout(context).apply {
             setBackgroundColor(context.getColor(R.color.kb_background))
         }
-        panel.addView(header())
+        val header = header()
         status = TextView(context).apply {
             gravity = Gravity.CENTER
             setTextColor(context.getColor(R.color.kb_key_text))
             setPadding(dp(24), dp(12), dp(24), dp(12))
         }
-        panel.addView(status, LinearLayout.LayoutParams(-1, dp(52)))
+        val content = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+        }
+        content.addView(status, LinearLayout.LayoutParams(-1, dp(52)))
         val scroll = android.widget.ScrollView(context)
         grid = GridLayout(context).apply {
             columnCount = 3
@@ -62,7 +64,7 @@ class GifPanel(
             setPadding(dp(4), 0, dp(4), dp(8))
         }
         scroll.addView(grid)
-        panel.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+        content.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
         searchKeyboard =
             KeyboardView(context).apply {
                 listener =
@@ -138,7 +140,31 @@ class GifPanel(
                     },
                 )
             }
-        panel.addView(searchKeyboard, LinearLayout.LayoutParams(-1, -2))
+        val keyboardRows =
+            if (
+                KeyboardPreferences.getBoolean(
+                    context,
+                    KeyboardPreferences.SHOW_NUMBER_ROW,
+                )
+            ) {
+                5
+            } else {
+                4
+            }
+        val headerHeight = dp(112)
+        val keyboardHeight = dp(keyboardRows * 58)
+        panel.addView(
+            content,
+            FrameLayout.LayoutParams(-1, -1).apply {
+                topMargin = headerHeight
+                bottomMargin = keyboardHeight
+            },
+        )
+        panel.addView(header, FrameLayout.LayoutParams(-1, headerHeight))
+        panel.addView(
+            searchKeyboard,
+            FrameLayout.LayoutParams(-1, keyboardHeight, Gravity.BOTTOM),
+        )
         target.removeAllViews()
         target.addView(panel, -1, -1)
         target.visibility = View.VISIBLE
@@ -151,8 +177,15 @@ class GifPanel(
         if (end > 0) search.text.delete(end - 1, end)
     }
 
-    private fun header(): View = FrameLayout(context).apply {
-        setBackgroundColor(context.getColor(R.color.kb_background))
+    private fun header(): View =
+        LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(context.getColor(R.color.kb_background))
+            val titleRow =
+                LinearLayout(context).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                }
         val close = ImageButton(context).apply {
             setImageResource(R.drawable.ic_arrow_back)
             setColorFilter(context.getColor(R.color.kb_toolbar_icon))
@@ -160,29 +193,32 @@ class GifPanel(
             contentDescription = context.getString(R.string.gif_close)
             setOnClickListener { onClose() }
         }
-        addView(close, FrameLayout.LayoutParams(dp(56), dp(56), Gravity.START))
-        val title = TextView(context).apply {
-            text = context.getString(R.string.gif_title)
-            gravity = Gravity.CENTER
-            textSize = 18f
-            setTextColor(context.getColor(R.color.kb_key_text))
-        }
-        addView(title, FrameLayout.LayoutParams(-1, dp(56)))
+            titleRow.addView(close, LinearLayout.LayoutParams(dp(56), dp(56)))
+            titleRow.addView(
+                TextView(context).apply {
+                    text = context.getString(R.string.gif_title)
+                    gravity = Gravity.CENTER_VERTICAL
+                    textSize = 18f
+                    setTextColor(context.getColor(R.color.kb_key_text))
+                },
+                LinearLayout.LayoutParams(0, dp(56), 1f),
+            )
+            addView(titleRow, LinearLayout.LayoutParams(-1, dp(56)))
         search = EditText(context).apply {
             hint = context.getString(R.string.gif_search_hint)
             setSingleLine(true)
             showSoftInputOnFocus = false
-            setPadding(dp(52), 0, dp(52), 0)
+            isFocusable = true
+            isFocusableInTouchMode = true
+            setPadding(dp(16), 0, dp(16), 0)
             contentDescription = context.getString(R.string.gif_search_hint)
             setOnEditorActionListener { _, _, _ ->
                 load(text.toString())
                 true
             }
         }
-        addView(search, FrameLayout.LayoutParams(-1, dp(56)))
-        title.visibility = View.GONE
-        close.bringToFront()
-    }
+            addView(search, LinearLayout.LayoutParams(-1, dp(56)))
+        }
 
     private fun load(query: String) {
         val id = requestId.incrementAndGet()
