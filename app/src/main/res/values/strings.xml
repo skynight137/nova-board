@@ -31,7 +31,8 @@
     <string name="gif_empty">No GIFs found</string>
     <string name="gif_error">Unable to load GIFs. Check your connection and try again.</string>
     <string name="gif_not_configured">GIF search is not configured yet.</string>
-    <string name="gif_inserted">GIF link inserted</string>
+    <string name="gif_share_title">Share GIF</string>
+    <string name="gif_share_failed">Unable to open the share menu</string>
     <string name="gif_close">Close GIF panel</string>
     <string name="cd_more">More keyboard tools</string>
     <string name="cd_close_tools">Close keyboard tools</string>
