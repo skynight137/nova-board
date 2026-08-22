@@ -50,6 +50,7 @@ import com.novaboard.ime.emoji.EmojiData
 import com.novaboard.ime.emoji.EmojiPanel
 import com.novaboard.ime.gif.GifItem
 import com.novaboard.ime.gif.GifPanel
+import com.novaboard.ime.gif.supportsGifContent
 import com.novaboard.ime.hotkeys.HotkeyController
 import com.novaboard.ime.model.Key
 import com.novaboard.ime.model.KeyType
@@ -596,6 +597,12 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private fun insertGif(item: GifItem) {
         gifPanel?.dismiss()
         gifPanel = null
+        val inputConnection = currentInputConnection
+        if (inputConnection == null) return
+        if (!supportsGifContent(currentInputEditorInfo?.contentMimeTypes)) {
+            sendGifLinkFallback(item, inputConnection)
+            return
+        }
         Toast.makeText(this, getString(R.string.gif_preparing), Toast.LENGTH_SHORT).show()
         runCatching {
             val session = inputSession
@@ -695,17 +702,21 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             mainHandler.postDelayed({ file.delete() }, GIF_RETENTION_MS)
         } else {
             file.delete()
-            val fallbackSent =
-                runCatching { inputConnection.commitText(item.contentUrl, 1) }.getOrDefault(false)
-            Toast.makeText(
-                    this,
-                    getString(
-                        if (fallbackSent) R.string.gif_link_fallback else R.string.gif_editor_unsupported,
-                    ),
-                    Toast.LENGTH_SHORT,
-                )
-                .show()
+            sendGifLinkFallback(item, inputConnection)
         }
+    }
+
+    private fun sendGifLinkFallback(item: GifItem, inputConnection: InputConnection) {
+        val fallbackSent =
+            runCatching { inputConnection.commitText(item.contentUrl, 1) }.getOrDefault(false)
+        Toast.makeText(
+                this,
+                getString(
+                    if (fallbackSent) R.string.gif_link_fallback else R.string.gif_editor_unsupported,
+                ),
+                Toast.LENGTH_SHORT,
+            )
+            .show()
     }
 
     private fun pasteClipboardItem(item: ClipboardItem) {
