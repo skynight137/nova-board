@@ -28,6 +28,12 @@ import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import java.io.File
+import java.io.FileOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.UUID
+import java.util.concurrent.Executors
 import com.novaboard.ime.clipboard.ClipType
 import com.novaboard.ime.clipboard.ClipboardHistoryManager
 import com.novaboard.ime.clipboard.ClipboardItem
@@ -93,6 +99,8 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private var selectionEnd = -1
     private val cursorRepeatHandler = Handler(Looper.getMainLooper())
     private val suggestionRefreshHandler = Handler(Looper.getMainLooper())
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val gifShareExecutor = Executors.newSingleThreadExecutor()
     private val suggestionRefreshRunnable = Runnable { refreshSuggestions() }
     private var cursorRepeatRunnable: Runnable? = null
     private val cursorRepeatController =
@@ -149,6 +157,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         gifPanel?.dismiss()
         clipboardHistory.stop()
         speechRecognizer?.destroy()
+        gifShareExecutor.shutdownNow()
         getSharedPreferences("novaboard_prefs", MODE_PRIVATE)
             .unregisterOnSharedPreferenceChangeListener(preferenceListener)
         AppLog.i("NovaBoardService", "Input method service destroyed")
@@ -586,12 +595,82 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     }
 
     private fun insertGif(item: GifItem) {
+        gifPanel?.dismiss()
+        gifPanel = null
+        Toast.makeText(this, getString(R.string.gif_preparing), Toast.LENGTH_SHORT).show()
+        val session = inputSession
+        gifShareExecutor.execute {
+            runCatching { downloadGif(item) }
+                .onSuccess { file ->
+                    mainHandler.post {
+                        if (session == inputSession) {
+                            shareGifFile(item, file)
+                        } else {
+                            file.delete()
+                        }
+                    }
+                }
+                .onFailure { error ->
+                    AppLog.w("NovaBoardService", "GIF download failed", error)
+                    mainHandler.post {
+                        if (session == inputSession) {
+                            Toast.makeText(
+                                    this,
+                                    getString(R.string.gif_share_failed),
+                                    Toast.LENGTH_SHORT,
+                                )
+                                .show()
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun downloadGif(item: GifItem): File {
+        val root = File(cacheDir, GIF_CACHE_DIRECTORY).apply { mkdirs() }
+        root.listFiles()?.filter { it.isFile }?.forEach(File::delete)
+        val destination = File(root, "${UUID.randomUUID()}.gif")
+        val connection = (URL(item.contentUrl).openConnection() as HttpURLConnection).apply {
+            connectTimeout = 10_000
+            readTimeout = 20_000
+            requestMethod = "GET"
+            setRequestProperty("Accept", "image/gif")
+        }
+        try {
+            check(connection.responseCode in 200..299) {
+                "GIF download returned HTTP ${connection.responseCode}"
+            }
+            check(connection.contentLengthLong <= MAX_GIF_BYTES || connection.contentLengthLong < 0) {
+                "GIF exceeds the temporary share size limit"
+            }
+            FileOutputStream(destination).use { output ->
+                connection.inputStream.use { input ->
+                    val buffer = ByteArray(DOWNLOAD_BUFFER_SIZE)
+                    var total = 0L
+                    while (true) {
+                        val count = input.read(buffer)
+                        if (count < 0) break
+                        total += count
+                        check(total <= MAX_GIF_BYTES) { "GIF exceeds the temporary share size limit" }
+                        output.write(buffer, 0, count)
+                    }
+                }
+            }
+            return destination
+        } catch (error: Exception) {
+            destination.delete()
+            throw error
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    private fun shareGifFile(item: GifItem, file: File) {
+        val gifUri = Uri.parse("content://$GIF_SHARE_AUTHORITY/${file.name}")
         val shareIntent =
             Intent(Intent.ACTION_SEND).apply {
                 type = "image/gif"
-                val gifUri = Uri.parse(item.contentUrl)
                 putExtra(Intent.EXTRA_STREAM, gifUri)
-                putExtra(Intent.EXTRA_TEXT, item.contentUrl)
                 putExtra(Intent.EXTRA_TITLE, item.title)
                 clipData = ClipData.newRawUri(item.title, gifUri)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -604,14 +683,14 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                         getString(R.string.gif_share_title),
                     ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                 )
+                mainHandler.postDelayed({ file.delete() }, GIF_RETENTION_MS)
             }
             .onFailure {
+                file.delete()
                 AppLog.w("NovaBoardService", "GIF share was rejected", it)
                 Toast.makeText(this, getString(R.string.gif_share_failed), Toast.LENGTH_SHORT)
                     .show()
             }
-        gifPanel?.dismiss()
-        gifPanel = null
     }
 
     private fun pasteClipboardItem(item: ClipboardItem) {
@@ -741,6 +820,11 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         const val CURSOR_REPEAT_INITIAL_DELAY_MS = 350L
         const val CURSOR_REPEAT_INTERVAL_MS = 70L
         const val SUGGESTION_REFRESH_DELAY_MS = 40L
+        const val GIF_CACHE_DIRECTORY = "gif-share"
+        const val GIF_SHARE_AUTHORITY = "com.novaboard.ime.gif-share"
+        const val MAX_GIF_BYTES = 15L * 1024L * 1024L
+        const val DOWNLOAD_BUFFER_SIZE = 16 * 1024
+        const val GIF_RETENTION_MS = 10 * 60 * 1000L
     }
 
     // ---- suggestions ----

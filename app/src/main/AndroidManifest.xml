@@ -29,6 +29,12 @@
             android:exported="false"
             android:grantUriPermissions="true" />
 
+        <provider
+            android:name=".gif.GifShareContentProvider"
+            android:authorities="com.novaboard.ime.gif-share"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+
         <service
             android:name=".NovaBoardService"
             android:permission="android.permission.BIND_INPUT_METHOD"
