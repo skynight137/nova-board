@@ -24,6 +24,7 @@
     <string name="cd_hotkeys">Hotkeys</string>
     <string name="cd_voice">Voice typing</string>
     <string name="cd_more">More keyboard tools</string>
+    <string name="cd_close_tools">Close keyboard tools</string>
     <string name="tool_menu_title">Keyboard tools</string>
     <string name="tool_settings">Settings</string>
     <string name="tool_languages">Languages</string>

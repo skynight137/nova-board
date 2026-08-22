@@ -356,30 +356,29 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             }
         header.addView(
             TextView(themedContext).apply {
-                text = "‹"
-                textSize = 30f
-                setTextColor(themedContext.getColor(R.color.kb_key_text))
-                gravity = Gravity.CENTER
-                contentDescription = getString(R.string.clipboard_back_to_keyboard)
-                setPadding(8, 0, 8, 0)
-                setOnClickListener { dismissToolsMenu() }
-            },
-            LinearLayout.LayoutParams(
-                (52 * resources.displayMetrics.density).toInt(),
-                ViewGroup.LayoutParams.MATCH_PARENT,
-            ),
-        )
-        header.addView(
-            TextView(themedContext).apply {
                 text = getString(R.string.tool_menu_title)
                 textSize = 16f
                 setTextColor(themedContext.getColor(R.color.kb_key_text))
-                gravity = Gravity.CENTER_VERTICAL
+                gravity = Gravity.CENTER
             },
             LinearLayout.LayoutParams(
                 0,
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 1f,
+            ),
+        )
+        header.addView(
+            ImageButton(themedContext).apply {
+                setImageResource(R.drawable.ic_close)
+                setColorFilter(themedContext.getColor(R.color.kb_toolbar_icon))
+                background = null
+                contentDescription = getString(R.string.cd_close_tools)
+                setPadding(8, 8, 8, 8)
+                setOnClickListener { dismissToolsMenu() }
+            },
+            LinearLayout.LayoutParams(
+                (52 * resources.displayMetrics.density).toInt(),
+                ViewGroup.LayoutParams.MATCH_PARENT,
             ),
         )
         menu.addView(
