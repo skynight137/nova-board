@@ -25,6 +25,14 @@ class EditingContractsTest {
     }
 
     @Test
+    fun previousCodePointDeletionRemovesBothSurrogateUnitsForEmoji() {
+        assertEquals(0, previousCodePointDeletionCount(""))
+        assertEquals(1, previousCodePointDeletionCount("a"))
+        assertEquals(2, previousCodePointDeletionCount("😀"))
+        assertEquals(2, previousCodePointDeletionCount("a😀"))
+    }
+
+    @Test
     fun undoRequiresTheReplacementToRemainAtCursor() {
         val state = AutocorrectState("teh", "the ", "write the ")
 

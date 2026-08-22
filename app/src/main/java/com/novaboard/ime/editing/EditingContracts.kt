@@ -19,6 +19,16 @@ fun previousWordDeletionCount(textBeforeCursor: String): Int {
     return textBeforeCursor.length - wordStart
 }
 
+/** Returns the UTF-16 code-unit count for the single Unicode code point before the cursor. */
+fun previousCodePointDeletionCount(textBeforeCursor: String): Int =
+    if (textBeforeCursor.isEmpty()) {
+        0
+    } else {
+        Character.charCount(
+            Character.codePointBefore(textBeforeCursor, textBeforeCursor.length),
+        )
+    }
+
 /**
  * The snapshot captured immediately after an autocorrect replacement.
  *

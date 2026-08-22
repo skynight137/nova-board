@@ -37,6 +37,7 @@ import com.novaboard.ime.editing.RepeatToken
 import com.novaboard.ime.editing.acceptsInputSessionResult
 import com.novaboard.ime.editing.canUndoAutocorrect
 import com.novaboard.ime.editing.previousWordDeletionCount
+import com.novaboard.ime.editing.previousCodePointDeletionCount
 import com.novaboard.ime.editing.shouldResetTrackedTyping
 import com.novaboard.ime.editor.isConversationEditorInputType
 import com.novaboard.ime.emoji.EmojiData
@@ -838,8 +839,14 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             scheduleSuggestionsRefresh()
             return
         }
-        ic.deleteSurroundingText(1, 0)
-        if (currentWord.isNotEmpty()) currentWord.deleteCharAt(currentWord.length - 1)
+        val textBeforeCursor = ic.getTextBeforeCursor(128, 0)?.toString().orEmpty()
+        val deletionCount = previousCodePointDeletionCount(textBeforeCursor)
+        if (deletionCount > 0) {
+            ic.deleteSurroundingText(deletionCount, 0)
+            repeat(deletionCount.coerceAtMost(currentWord.length)) {
+                currentWord.deleteCharAt(currentWord.length - 1)
+            }
+        }
         lastAutocorrectState = null
         scheduleSuggestionsRefresh()
     }
