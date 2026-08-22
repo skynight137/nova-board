@@ -1,7 +1,7 @@
 # React Native Bridge Contract
 
-Status: Phase 2 provider wiring complete; instrumentation coverage for the
-service-owned adapter is still pending.
+Status: Phase 3 settings family landed; production settings hosting and
+instrumentation coverage for the service-owned adapter are still pending.
 
 ## Boundary
 
@@ -34,6 +34,9 @@ The contract has typed request families for:
 - theme reads
 - haptic feedback
 - keyboard metrics
+- settings actions: open Android's keyboard settings, show the input-method
+  picker, and read enabled/selected status (`MainActivity` owns this adapter;
+  a selected method must also be enabled)
 
 Provider, permission, configuration, and runtime failures have distinct error
 codes so the UI can show the real unavailable state.

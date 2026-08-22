@@ -1,7 +1,8 @@
 # React Native Migration Baseline
 
-Status: Phase 2 native adapter foundation complete; provider-specific bridge
-operations, instrumentation coverage, and device validation remain pending.
+Status: Phase 3 in progress; settings bridge family and preview settings
+states landed. Production RN hosting, instrumentation coverage, and device
+validation remain pending.
 
 ## Architecture baseline
 
@@ -129,3 +130,7 @@ The initial production preview measurement is 276.26 kB JavaScript (87.95 kB
 gzip) plus 0.12 kB CSS (0.13 kB gzip), produced by Vite 7.1.5. The added
 runtime dependencies are React Native 0.81.4, React Native Web 0.20.0, React
 19.1.1, React DOM 19.1.1, Vite 7.1.5, and the Vite React plugin 5.0.2.
+
+After the settings surface (loading/error/empty/theme/narrow states) the
+preview measures 297.02 kB JavaScript (93.51 kB gzip) with no new runtime
+dependencies.

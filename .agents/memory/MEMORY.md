@@ -31,3 +31,4 @@
 - [Skills repository aliases](skills-repository-aliases.md) — validate shorthand skill names against real GitHub repositories before passing them to the skills CLI.
 - [Scope-matched verification](scope-matched-verification.md) — validate only the toolchain affected by a change; Bash/config edits do not require unrelated Gradle builds.
 - [Native bridge session gate](native-bridge-session-gate.md) — only resetInputSession may begin bridge sessions; unavailable provider operations must fail explicitly, not fake success.
+- [Settings bridge family](settings-bridge-family.md) — settings actions use a dedicated bridge family owned by MainActivity; selected implies enabled, and preview states stay mock-driven.

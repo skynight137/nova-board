@@ -2,11 +2,12 @@
 
 ## Status
 
-**Phase 2 native adapter foundation complete — provider-specific bridge
-operations, instrumentation coverage, and device validation remain pending.**
+**Phase 3 in progress: settings bridge family and preview settings states
+landed; production RN hosting and device validation remain.**
 
-The preview foundation is intentionally independent from the Android/IME
-workflow. No production UI migration or native bridge changes are included.
+The preview remains intentionally independent from the Android/IME build: the
+native app, release APK, and native fallback stay buildable without a Metro
+server or JavaScript runtime.
 
 ## Current-state correction
 
@@ -144,29 +145,34 @@ Remaining before Phase 2 is fully complete:
 - [ ] Instrumentation coverage for the service-owned adapter across input
   session changes (requires an Android target; no device in this workspace).
 
-### Phase 3: Migrate settings and non-IME surfaces `[ ]`
+### Phase 3: Migrate settings and non-IME surfaces `[~]`
 
 Move `MainActivity` settings UI first because it is easier to host and preview
 than the live keyboard window.
 
 Acceptance criteria:
 
-- [ ] React Native settings can enable NovaBoard and open Android's input-method
-  picker through a native bridge.
+- [x] The bridge has a typed settings family for opening Android's keyboard
+  settings, showing the input-method picker, and reading enabled/selected
+  status; `MainActivity` owns the session-gated adapter that serves it.
+- [ ] React Native settings hosting replaces the native screen behind the same
+  bridge (production hosting is not wired yet; the preview drives the mock).
 - [ ] Theme, gesture, incognito, clipboard-retention, and other existing
   preferences retain their current defaults and persistence behavior.
 - [ ] Accessibility labels, focus order, dynamic text, and switch states match
   or improve the current native screen.
-- [ ] Settings remains usable if the React Native bundle is unavailable,
-  including a deliberate native fallback or a clear failure state.
-- [ ] Preview includes loading, error, empty, light-theme, dark-theme, and
-  narrow-phone states.
+- [x] Settings remains usable if the React Native bundle is unavailable: the
+  native screen stays the default surface, so the fallback is deliberate.
+- [x] Preview includes loading, error (retryable), empty-group, light-theme,
+  dark-theme, and narrow-phone states.
 
 Verification:
 
-- [ ] Settings contract and persistence tests pass.
-- [ ] Debug APK launches settings and reaches Android input-method controls.
-- [ ] Direct preview matches the approved settings states.
+- [x] Settings contract tests pass (settings seam delegation, unavailable
+  handler, status invariant).
+- [ ] Debug APK launches settings and reaches Android input-method controls
+  (requires a representative Android target).
+- [x] Direct preview builds and renders the approved settings states.
 
 ### Phase 4: Migrate panel UI with native IME hosting `[ ]`
 
