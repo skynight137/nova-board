@@ -1,7 +1,8 @@
 # React Native Bridge Contract
 
-Status: Phase 3 settings family landed; production settings hosting and
-instrumentation coverage for the service-owned adapter are still pending.
+Status: Phase 3 settings family landed; emoji request family added for the
+Phase 4 panel work. Production panel hosting and instrumentation coverage for
+the service-owned adapters are still pending.
 
 ## Boundary
 
@@ -34,6 +35,7 @@ The contract has typed request families for:
 - theme reads
 - haptic feedback
 - keyboard metrics
+- emoji list and search (served from the shared `EmojiData` source)
 - settings actions: open Android's keyboard settings, show the input-method
   picker, and read enabled/selected status (`MainActivity` owns this adapter;
   a selected method must also be enabled)

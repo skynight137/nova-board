@@ -32,3 +32,4 @@
 - [Scope-matched verification](scope-matched-verification.md) — validate only the toolchain affected by a change; Bash/config edits do not require unrelated Gradle builds.
 - [Native bridge session gate](native-bridge-session-gate.md) — only resetInputSession may begin bridge sessions; unavailable provider operations must fail explicitly, not fake success.
 - [Settings bridge family](settings-bridge-family.md) — settings actions use a dedicated bridge family owned by MainActivity; selected implies enabled, and preview states stay mock-driven.
+- [Emoji bridge family](emoji-bridge-family.md) — emoji list/search serve from the shared EmojiData source; the bridge only maps to EmojiPreviewItem responses.

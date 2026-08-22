@@ -3,7 +3,8 @@
 ## Status
 
 **Phase 3 in progress: settings bridge family and preview settings states
-landed; production RN hosting and device validation remain.**
+landed; emoji request family added. Production panel hosting and device
+validation remain.**
 
 The preview remains intentionally independent from the Android/IME build: the
 native app, release APK, and native fallback stay buildable without a Metro
@@ -155,6 +156,8 @@ Acceptance criteria:
 - [x] The bridge has a typed settings family for opening Android's keyboard
   settings, showing the input-method picker, and reading enabled/selected
   status; `MainActivity` owns the session-gated adapter that serves it.
+- [x] The bridge has a typed emoji family (list and search) served from the
+  shared `EmojiData` source, ready for the Phase 4 emoji panel.
 - [ ] React Native settings hosting replaces the native screen behind the same
   bridge (production hosting is not wired yet; the preview drives the mock).
 - [ ] Theme, gesture, incognito, clipboard-retention, and other existing
