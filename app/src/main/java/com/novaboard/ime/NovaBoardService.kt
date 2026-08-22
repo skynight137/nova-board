@@ -348,15 +348,42 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 setBackgroundColor(themedContext.getColor(R.color.kb_key_bg_special))
                 setPadding(8, 6, 8, 8)
             }
-        menu.addView(
+        val header =
+            LinearLayout(themedContext).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                minimumHeight = (56 * resources.displayMetrics.density).toInt()
+            }
+        header.addView(
+            TextView(themedContext).apply {
+                text = "‹"
+                textSize = 30f
+                setTextColor(themedContext.getColor(R.color.kb_key_text))
+                gravity = Gravity.CENTER
+                contentDescription = getString(R.string.clipboard_back_to_keyboard)
+                setPadding(8, 0, 8, 0)
+                setOnClickListener { dismissToolsMenu() }
+            },
+            LinearLayout.LayoutParams(
+                (52 * resources.displayMetrics.density).toInt(),
+                ViewGroup.LayoutParams.MATCH_PARENT,
+            ),
+        )
+        header.addView(
             TextView(themedContext).apply {
                 text = getString(R.string.tool_menu_title)
                 textSize = 16f
                 setTextColor(themedContext.getColor(R.color.kb_key_text))
-                gravity = Gravity.CENTER
-                setPadding(8, 10, 8, 10)
-                setOnClickListener { dismissToolsMenu() }
+                gravity = Gravity.CENTER_VERTICAL
             },
+            LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                1f,
+            ),
+        )
+        menu.addView(
+            header,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,

@@ -9,6 +9,7 @@
 - [Strict JSON import fields](strict-json-import-fields.md) — reject malformed present values; optional JSON helpers must not silently replace them with defaults.
 - [Android instrumentation service seams](android-instrumentation-service-seams.md) — use package-visible state seams; framework lifecycle callbacks may be protected.
 - [Overlay state boundary](overlay-state-boundary.md) — service gesture state is authoritative; marker count can be zero for a runnable loaded setup.
+- [Tools overlay touch boundary](tools-overlay-touch-boundary.md) — modal IME tool panels must consume the full surface so taps cannot reach the hidden keyboard.
 - [Android migration verification](android-migration-verification.md) — archived app Gradle overrides can conflict with current Java targets and debug signing.
 - [History rewrite safety](history-rewrite.md) — preview and verify full-history message rewrites; filter-branch uses HEAD to include the root commit.
 - [NovaBoard archive migration](novaboard-migration.md) — native IME archives need current template build/plugin adaptation and APK identity verification.
