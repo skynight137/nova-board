@@ -111,6 +111,12 @@
                 android:text="@string/export_app_log" />
 
             <Button
+                android:id="@+id/btnCheckForUpdates"
+                style="@style/NovaBoardSettingsListRow"
+                android:layout_width="match_parent"
+                android:text="@string/check_for_updates" />
+
+            <Button
                 android:id="@+id/btnThemeSettings"
                 style="@style/NovaBoardSettingsListRow"
                 android:layout_width="match_parent"

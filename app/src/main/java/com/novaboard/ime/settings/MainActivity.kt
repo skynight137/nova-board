@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.Gravity
@@ -27,6 +28,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.OnBackPressedCallback
 import com.novaboard.ime.R
+import com.novaboard.ime.BuildConfig
 import com.novaboard.ime.clipboard.ClipboardHistoryManager
 import com.novaboard.ime.emoji.EmojiPanel
 import com.novaboard.ime.model.Key
@@ -99,6 +101,18 @@ class MainActivity : AppCompatActivity() {
                 createReport.launch("NovaBoard-diagnostic-report.txt")
             } catch (_: ActivityNotFoundException) {
                 Toast.makeText(this, R.string.app_log_export_failed, Toast.LENGTH_LONG).show()
+            }
+        }
+        findViewById<Button>(R.id.btnCheckForUpdates).setOnClickListener {
+            try {
+                startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse(BuildConfig.RELEASE_PAGE_URL),
+                    ),
+                )
+            } catch (_: ActivityNotFoundException) {
+                Toast.makeText(this, R.string.release_page_open_failed, Toast.LENGTH_LONG).show()
             }
         }
         findViewById<Button>(R.id.btnThemeSettings).setOnClickListener {
@@ -285,6 +299,7 @@ class MainActivity : AppCompatActivity() {
         setSettingsRowIcon(R.id.btnGestureSettings, R.drawable.ic_typing)
         setSettingsRowIcon(R.id.btnIncognito, R.drawable.ic_privacy)
         setSettingsRowIcon(R.id.btnExportLog, R.drawable.ic_info)
+        setSettingsRowIcon(R.id.btnCheckForUpdates, R.drawable.ic_info)
         setSettingsRowIcon(R.id.btnThemeSettings, R.drawable.ic_theme)
         setSettingsRowIcon(R.id.btnResetSettings, R.drawable.ic_reset)
     }
