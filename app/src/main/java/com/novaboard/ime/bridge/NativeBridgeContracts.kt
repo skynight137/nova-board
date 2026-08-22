@@ -200,33 +200,42 @@ fun bridgeError(
     retryable: Boolean = false,
 ): BridgeResult.Failure = BridgeResult.Failure(BridgeError(code, message, retryable))
 
+typealias BridgeCompletion = (BridgeResult) -> Unit
+
+typealias ClipboardOperationHandler = (ClipboardOperation, BridgeCompletion) -> Unit
+
+typealias GifOperationHandler = (GifOperation, BridgeCompletion) -> Unit
+
+typealias VoiceOperationHandler = (VoiceOperation, BridgeCompletion) -> Unit
+
 class SessionScopedNativeBridge(
     private val sessionGate: SessionGate,
-    private val handler: (NativeBridgeRequest) -> BridgeResult,
+    private val handler: (NativeBridgeRequest, BridgeCompletion) -> Unit,
 ) : NativeBridge {
+    constructor(
+        sessionGate: SessionGate,
+        syncHandler: (NativeBridgeRequest) -> BridgeResult,
+    ) : this(sessionGate, { request, completion -> completion(syncHandler(request)) })
+
     override fun execute(request: NativeBridgeRequest, callback: (BridgeResult) -> Unit) {
         if (!sessionGate.accepts(request)) {
-            callback(
-                bridgeError(
-                    BridgeErrorCode.STALE_SESSION,
-                    "The input session is no longer active",
-                ),
-            )
+            callback(staleSession("The input session is no longer active"))
             return
         }
 
-        val result = handler(request)
-        callback(
-            if (sessionGate.accepts(request)) {
-                result
-            } else {
-                bridgeError(
-                    BridgeErrorCode.STALE_SESSION,
-                    "The input session changed while the request was running",
-                )
-            },
-        )
+        handler(request) { result ->
+            callback(
+                if (sessionGate.accepts(request)) {
+                    result
+                } else {
+                    staleSession("The input session changed while the request was running")
+                },
+            )
+        }
     }
+
+    private fun staleSession(message: String) =
+        bridgeError(BridgeErrorCode.STALE_SESSION, message)
 }
 
 class SessionGate(initialSession: InputSessionId? = null) {

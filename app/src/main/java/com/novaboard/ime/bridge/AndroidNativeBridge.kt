@@ -6,8 +6,11 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.view.KeyEvent
 import android.view.inputmethod.InputConnection
+import com.novaboard.ime.clipboard.ClipType
+import com.novaboard.ime.clipboard.ClipboardItem
 import com.novaboard.ime.editing.previousCodePointDeletionCount
 import com.novaboard.ime.editing.previousWordDeletionCount
+import com.novaboard.ime.gif.GifClientException
 import com.novaboard.ime.settings.KeyboardPreferences
 import com.novaboard.ime.theme.ThemeManager
 import com.novaboard.ime.theme.ThemeMode
@@ -17,33 +20,58 @@ import com.novaboard.ime.theme.ThemeMode
  * session gate; callers only see explicit commands and typed responses.
  */
 class AndroidNativeBridge(
-    private val context: Context,
+    private val contextProvider: () -> Context,
     private val connectionProvider: () -> InputConnection?,
     private val sessionGate: SessionGate,
+    private val clipboardOperations: ClipboardOperationHandler? = null,
+    private val gifOperations: GifOperationHandler? = null,
+    private val voiceOperations: VoiceOperationHandler? = null,
 ) : NativeBridge {
+    constructor(
+        context: Context,
+        connectionProvider: () -> InputConnection?,
+        sessionGate: SessionGate,
+        clipboardOperations: ClipboardOperationHandler? = null,
+        gifOperations: GifOperationHandler? = null,
+        voiceOperations: VoiceOperationHandler? = null,
+    ) : this({ context }, connectionProvider, sessionGate, clipboardOperations, gifOperations, voiceOperations)
+
+    private val context: Context
+        get() = contextProvider()
+
     private val dispatcher =
-        SessionScopedNativeBridge(sessionGate) { request -> handle(request) }
+        SessionScopedNativeBridge(sessionGate, ::dispatch)
 
     override fun execute(request: NativeBridgeRequest, callback: (BridgeResult) -> Unit) =
         dispatcher.execute(request, callback)
 
-    private fun handle(request: NativeBridgeRequest): BridgeResult =
+    private fun dispatch(request: NativeBridgeRequest, complete: BridgeCompletion) {
         when (request) {
-            is NativeBridgeRequest.Editor -> handleEditor(request.command)
-            is NativeBridgeRequest.Preferences -> handlePreferences(request.operation)
-            is NativeBridgeRequest.Theme -> handleTheme()
-            is NativeBridgeRequest.Haptic -> handleHaptic(request.operation)
-            is NativeBridgeRequest.KeyboardMetrics -> handleMetrics()
-            is NativeBridgeRequest.Clipboard,
-            is NativeBridgeRequest.Gif,
-            is NativeBridgeRequest.Voice,
-            ->
-                bridgeError(
-                    BridgeErrorCode.RUNTIME_UNAVAILABLE,
-                    "This native operation is not attached to the Android adapter yet",
-                    retryable = true,
-                )
+            is NativeBridgeRequest.Editor -> complete(handleEditor(request.command))
+            is NativeBridgeRequest.Preferences -> complete(handlePreferences(request.operation))
+            is NativeBridgeRequest.Theme -> complete(handleTheme())
+            is NativeBridgeRequest.Haptic -> complete(handleHaptic(request.operation))
+            is NativeBridgeRequest.KeyboardMetrics -> complete(handleMetrics())
+            is NativeBridgeRequest.Clipboard -> dispatchProvider(request.operation, clipboardOperations, complete)
+            is NativeBridgeRequest.Gif -> dispatchProvider(request.operation, gifOperations, complete)
+            is NativeBridgeRequest.Voice -> dispatchProvider(request.operation, voiceOperations, complete)
         }
+    }
+
+    private fun <T> dispatchProvider(
+        operation: T,
+        handler: ((T, BridgeCompletion) -> Unit)?,
+        complete: BridgeCompletion,
+    ) {
+        if (handler == null) {
+            complete(runtimeUnavailable("This native operation is not attached to the Android adapter yet"))
+        } else {
+            handler(operation, complete)
+        }
+    }
+
+    private fun runtimeUnavailable(message: String): BridgeResult.Failure =
+        bridgeError(BridgeErrorCode.RUNTIME_UNAVAILABLE, message, retryable = true)
 
     private fun handleEditor(command: EditorCommand): BridgeResult {
         val connection =
@@ -186,3 +214,36 @@ class AndroidNativeBridge(
             )
     }
 }
+
+internal fun gifSearchError(error: Throwable): BridgeResult.Failure =
+    when (error) {
+        is GifClientException.NotConfigured ->
+            bridgeError(
+                BridgeErrorCode.NOT_CONFIGURED,
+                "The GIF provider API key is not configured",
+            )
+        is GifClientException.InvalidResponse ->
+            bridgeError(
+                BridgeErrorCode.PROVIDER_REJECTED,
+                "The GIF provider returned an invalid response",
+            )
+        is GifClientException.HttpFailure ->
+            bridgeError(
+                BridgeErrorCode.PROVIDER_REJECTED,
+                "The GIF provider request failed with HTTP ${error.code}",
+                retryable = true,
+            )
+        else ->
+            bridgeError(
+                BridgeErrorCode.PROVIDER_REJECTED,
+                "The GIF provider request failed",
+                retryable = true,
+            )
+    }
+
+internal fun ClipboardItem.toPreviewItem(): ClipboardPreviewItem =
+    ClipboardPreviewItem(
+        id = id,
+        text = if (type == ClipType.TEXT) text else null,
+        pinned = pinned,
+    )

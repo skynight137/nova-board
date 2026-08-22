@@ -131,4 +131,50 @@ class NativeBridgeContractsTest {
             (results.single() as BridgeResult.Failure).error.code,
         )
     }
+
+    @Test
+    fun deferredCompletionsAreRejectedWhenTheSessionChangedWhileRunning() {
+        val gate = SessionGate(InputSessionId(5L))
+        var pending: ((BridgeResult) -> Unit)? = null
+        val bridge =
+            SessionScopedNativeBridge(gate) { _, completion -> pending = completion }
+        val results = mutableListOf<BridgeResult>()
+        val request =
+            NativeBridgeRequest.Editor(
+                InputSessionId(5L),
+                BridgeRequestId("deferred-1"),
+                EditorCommand.CommitText("hi"),
+            )
+
+        bridge.execute(request, results::add)
+        assertTrue(results.isEmpty())
+
+        gate.begin(InputSessionId(6L))
+        pending?.invoke(BridgeResult.Success(NativeBridgeResponse.Accepted))
+
+        assertEquals(
+            BridgeErrorCode.STALE_SESSION,
+            (results.single() as BridgeResult.Failure).error.code,
+        )
+    }
+
+    @Test
+    fun syncHandlerConstructorStillCompletesInline() {
+        val gate = SessionGate(InputSessionId(9L))
+        val bridge =
+            SessionScopedNativeBridge(gate) { request ->
+                if (gate.accepts(request)) BridgeResult.Success(NativeBridgeResponse.BooleanValue(true)) else error("unreachable")
+            }
+        val results = mutableListOf<BridgeResult>()
+        val request =
+            NativeBridgeRequest.Preferences(
+                InputSessionId(9L),
+                BridgeRequestId("pref-1"),
+                PreferenceOperation.ReadBoolean("show_number_row"),
+            )
+
+        bridge.execute(request, results::add)
+
+        assertEquals(listOf<BridgeResult>(BridgeResult.Success(NativeBridgeResponse.BooleanValue(true))), results)
+    }
 }

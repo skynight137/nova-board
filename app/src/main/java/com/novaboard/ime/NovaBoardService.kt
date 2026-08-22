@@ -37,10 +37,22 @@ import com.novaboard.ime.clipboard.ClipType
 import com.novaboard.ime.clipboard.ClipboardHistoryManager
 import com.novaboard.ime.clipboard.ClipboardItem
 import com.novaboard.ime.clipboard.ClipboardPanel
+import com.novaboard.ime.clipboard.filterClipboardItems
 import com.novaboard.ime.bridge.AndroidNativeBridge
+import com.novaboard.ime.bridge.BridgeErrorCode
+import com.novaboard.ime.bridge.BridgeResult
+import com.novaboard.ime.bridge.ClipboardOperation
+import com.novaboard.ime.bridge.GifOperation
+import com.novaboard.ime.bridge.GifPreviewItem
 import com.novaboard.ime.bridge.InputSessionId
 import com.novaboard.ime.bridge.NativeBridge
+import com.novaboard.ime.bridge.NativeBridgeResponse
 import com.novaboard.ime.bridge.SessionGate
+import com.novaboard.ime.bridge.VoiceOperation
+import com.novaboard.ime.bridge.VoiceStateValue
+import com.novaboard.ime.bridge.bridgeError
+import com.novaboard.ime.bridge.gifSearchError
+import com.novaboard.ime.bridge.toPreviewItem
 import com.novaboard.ime.editing.AutocorrectState
 import com.novaboard.ime.editing.RepeatController
 import com.novaboard.ime.editing.RepeatToken
@@ -52,6 +64,7 @@ import com.novaboard.ime.editing.shouldResetTrackedTyping
 import com.novaboard.ime.editor.isConversationEditorInputType
 import com.novaboard.ime.emoji.EmojiData
 import com.novaboard.ime.emoji.EmojiPanel
+import com.novaboard.ime.gif.GifClient
 import com.novaboard.ime.gif.GifItem
 import com.novaboard.ime.gif.GifPanel
 import com.novaboard.ime.gif.supportsGifContent
@@ -99,11 +112,15 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private var listening = false
     private var inputSession = 0L
     private val bridgeSessionGate = SessionGate()
+    private val gifBridgeClient by lazy { GifClient() }
     private val nativeBridge: NativeBridge by lazy {
         AndroidNativeBridge(
             context = this,
             connectionProvider = { currentInputConnection },
             sessionGate = bridgeSessionGate,
+            clipboardOperations = { operation, complete -> complete(handleClipboardOperation(operation)) },
+            gifOperations = ::handleGifOperation,
+            voiceOperations = { operation, complete -> complete(handleVoiceOperation(operation)) },
         )
     }
     private var voiceRecognizerGeneration = 0L
@@ -601,6 +618,103 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             )
         gifPanel?.show(overlayPanelContainer)
     }
+
+    private fun handleClipboardOperation(operation: ClipboardOperation): BridgeResult =
+        when (operation) {
+            is ClipboardOperation.List ->
+                BridgeResult.Success(
+                    NativeBridgeResponse.ClipboardItems(clipboardHistory.getItems().map { it.toPreviewItem() }),
+                )
+            is ClipboardOperation.Search ->
+                BridgeResult.Success(
+                    NativeBridgeResponse.ClipboardItems(
+                        filterClipboardItems(clipboardHistory.getItems(), operation.query).map { it.toPreviewItem() },
+                    ),
+                )
+            is ClipboardOperation.SetPinned -> {
+                val item =
+                    clipboardHistory.getItems().firstOrNull { it.id == operation.itemId }
+                        ?: return bridgeError(BridgeErrorCode.INVALID_REQUEST, "Unknown clipboard item")
+                if (item.pinned != operation.pinned) clipboardHistory.togglePin(item.id)
+                BridgeResult.Success(NativeBridgeResponse.Accepted)
+            }
+            is ClipboardOperation.Delete -> {
+                if (clipboardHistory.getItems().none { it.id == operation.itemId }) {
+                    return bridgeError(BridgeErrorCode.INVALID_REQUEST, "Unknown clipboard item")
+                }
+                clipboardHistory.delete(operation.itemId)
+                BridgeResult.Success(NativeBridgeResponse.Accepted)
+            }
+        }
+
+    private fun handleGifOperation(operation: GifOperation, complete: (BridgeResult) -> Unit) {
+        when (operation) {
+            is GifOperation.Search ->
+                gifShareExecutor.execute {
+                    val result =
+                        runCatching { gifBridgeClient.load(operation.query) }.fold(
+                            onSuccess = { items ->
+                                BridgeResult.Success(
+                                    NativeBridgeResponse.GifItems(
+                                        items.map { GifPreviewItem(it.slug, it.title, it.previewUrl) },
+                                    ),
+                                )
+                            },
+                            onFailure = ::gifSearchError,
+                        )
+                    mainHandler.post { complete(result) }
+                }
+            is GifOperation.Insert -> {
+                val inputConnection = currentInputConnection
+                if (inputConnection == null) {
+                    complete(
+                        bridgeError(
+                            BridgeErrorCode.EDITOR_UNAVAILABLE,
+                            "No active editor connection is available",
+                            retryable = true,
+                        ),
+                    )
+                    return
+                }
+                insertGif(
+                    GifItem(
+                        slug = operation.contentUrl,
+                        title = operation.contentUrl.substringAfterLast('/').ifBlank { "GIF" },
+                        previewUrl = "",
+                        contentUrl = operation.contentUrl,
+                    ),
+                )
+                complete(BridgeResult.Success(NativeBridgeResponse.Accepted))
+            }
+        }
+    }
+
+    private fun handleVoiceOperation(operation: VoiceOperation): BridgeResult =
+        when (operation) {
+            VoiceOperation.Start -> {
+                if (
+                    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M &&
+                    checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    bridgeError(
+                        BridgeErrorCode.PERMISSION_REQUIRED,
+                        "Microphone permission is required for voice typing",
+                    )
+                } else if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+                    bridgeError(
+                        BridgeErrorCode.RUNTIME_UNAVAILABLE,
+                        "Speech recognition isn't available on this device",
+                    )
+                } else {
+                    startVoiceInput()
+                    BridgeResult.Success(NativeBridgeResponse.VoiceState(VoiceStateValue.LISTENING))
+                }
+            }
+            VoiceOperation.Stop -> {
+                stopVoiceInput()
+                BridgeResult.Success(NativeBridgeResponse.VoiceState(VoiceStateValue.IDLE))
+            }
+        }
 
     private fun insertGif(item: GifItem) {
         gifPanel?.dismiss()
