@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import rawTokens from "../../design-system/novaboard/design-tokens.json";
+import { createPreviewBridge, previewSession } from "./bridgeMock";
 import "./styles.css";
 
 const tokens = {
@@ -55,6 +56,11 @@ function Key({ label, theme, utility = false }) {
 function App() {
   const [dark, setDark] = useState(false);
   const theme = dark ? tokens.dark : tokens.light;
+  const bridgeState = createPreviewBridge().execute({
+    family: "theme",
+    sessionId: previewSession,
+    requestId: "preview-theme",
+  });
   return (
     <View style={[styles.page, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
@@ -115,6 +121,9 @@ function App() {
       </View>
       <Text style={[styles.caption, { color: theme.secondary }]}>
         Touch targets use the shared {rawTokens.component.touchTargetMinDp}dp minimum. Press a key to preview its state.
+      </Text>
+      <Text style={[styles.caption, { color: theme.secondary }]}>
+        Bridge mock: {bridgeState.ok ? "theme response available" : bridgeState.error.code}
       </Text>
     </View>
   );

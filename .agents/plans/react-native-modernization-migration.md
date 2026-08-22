@@ -110,31 +110,31 @@ Verification:
 - [x] Existing JVM tests pass.
 - [x] `git diff --check` passes.
 
-### Phase 2: Shared contracts and native bridge seams `[ ]`
+### Phase 2: Shared contracts and native bridge seams `[~]`
 
 Create testable interfaces between React Native UI and native Android behavior
 before moving production screens.
 
 Acceptance criteria:
 
-- [ ] Editor actions are represented as explicit commands owned by the native
+- [x] Editor actions are represented as explicit commands owned by the native
   service; JavaScript cannot receive an unrestricted `InputConnection`.
-- [ ] Clipboard, GIF, voice, preferences, theme, haptic, and keyboard-metric
+- [x] Clipboard, GIF, voice, preferences, theme, haptic, and keyboard-metric
   APIs have typed request/result/error contracts.
-- [ ] Native bridge errors are visible to the UI and do not silently fall back
+- [x] Native bridge errors are visible to the UI and do not silently fall back
   to fake success.
-- [ ] Session identity and cancellation are included in asynchronous bridge
+- [x] Session identity and cancellation are included in asynchronous bridge
   operations.
-- [ ] Privacy-sensitive data is minimized at the bridge boundary; clipboard
+- [x] Privacy-sensitive data is minimized at the bridge boundary; clipboard
   contents and diagnostic secrets are not logged.
-- [ ] Contract tests cover success, unavailable-runtime, stale-session,
+- [x] Contract tests cover success, unavailable-runtime, stale-session,
   permission, and provider-rejection cases.
 
 Verification:
 
-- [ ] Focused JVM contract tests pass.
-- [ ] Native bridge tests pass without requiring a live keyboard.
-- [ ] A preview mock implements the same contracts for deterministic UI states.
+- [x] Focused JVM contract tests pass.
+- [x] Native bridge tests pass without requiring a live keyboard.
+- [x] A preview mock implements the same contracts for deterministic UI states.
 
 ### Phase 3: Migrate settings and non-IME surfaces `[ ]`
 
