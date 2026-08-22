@@ -1,7 +1,7 @@
 # React Native Bridge Contract
 
-Status: Phase 2 contract foundation. The native adapter and instrumentation
-coverage are still pending.
+Status: Phase 2 native adapter foundation complete; provider-specific operations
+and instrumentation coverage are still pending.
 
 ## Boundary
 
@@ -42,8 +42,11 @@ codes so the UI can show the real unavailable state.
 
 The contract is platform-neutral and safe to unit test.
 `SessionScopedNativeBridge` provides the session and callback boundary without
-owning Android objects. The production adapter must be owned by
-`NovaBoardService`, keeping all `InputConnection` access inside that adapter.
+owning Android objects. `AndroidNativeBridge` is owned by the Android service
+boundary and keeps all `InputConnection` access inside that adapter. It handles
+editor commands, boolean preferences, theme reads, haptics, and keyboard
+metrics. Clipboard, GIF, and voice operations currently return an explicit
+runtime-unavailable error until their provider lifecycles are connected.
 The preview uses `preview/src/bridgeMock.js`, a deterministic mock that returns
 the same response and error shapes and explicitly reports unavailable native
 runtime operations.

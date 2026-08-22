@@ -175,6 +175,7 @@ sealed interface BridgeResult {
 }
 
 enum class BridgeErrorCode {
+    EDITOR_UNAVAILABLE,
     RUNTIME_UNAVAILABLE,
     STALE_SESSION,
     INVALID_REQUEST,

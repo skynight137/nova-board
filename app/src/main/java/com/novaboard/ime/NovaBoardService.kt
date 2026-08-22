@@ -37,6 +37,10 @@ import com.novaboard.ime.clipboard.ClipType
 import com.novaboard.ime.clipboard.ClipboardHistoryManager
 import com.novaboard.ime.clipboard.ClipboardItem
 import com.novaboard.ime.clipboard.ClipboardPanel
+import com.novaboard.ime.bridge.AndroidNativeBridge
+import com.novaboard.ime.bridge.InputSessionId
+import com.novaboard.ime.bridge.NativeBridge
+import com.novaboard.ime.bridge.SessionGate
 import com.novaboard.ime.editing.AutocorrectState
 import com.novaboard.ime.editing.RepeatController
 import com.novaboard.ime.editing.RepeatToken
@@ -94,6 +98,14 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private var speechRecognizer: SpeechRecognizer? = null
     private var listening = false
     private var inputSession = 0L
+    private val bridgeSessionGate = SessionGate()
+    private val nativeBridge: NativeBridge by lazy {
+        AndroidNativeBridge(
+            context = this,
+            connectionProvider = { currentInputConnection },
+            sessionGate = bridgeSessionGate,
+        )
+    }
     private var voiceRecognizerGeneration = 0L
     private var selectionStart = -1
     private var selectionEnd = -1
@@ -261,6 +273,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private fun resetInputSession() {
         stopCursorRepeat()
         inputSession++
+        bridgeSessionGate.begin(InputSessionId(inputSession))
         if (::keyboardView.isInitialized) keyboardView.cancelInteractions()
         stopVoiceInput()
         clipboardPanel?.dismiss()
