@@ -98,7 +98,7 @@ These behaviors were manually confirmed in the active keyboard:
 - [✓] Expandable tools row
 - [✓] Clipboard panel
 - [✓] KLIPY GIF panel with trending results and keyword search
-- [✓] GIF sharing through Android's share sheet with KLIPY GIF metadata
+- [✓] Direct GIF insertion through Android rich-content input
 - [✓] Hotkeys panel
 - [✓] Voice panel
 - [✓] Emoji panel

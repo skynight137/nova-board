@@ -25,7 +25,7 @@ input without a third-party keyboard SDK.
   available
 - Scrollable, compact emoji picker with padded, uncropped emoji cells
 - KLIPY-powered GIF panel opened from the toolbar or tools menu, with trending
-  GIFs, keyword search, and Android share-sheet handoff
+  GIFs, keyword search, and direct rich-content insertion into compatible editors
 - System, light, and dark themes
 - Voice typing through Android's on-device `SpeechRecognizer`
 - Optional gesture typing across letter keys with bounded path recognition

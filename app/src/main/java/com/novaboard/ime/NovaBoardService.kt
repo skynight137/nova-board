@@ -1,6 +1,5 @@
 package com.novaboard.ime
 
-import android.content.ClipData
 import android.content.ClipDescription
 import android.content.Context
 import android.content.pm.PackageManager
@@ -604,7 +603,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 .onSuccess { file ->
                     mainHandler.post {
                         if (session == inputSession) {
-                            shareGifFile(item, file)
+                            commitGifFile(item, file)
                         } else {
                             file.delete()
                         }
@@ -616,7 +615,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                         if (session == inputSession) {
                             Toast.makeText(
                                     this,
-                                    getString(R.string.gif_share_failed),
+                                    getString(R.string.gif_download_failed),
                                     Toast.LENGTH_SHORT,
                                 )
                                 .show()
@@ -665,32 +664,37 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         }
     }
 
-    private fun shareGifFile(item: GifItem, file: File) {
+    private fun commitGifFile(item: GifItem, file: File) {
         val gifUri = Uri.parse("content://$GIF_SHARE_AUTHORITY/${file.name}")
-        val shareIntent =
-            Intent(Intent.ACTION_SEND).apply {
-                type = "image/gif"
-                putExtra(Intent.EXTRA_STREAM, gifUri)
-                putExtra(Intent.EXTRA_TITLE, item.title)
-                clipData = ClipData.newRawUri(item.title, gifUri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-        runCatching {
-                startActivity(
-                    Intent.createChooser(
-                        shareIntent,
-                        getString(R.string.gif_share_title),
-                    ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        val inputConnection = currentInputConnection
+        if (inputConnection == null) {
+            file.delete()
+            return
+        }
+        val inserted =
+            runCatching {
+                    inputConnection.commitContent(
+                        InputContentInfo(
+                            gifUri,
+                            ClipDescription(item.title, arrayOf("image/gif")),
+                            null,
+                        ),
+                        InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION,
+                        null,
+                    )
+                }
+                .getOrDefault(false)
+        if (inserted) {
+            mainHandler.postDelayed({ file.delete() }, GIF_RETENTION_MS)
+        } else {
+            file.delete()
+            Toast.makeText(
+                    this,
+                    getString(R.string.gif_editor_unsupported),
+                    Toast.LENGTH_SHORT,
                 )
-                mainHandler.postDelayed({ file.delete() }, GIF_RETENTION_MS)
-            }
-            .onFailure {
-                file.delete()
-                AppLog.w("NovaBoardService", "GIF share was rejected", it)
-                Toast.makeText(this, getString(R.string.gif_share_failed), Toast.LENGTH_SHORT)
-                    .show()
-            }
+                .show()
+        }
     }
 
     private fun pasteClipboardItem(item: ClipboardItem) {
