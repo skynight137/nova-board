@@ -87,6 +87,12 @@ sealed interface NativeBridgeRequest {
         override val requestId: BridgeRequestId,
         val operation: SettingsOperation,
     ) : NativeBridgeRequest
+
+    data class Emoji(
+        override val sessionId: InputSessionId,
+        override val requestId: BridgeRequestId,
+        val operation: EmojiOperation,
+    ) : NativeBridgeRequest
 }
 
 sealed interface ClipboardOperation {
@@ -136,6 +142,12 @@ sealed interface SettingsOperation {
     data object ReadStatus : SettingsOperation
 }
 
+sealed interface EmojiOperation {
+    data object List : EmojiOperation
+
+    data class Search(val query: String) : EmojiOperation
+}
+
 sealed interface NativeBridgeResponse {
     data object Accepted : NativeBridgeResponse
     data class BooleanValue(val value: Boolean) : NativeBridgeResponse
@@ -146,6 +158,7 @@ sealed interface NativeBridgeResponse {
     data class ThemeValue(val theme: ThemeValueType) : NativeBridgeResponse
     data class KeyboardMetrics(val metrics: KeyboardMetricsValue) : NativeBridgeResponse
     data class InputMethodStatus(val status: InputMethodStatusValue) : NativeBridgeResponse
+    data class EmojiItems(val items: List<EmojiPreviewItem>) : NativeBridgeResponse
 }
 
 data class InputMethodStatusValue(
@@ -167,6 +180,10 @@ data class GifPreviewItem(
     val slug: String,
     val title: String,
     val previewUrl: String,
+)
+
+data class EmojiPreviewItem(
+    val emoji: String,
 )
 
 enum class VoiceStateValue {
@@ -233,6 +250,8 @@ typealias GifOperationHandler = (GifOperation, BridgeCompletion) -> Unit
 typealias VoiceOperationHandler = (VoiceOperation, BridgeCompletion) -> Unit
 
 typealias SettingsOperationHandler = (SettingsOperation, BridgeCompletion) -> Unit
+
+typealias EmojiOperationHandler = (EmojiOperation, BridgeCompletion) -> Unit
 
 class SessionScopedNativeBridge(
     private val sessionGate: SessionGate,

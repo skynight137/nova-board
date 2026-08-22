@@ -42,6 +42,8 @@ import com.novaboard.ime.bridge.AndroidNativeBridge
 import com.novaboard.ime.bridge.BridgeErrorCode
 import com.novaboard.ime.bridge.BridgeResult
 import com.novaboard.ime.bridge.ClipboardOperation
+import com.novaboard.ime.bridge.EmojiOperation
+import com.novaboard.ime.bridge.EmojiPreviewItem
 import com.novaboard.ime.bridge.GifOperation
 import com.novaboard.ime.bridge.GifPreviewItem
 import com.novaboard.ime.bridge.InputSessionId
@@ -121,6 +123,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             clipboardOperations = { operation, complete -> complete(handleClipboardOperation(operation)) },
             gifOperations = ::handleGifOperation,
             voiceOperations = { operation, complete -> complete(handleVoiceOperation(operation)) },
+            emojiOperations = { operation, complete -> complete(handleEmojiOperation(operation)) },
         )
     }
     private var voiceRecognizerGeneration = 0L
@@ -714,6 +717,18 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 stopVoiceInput()
                 BridgeResult.Success(NativeBridgeResponse.VoiceState(VoiceStateValue.IDLE))
             }
+        }
+
+    private fun handleEmojiOperation(operation: EmojiOperation): BridgeResult =
+        when (operation) {
+            EmojiOperation.List ->
+                BridgeResult.Success(NativeBridgeResponse.EmojiItems(EmojiData.all.map { EmojiPreviewItem(it) }))
+            is EmojiOperation.Search ->
+                BridgeResult.Success(
+                    NativeBridgeResponse.EmojiItems(
+                        EmojiData.search(operation.query).map { EmojiPreviewItem(it) },
+                    ),
+                )
         }
 
     private fun insertGif(item: GifItem) {

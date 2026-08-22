@@ -101,6 +101,66 @@ class AndroidNativeBridgeTest {
     }
 
     @Test
+    fun emojiFamilyWithoutHandlerStaysExplicitlyUnavailable() {
+        val bridge =
+            AndroidNativeBridge(
+                contextProvider = { error("Context is not needed for provider seams") },
+                connectionProvider = { null },
+                sessionGate = SessionGate(InputSessionId(12L)),
+            )
+        val results = mutableListOf<BridgeResult>()
+        val request =
+            NativeBridgeRequest.Emoji(
+                InputSessionId(12L),
+                BridgeRequestId("emoji-1"),
+                EmojiOperation.List,
+            )
+
+        bridge.execute(request, results::add)
+
+        assertEquals(
+            BridgeErrorCode.RUNTIME_UNAVAILABLE,
+            (results.single() as BridgeResult.Failure).error.code,
+        )
+    }
+
+    @Test
+    fun attachedEmojiHandlerReceivesOperations() {
+        var received: EmojiOperation? = null
+        val bridge =
+            AndroidNativeBridge(
+                contextProvider = { error("Context is not needed for provider seams") },
+                connectionProvider = { null },
+                sessionGate = SessionGate(InputSessionId(13L)),
+                emojiOperations = { operation, complete ->
+                    received = operation
+                    complete(
+                        BridgeResult.Success(
+                            NativeBridgeResponse.EmojiItems(listOf(EmojiPreviewItem("\u2764\ufe0f"))),
+                        ),
+                    )
+                },
+            )
+        val results = mutableListOf<BridgeResult>()
+        val request =
+            NativeBridgeRequest.Emoji(
+                InputSessionId(13L),
+                BridgeRequestId("emoji-2"),
+                EmojiOperation.Search("heart"),
+            )
+
+        bridge.execute(request, results::add)
+
+        assertEquals(EmojiOperation.Search("heart"), received)
+        assertEquals(
+            listOf(EmojiPreviewItem("\u2764\ufe0f")),
+            (results.single() as BridgeResult.Success).let {
+                (it.response as NativeBridgeResponse.EmojiItems).items
+            },
+        )
+    }
+
+    @Test
     fun attachedClipboardHandlerReceivesOperations() {
         var received: ClipboardOperation? = null
         val bridge =

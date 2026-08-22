@@ -27,6 +27,7 @@ class AndroidNativeBridge(
     private val gifOperations: GifOperationHandler? = null,
     private val voiceOperations: VoiceOperationHandler? = null,
     private val settingsOperations: SettingsOperationHandler? = null,
+    private val emojiOperations: EmojiOperationHandler? = null,
 ) : NativeBridge {
     constructor(
         context: Context,
@@ -36,7 +37,8 @@ class AndroidNativeBridge(
         gifOperations: GifOperationHandler? = null,
         voiceOperations: VoiceOperationHandler? = null,
         settingsOperations: SettingsOperationHandler? = null,
-    ) : this({ context }, connectionProvider, sessionGate, clipboardOperations, gifOperations, voiceOperations, settingsOperations)
+        emojiOperations: EmojiOperationHandler? = null,
+    ) : this({ context }, connectionProvider, sessionGate, clipboardOperations, gifOperations, voiceOperations, settingsOperations, emojiOperations)
 
     private val context: Context
         get() = contextProvider()
@@ -58,6 +60,7 @@ class AndroidNativeBridge(
             is NativeBridgeRequest.Gif -> dispatchProvider(request.operation, gifOperations, complete)
             is NativeBridgeRequest.Voice -> dispatchProvider(request.operation, voiceOperations, complete)
             is NativeBridgeRequest.Settings -> dispatchProvider(request.operation, settingsOperations, complete)
+            is NativeBridgeRequest.Emoji -> dispatchProvider(request.operation, emojiOperations, complete)
         }
     }
 
