@@ -53,42 +53,6 @@ NovaBoard/
 └── README.md
 ```
 
-### Where changes belong
-
-- **Settings entry point:** `app/src/main/java/com/novaboard/ime/settings/MainActivity.kt`
-- **Keyboard service:** `app/src/main/java/com/novaboard/ime/NovaBoardService.kt`
-- **Keyboard rendering:** `app/src/main/java/com/novaboard/ime/view/KeyboardView.kt`
-- **Keyboard layout:** `app/src/main/res/layout/keyboard_container.xml`
-- **Diagnostic logging:** `app/src/main/java/com/novaboard/ime/util/AppLog.kt`
-- **Release automation:** `.releaserc.cjs`, `.github/workflows/release.yml`,
-  and `.github/release-tooling/prepare-release.sh`
-
-## Architecture
-
-### Android input-method service
-
-`NovaBoardService` owns the IME lifecycle, input connection, keyboard overlays,
-clipboard, suggestions, and voice-input actions. Native views keep the keyboard
-usable across API 26+ devices without a third-party keyboard SDK.
-
-**Why:** NovaBoard is an input method, so text interaction belongs behind
-Android's `BIND_INPUT_METHOD` service boundary rather than accessibility APIs.
-
-### Local clipboard history
-
-Clipboard history is stored locally and supports text, image references,
-pinning, and deletion from the keyboard overlay.
-
-**Why:** keyboard content and preferences should not leave the device implicitly.
-
-### Declarative build and release policy
-
-Gradle configuration and dependency versions use Kotlin DSL and the version
-catalog. Formatting, lint, packaging, semantic-release, signing, and release
-page configuration remain in the existing build and release files.
-
-**Why:** one executable source of truth prevents project documentation from
-drifting away from the build.
 
 ## Features
 
