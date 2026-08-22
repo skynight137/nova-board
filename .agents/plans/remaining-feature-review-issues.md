@@ -20,7 +20,7 @@ Compared with `attached_assets/untitled_1787187644560.md` and the current source
 ### Partial
 
 - **Typing/autocorrect:** external selection and insertion invalidation exists; undo-autocorrect now requires the exact bounded post-replacement text snapshot. Android fake-input-connection coverage remains deferred.
-- **Emoji-on-enter:** unsupported email/URI/password variations are excluded, but the policy is still based on input type rather than a clear supported conversation-editor contract.
+- **Emoji-on-enter:** now an explicit positive allowlist (`SUPPORTED_CONVERSATION_VARIATIONS`) in `EditorPolicy.isConversationEditorInputType`, with comprehensive JVM regression coverage in `EditorPolicyTest` (supported variations allowed; email/uri/password/visible-password/web-email/person-name/filter/postal/phonetic excluded). Android UI/IME-action verification remains deferred.
 - **Settings:** the inactive settings were removed from the dialog and retained boolean defaults now have pure regression coverage; Android reset/UI verification remains deferred.
 - **Emoji controls:** text search and categories work; GIF/media remains intentionally unavailable and needs a product decision if it should return.
 
