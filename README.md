@@ -24,6 +24,8 @@ input without a third-party keyboard SDK.
 - Clipboard stays open after paste so history, search, and pin controls remain
   available
 - Scrollable, compact emoji picker with padded, uncropped emoji cells
+- KLIPY-powered GIF panel opened from the toolbar or tools menu, with trending
+  GIFs, keyword search, and editor-compatible insertion fallback
 - System, light, and dark themes
 - Voice typing through Android's on-device `SpeechRecognizer`
 - Optional gesture typing across letter keys with bounded path recognition

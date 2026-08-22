@@ -23,6 +23,16 @@
     <string name="cd_clipboard">Clipboard</string>
     <string name="cd_hotkeys">Hotkeys</string>
     <string name="cd_voice">Voice typing</string>
+    <string name="cd_gif">GIF</string>
+    <string name="gif_title">GIFs by KLIPY</string>
+    <string name="gif_search_hint">Search KLIPY GIFs</string>
+    <string name="gif_trending">Trending</string>
+    <string name="gif_loading">Loading GIFs…</string>
+    <string name="gif_empty">No GIFs found</string>
+    <string name="gif_error">Unable to load GIFs. Check your connection and try again.</string>
+    <string name="gif_not_configured">GIF search is not configured yet.</string>
+    <string name="gif_inserted">GIF link inserted</string>
+    <string name="gif_close">Close GIF panel</string>
     <string name="cd_more">More keyboard tools</string>
     <string name="cd_close_tools">Close keyboard tools</string>
     <string name="tool_menu_title">Keyboard tools</string>

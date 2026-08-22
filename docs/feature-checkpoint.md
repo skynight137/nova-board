@@ -97,6 +97,8 @@ These behaviors were manually confirmed in the active keyboard:
 - [✓] Prediction bar remains visible above the number row
 - [✓] Expandable tools row
 - [✓] Clipboard panel
+- [✓] KLIPY GIF panel with trending results and keyword search
+- [✓] GIF insertion through Android rich-content input with direct URL fallback
 - [✓] Hotkeys panel
 - [✓] Voice panel
 - [✓] Emoji panel

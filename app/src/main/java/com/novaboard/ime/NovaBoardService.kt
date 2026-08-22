@@ -42,6 +42,8 @@ import com.novaboard.ime.editing.shouldResetTrackedTyping
 import com.novaboard.ime.editor.isConversationEditorInputType
 import com.novaboard.ime.emoji.EmojiData
 import com.novaboard.ime.emoji.EmojiPanel
+import com.novaboard.ime.gif.GifItem
+import com.novaboard.ime.gif.GifPanel
 import com.novaboard.ime.hotkeys.HotkeyController
 import com.novaboard.ime.model.Key
 import com.novaboard.ime.model.KeyType
@@ -78,6 +80,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private val hotkeyController = HotkeyController { currentInputConnection }
     private var clipboardPanel: ClipboardPanel? = null
     private var emojiPanel: EmojiPanel? = null
+    private var gifPanel: GifPanel? = null
     private var toolsMenuView: View? = null
     private var lastSpaceTime = 0L
     private var lastAutocorrectState: AutocorrectState? = null
@@ -142,6 +145,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     override fun onDestroy() {
         resetInputSession()
         emojiPanel?.dismiss()
+        gifPanel?.dismiss()
         clipboardHistory.stop()
         speechRecognizer?.destroy()
         getSharedPreferences("novaboard_prefs", MODE_PRIVATE)
@@ -258,6 +262,8 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         clipboardPanel = null
         emojiPanel?.dismiss()
         emojiPanel = null
+        gifPanel?.dismiss()
+        gifPanel = null
         dismissToolsMenu()
         if (::overlayPanelContainer.isInitialized) {
             overlayPanelContainer.removeAllViews()
@@ -334,6 +340,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         root.findViewById<ImageButton>(R.id.btnClipboard).setOnClickListener { openClipboard(root) }
         root.findViewById<ImageButton>(R.id.btnHotkeys).setOnClickListener { toggleHotkeys() }
         root.findViewById<ImageButton>(R.id.btnVoice).setOnClickListener { toggleVoiceInput() }
+        root.findViewById<TextView>(R.id.btnGif).setOnClickListener { openGif() }
         root.findViewById<ImageButton>(R.id.btnMore).setOnClickListener {
             showToolsMenu(it)
         }
@@ -415,6 +422,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                     ToolMenuItem("hotkeys", getString(R.string.cd_hotkeys)),
                     ToolMenuItem("voice", getString(R.string.cd_voice)),
                     ToolMenuItem("emoji", getString(R.string.cd_emoji)),
+                    ToolMenuItem("gif", getString(R.string.cd_gif)),
                     ToolMenuItem("settings", getString(R.string.tool_settings)),
                     ToolMenuItem("incognito", getString(R.string.tool_incognito)),
                 ),
@@ -463,6 +471,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                     "hotkeys" -> toggleHotkeys()
                     "voice" -> toggleVoiceInput()
                     "emoji" -> onEmoji()
+                    "gif" -> openGif()
                     "settings" ->
                         startActivity(
                             Intent(this@NovaBoardService, MainActivity::class.java)
@@ -553,6 +562,51 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 },
             )
         clipboardPanel?.show(overlayPanelContainer)
+    }
+
+    private fun openGif() {
+        dismissToolsMenu()
+        clipboardPanel?.dismiss()
+        emojiPanel?.dismiss()
+        gifPanel?.dismiss()
+        val session = inputSession
+        gifPanel =
+            GifPanel(
+                this,
+                onPick = { item ->
+                    if (session == inputSession) insertGif(item)
+                },
+                onClose = {
+                    gifPanel?.dismiss()
+                    gifPanel = null
+                },
+            )
+        gifPanel?.show(overlayPanelContainer)
+    }
+
+    private fun insertGif(item: GifItem) {
+        val ic = currentInputConnection ?: return
+        val inserted =
+            runCatching {
+                    val info =
+                        InputContentInfo(
+                            Uri.parse(item.contentUrl),
+                            ClipDescription(item.title, arrayOf("image/gif")),
+                            null,
+                        )
+                    ic.commitContent(
+                        info,
+                        InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION,
+                        null,
+                    )
+                }
+                .getOrDefault(false)
+        if (!inserted) {
+            ic.commitText(item.contentUrl, 1)
+            Toast.makeText(this, getString(R.string.gif_inserted), Toast.LENGTH_SHORT).show()
+        }
+        gifPanel?.dismiss()
+        gifPanel = null
     }
 
     private fun pasteClipboardItem(item: ClipboardItem) {

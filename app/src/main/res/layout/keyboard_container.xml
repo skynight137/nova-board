@@ -47,6 +47,8 @@
                 android:src="@drawable/ic_hotkeys" android:contentDescription="@string/cd_hotkeys" />
             <ImageButton android:id="@+id/btnVoice" style="@style/NovaBoardToolIcon"
                 android:src="@drawable/ic_mic" android:contentDescription="@string/cd_voice" />
+            <TextView android:id="@+id/btnGif" style="@style/NovaBoardToolText"
+                android:text="GIF" android:contentDescription="@string/cd_gif" />
         </LinearLayout>
 
         <LinearLayout
