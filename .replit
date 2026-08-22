@@ -31,13 +31,22 @@ args = "bash scripts/setup.sh"
 outputType = "console"
 
 [[workflows.workflow]]
-name = "Pull (dev) - rebase"
+name = "Pull (dev) - rebase continue"
 mode = "sequential"
 author = 45095703
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "git pull origin dev --rebase"
+args = "git pull origin dev --rebase continue"
+
+[[workflows.workflow]]
+name = "Opencode"
+mode = "sequential"
+author = 47571172
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "source .local/env.sh && opencode web --port 80"
 
 [userenv.shared]
 NODE_ENV = "production"
@@ -54,6 +63,7 @@ UV_PROJECT_ENVIRONMENT = ".venv"
 [[ports]]
 localPort = 80
 externalPort = 80
+exposeLocalhost = true
 
 
 

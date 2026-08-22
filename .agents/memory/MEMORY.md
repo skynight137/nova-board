@@ -32,3 +32,5 @@
 - [IME theme and cursor controls](ime-theme-and-cursor-controls.md) — AppCompat night mode needs an explicit IME context, and arrow touch-up must not resend the initial move.
 - [Unicode backspace](unicode-backspace.md) — backspace counts UTF-16 units for the previous Unicode code point so emoji surrogate pairs are removed together.
 - [GIF share cache lifecycle](gif-share-cache-lifecycle.md) — retain active content-provider files until their handoff retention window expires.
+- [SDK package verification](sdk-package-verification.md) — sdkmanager package IDs can differ from compileSdk labels; verify catalog names and never suppress install failures.
+- [Skills repository aliases](skills-repository-aliases.md) — validate shorthand skill names against real GitHub repositories before passing them to the skills CLI.
