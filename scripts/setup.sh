@@ -376,16 +376,18 @@ main() {
   fi
 
   # ── Summary ──────────────────────────────────────────────────────────────────
-cat <<SUMMARY
-
+  cat <<SUMMARY
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Setup complete!
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   Selected options completed.
+SUMMARY
+
+  if [[ "$INSTALL_ANDROID_TOOLS" == true ]]; then
+    cat <<SUMMARY
   Android tools: source $ENV_FILE
-  OpenCode:      export PATH=$OPENCODE_BIN_DIR:\$PATH
 
   To generate or replace the release keystore
   (ANDROID_MODULE/keystore.jks; defaults to app/keystore.jks)
@@ -399,7 +401,14 @@ cat <<SUMMARY
   For CI (.github/workflows/release.yml), also add a GitHub Actions repository
   secret named KEYSTORE_B64 containing \`base64 -w0 "\${ANDROID_MODULE:-app}/keystore.jks"\` — see
   docs/releasing.md.
+SUMMARY
+  fi
 
+  if [[ "$INSTALL_OPENCODE" == true ]]; then
+    echo "  OpenCode:      export PATH=$OPENCODE_BIN_DIR:\$PATH"
+  fi
+
+  cat <<SUMMARY
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SUMMARY
