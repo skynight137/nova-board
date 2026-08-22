@@ -7,7 +7,7 @@ input without a third-party keyboard SDK.
 
 ## Features
 
-- SwiftKey-inspired toolbar layout with a prediction bar always visible directly
+- SwiftKey-inspired toolbar and keycap styling with a prediction bar always visible directly
   above the number row
 - Expandable tools row: the up chevron opens clipboard, hotkeys,
   voice, and overflow tools above the prediction bar; the down chevron collapses

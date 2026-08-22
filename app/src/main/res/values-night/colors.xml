@@ -6,6 +6,8 @@
     <color name="kb_key_bg_special">#1D2026</color>
     <color name="kb_key_text">#F4F5F7</color>
     <color name="kb_key_pressed">#414650</color>
+    <color name="kb_key_border">#3C424C</color>
+    <color name="kb_key_border_pressed">#626A77</color>
     <color name="kb_accent">#8AB4FF</color>
     <color name="kb_accent_pressed">#B7D0FF</color>
     <color name="kb_on_accent">#15171A</color>

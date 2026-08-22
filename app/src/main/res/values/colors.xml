@@ -1,11 +1,13 @@
 <resources>
     <!-- NovaBoard design tokens: light semantic roles. -->
-    <color name="kb_background">#F4F5F8</color>
+    <color name="kb_background">#F1F2F5</color>
     <color name="kb_surface">#FFFFFF</color>
     <color name="kb_key_bg">#FFFFFF</color>
     <color name="kb_key_bg_special">#DDE1E8</color>
-    <color name="kb_key_text">#15171A</color>
+    <color name="kb_key_text">#0D0F12</color>
     <color name="kb_key_pressed">#C9CED8</color>
+    <color name="kb_key_border">#C7CBD2</color>
+    <color name="kb_key_border_pressed">#AEB5C0</color>
     <color name="kb_accent">#4C7CF3</color>
     <color name="kb_accent_pressed">#315FCE</color>
     <color name="kb_on_accent">#FFFFFF</color>
