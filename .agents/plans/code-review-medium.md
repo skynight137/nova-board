@@ -139,7 +139,7 @@ validated dependency metadata.
 **Status:** Open  
 **Files:** `app/src/main/java/com/novaboard/ime/NovaBoardService.kt` (1,049
 lines), `app/src/main/java/com/novaboard/ime/settings/MainActivity.kt` (908
-lines), `replit.md:105-115`
+lines), `README.md`
 
 These classes combine lifecycle, editor/session state, clipboard, overlays,
 prediction, voice, settings pages, and preview behavior. Extract focused
