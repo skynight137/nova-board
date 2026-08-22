@@ -11,27 +11,6 @@ release_tooling_android_module() {
   printf '%s\n' "${module}"
 }
 
-release_tooling_release_json() {
-  local path="${RELEASE_JSON:-app-release.json}"
-  local segment
-  local segments
-
-  if [[ ! "${path}" =~ ^[A-Za-z0-9._/-]+$ || "${path}" == /* || "${path}" == *"//"* ]]; then
-    echo "ERROR: RELEASE_JSON must be a repository-relative file path" >&2
-    return 1
-  fi
-
-  IFS='/' read -r -a segments <<<"${path}"
-  for segment in "${segments[@]}"; do
-    if [[ "${segment}" == "." || "${segment}" == ".." || -z "${segment}" ]]; then
-      echo "ERROR: RELEASE_JSON must not contain empty or traversal path segments" >&2
-      return 1
-    fi
-  done
-
-  printf '%s\n' "${path}"
-}
-
 release_tooling_root_project_name() {
   local settings_file="${1:-settings.gradle.kts}"
   local project_name

@@ -21,7 +21,7 @@ boundary, cover platform-independent keyboard behavior with JVM tests, and run
 formatting plus debug packaging after UI/resource changes.
 
 **Why:** the archive has already been adapted to the repository's current
-namespace, toolchain, release metadata, and native View structure; re-copying
+namespace, toolchain, release/signing setup, and native View structure; re-copying
 archive build configuration would reintroduce stale assumptions.
 
 **How to apply:** use the existing app module as the source of truth. Update

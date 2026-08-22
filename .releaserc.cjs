@@ -36,8 +36,6 @@ module.exports = {
       {
         prepareCmd:
           "chmod +x .github/release-tooling/prepare-release.sh && .github/release-tooling/prepare-release.sh ${nextRelease.version}",
-        successCmd:
-          "chmod +x .github/release-tooling/publish-release-json.sh && .github/release-tooling/publish-release-json.sh ${nextRelease.version}",
       },
     ],
     [

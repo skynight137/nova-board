@@ -52,8 +52,6 @@ grep -Fq "unsupported APK filename characters" "${TEST_ROOT}/unsafe.stderr" ||
 
 [[ "$(ANDROID_MODULE=mobile release_tooling_android_module)" == "mobile" ]] ||
   fail "configured Android module was not resolved"
-[[ "$(RELEASE_JSON=metadata/release.json release_tooling_release_json)" == "metadata/release.json" ]] ||
-  fail "configured release manifest was not resolved"
 [[ "$(ANDROID_MODULE=mobile release_tooling_version_file)" == "mobile/gradle.properties" ]] ||
   fail "version file path was not derived from the configured module"
 [[ "$(ANDROID_MODULE=mobile release_tooling_release_dir)" == "mobile/build/outputs/apk/release" ]] ||

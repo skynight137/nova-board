@@ -122,17 +122,6 @@ reproducibility.
 Prefer trusted remote repositories for CI, add dependency verification
 metadata, and document any intentional local-development override.
 
-## MD-011 — Validate release manifest URLs against the configured repository
-
-**Severity:** Medium  
-**Status:** Open  
-**Files:** `.github/release-tooling/validate-release-manifest.sh:39-43`,
-`.github/workflows/release.yml:96-104`
-
-Manifest validation checks only that `download_url` uses HTTPS. It should also
-require the configured GitHub repository, expected release tag, and expected
-asset path, then verify the published digest/signature where available.
-
 ## MD-012 — Make release toolchains reproducible
 
 **Severity:** Medium  

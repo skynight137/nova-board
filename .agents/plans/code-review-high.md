@@ -29,13 +29,12 @@ compares the new code with the previous published code.
   Android version codes.
 - A release fails before publication if its version code is not greater than
   the previous release.
-- The generated APK and release metadata expose the same release identity.
+- The generated APK exposes the semantic-release version and signing identity.
 
 ### Resolution
 
 Android version codes are derived from semantic versions and release
-pre-release numbers; release preparation rejects non-increasing codes and
-stores the code in release metadata.
+pre-release numbers.
 
 ## HI-002 — Stop importing the existing system clipboard without consent
 

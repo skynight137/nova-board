@@ -113,9 +113,9 @@ main ──> stable release (automatic push or manual dispatch)
 ```
 
 The pipeline calculates the next version, updates `app/gradle.properties`,
-builds and signs `NovaBoard-<version>.apk`, and publishes the APK, detached
-signature, and release metadata to GitHub. The release page is opened manually
-from the app; there is no automatic updater.
+builds and signs `NovaBoard-<version>.apk`, and publishes the APK and detached
+signature to GitHub. The release page is opened manually from the app; there is
+no automatic updater.
 
 See [docs/releasing.md](docs/releasing.md) for signing and release details.
 The release workflow serializes publication. A `dev` run publishes a
