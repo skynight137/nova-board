@@ -1,7 +1,7 @@
 # React Native Bridge Contract
 
-Status: Phase 2 native adapter foundation complete; provider-specific operations
-and instrumentation coverage are still pending.
+Status: Phase 2 provider wiring complete; instrumentation coverage for the
+service-owned adapter is still pending.
 
 ## Boundary
 
@@ -42,11 +42,15 @@ codes so the UI can show the real unavailable state.
 
 The contract is platform-neutral and safe to unit test.
 `SessionScopedNativeBridge` provides the session and callback boundary without
-owning Android objects. `AndroidNativeBridge` is owned by the Android service
-boundary and keeps all `InputConnection` access inside that adapter. It handles
-editor commands, boolean preferences, theme reads, haptics, and keyboard
-metrics. Clipboard, GIF, and voice operations currently return an explicit
-runtime-unavailable error until their provider lifecycles are connected.
+owning Android objects; deferred completions are re-checked against the input
+session when they arrive, so a session change while a GIF search runs yields
+`STALE_SESSION`. `AndroidNativeBridge` is owned by the Android service
+boundary and keeps all `InputConnection` access inside that adapter. It
+handles editor commands, boolean preferences, theme reads, haptics, keyboard
+metrics, clipboard listing/search/pinning/deletion through the durable
+history manager, GIF search and insertion through the native KLIPY client and
+editor handoff (network runs off the main thread), and voice start/stop with
+typed permission and availability failures.
 The preview uses `preview/src/bridgeMock.js`, a deterministic mock that returns
 the same response and error shapes and explicitly reports unavailable native
 runtime operations.

@@ -115,7 +115,6 @@ Verification:
 
 Create testable interfaces between React Native UI and native Android behavior
 before moving production screens.
-
 Acceptance criteria:
 
 - [x] Editor actions are represented as explicit commands owned by the native
@@ -139,11 +138,11 @@ Verification:
 
 Remaining before Phase 2 is fully complete:
 
-- [ ] Clipboard, GIF, and voice request families are connected to their
-  provider lifecycles inside `AndroidNativeBridge` (they currently return an
-  explicit runtime-unavailable error).
+- [x] Clipboard, GIF, and voice request families are connected to their
+  provider lifecycles inside `AndroidNativeBridge`; deferred GIF results are
+  gated at completion time and unavailable providers stay explicit errors.
 - [ ] Instrumentation coverage for the service-owned adapter across input
-  session changes.
+  session changes (requires an Android target; no device in this workspace).
 
 ### Phase 3: Migrate settings and non-IME surfaces `[ ]`
 
