@@ -1,3 +1,13 @@
+# [1.1.0-dev.4](https://github.com/skynight137/nova-board/compare/v1.1.0-dev.3...v1.1.0-dev.4) (2026-08-22)
+
+
+### Bug Fixes
+
+* **ui:** align tools toggle with keyboard toolbar ([504ee2c](https://github.com/skynight137/nova-board/commit/504ee2c848bff40ddd4d887ecf741e718886df2d))
+* **ui:** anchor tools close transition ([769ba72](https://github.com/skynight137/nova-board/commit/769ba72afaa58ebdeffb4a2d690f06a884af573a))
+* **ui:** fill keyboard tools panel ([9f0d5e4](https://github.com/skynight137/nova-board/commit/9f0d5e41028f97803642fdcabebe51aee1d421ef))
+* **ui:** restore compact tools spacing ([c7eef24](https://github.com/skynight137/nova-board/commit/c7eef2403546d1d663d1aedc9a70a1d87da5568e))
+
 # [1.1.0-dev.3](https://github.com/skynight137/nova-board/compare/v1.1.0-dev.2...v1.1.0-dev.3) (2026-08-22)
 
 
