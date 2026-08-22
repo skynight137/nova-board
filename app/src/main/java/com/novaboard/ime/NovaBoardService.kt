@@ -594,7 +594,11 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         gifPanel = null
         val inputConnection = currentInputConnection
         if (inputConnection == null) return
-        if (!supportsGifContent(currentInputEditorInfo?.contentMimeTypes)) {
+        val editorInfo = currentInputEditorInfo
+        if (
+            isConversationEditor(editorInfo) ||
+                !supportsGifContent(editorInfo?.contentMimeTypes)
+        ) {
             sendGifLinkFallback(item, inputConnection)
             return
         }

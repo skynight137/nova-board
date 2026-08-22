@@ -47,7 +47,8 @@ input without a third-party keyboard SDK.
 - Image clipboard paste depends on the target editor accepting Android
   `InputContentInfo`; unsupported editors show a clear message.
 - GIF insertion uses Android rich content when supported and pastes the GIF URL
-  when the target editor rejects rich content.
+  when the target editor rejects rich content. Conversation and prompt fields
+  use the URL path directly to avoid editor lifecycle incompatibilities.
 - The suggestion dictionary is a small seed list intended to be replaceable by
   a larger frequency list or on-device language model.
 - The launcher icon is a placeholder vector monogram.
