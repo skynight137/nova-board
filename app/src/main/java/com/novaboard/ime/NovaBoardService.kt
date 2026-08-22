@@ -484,9 +484,8 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 cell,
                 GridLayout.LayoutParams().apply {
                     width = 0
-                    height = 0
+                    height = ViewGroup.LayoutParams.WRAP_CONTENT
                     columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                    rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                 },
             )
         }
@@ -494,8 +493,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             grid,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                0,
-                1f,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
             ),
         )
         overlayPanelContainer.removeAllViews()
