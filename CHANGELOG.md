@@ -1,3 +1,10 @@
+# [1.1.0-dev.7](https://github.com/skynight137/nova-board/compare/v1.1.0-dev.6...v1.1.0-dev.7) (2026-08-22)
+
+
+### Bug Fixes
+
+* **ci:** grant semantic release issue access ([fdcfa61](https://github.com/skynight137/nova-board/commit/fdcfa615cc88944af9a86d23d1083abaa354d240))
+
 # [1.1.0-dev.6](https://github.com/skynight137/nova-board/compare/v1.1.0-dev.5...v1.1.0-dev.6) (2026-08-22)
 
 
