@@ -16,6 +16,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import java.net.URL
 import java.util.concurrent.Executors
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.atomic.AtomicInteger
 import com.novaboard.ime.R
 import com.novaboard.ime.model.Key
@@ -30,8 +31,8 @@ class GifPanel(
     private val onPick: (GifItem) -> Unit,
     private val onClose: () -> Unit,
 ) {
-    private val executor = Executors.newFixedThreadPool(3)
-    private var requestId = AtomicInteger()
+    private var executor: ExecutorService? = null
+    private val requestId = AtomicInteger()
     private var target: ViewGroup? = null
     private var root: View? = null
     private lateinit var grid: GridLayout
@@ -41,6 +42,7 @@ class GifPanel(
 
     fun show(target: ViewGroup) {
         dismiss()
+        executor = Executors.newFixedThreadPool(3)
         this.target = target
         val panel = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
@@ -187,7 +189,7 @@ class GifPanel(
         status.text = context.getString(R.string.gif_loading)
         status.visibility = View.VISIBLE
         grid.removeAllViews()
-        executor.execute {
+        submit {
             try {
                 val results = client.load(query)
                 postIfCurrent(id) {
@@ -220,7 +222,7 @@ class GifPanel(
             columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
             setMargins(dp(2), dp(2), dp(2), dp(2))
         })
-        executor.execute {
+        submit {
             try {
                 val bitmap = URL(item.previewUrl).openStream().use(BitmapFactory::decodeStream)
                 if (bitmap != null) image.post { if (image.parent != null) image.setImageBitmap(bitmap) }
@@ -234,8 +236,14 @@ class GifPanel(
         root?.post { if (requestId.get() == id && root?.parent != null) action() }
     }
 
+    private fun submit(task: () -> Unit) {
+        runCatching { executor?.execute(task) }
+    }
+
     fun dismiss() {
         requestId.incrementAndGet()
+        executor?.shutdownNow()
+        executor = null
         root?.let { (it.parent as? ViewGroup)?.removeView(it) }
         target?.let { if (it.childCount == 0) it.visibility = View.GONE }
         root = null

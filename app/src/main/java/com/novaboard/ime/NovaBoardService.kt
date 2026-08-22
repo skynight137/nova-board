@@ -677,12 +677,15 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         }
         val inserted =
             runCatching {
-                    inputConnection.commitContent(
+                    val contentInfo =
                         InputContentInfo(
                             gifUri,
                             ClipDescription(item.title, arrayOf("image/gif")),
                             null,
-                        ),
+                        )
+                    contentInfo.requestPermission()
+                    inputConnection.commitContent(
+                        contentInfo,
                         InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION,
                         null,
                     )
@@ -693,11 +696,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         } else {
             file.delete()
             val fallbackSent =
-                runCatching {
-                        inputConnection.commitText(item.contentUrl, 1)
-                        true
-                    }
-                    .getOrDefault(false)
+                runCatching { inputConnection.commitText(item.contentUrl, 1) }.getOrDefault(false)
             Toast.makeText(
                     this,
                     getString(
