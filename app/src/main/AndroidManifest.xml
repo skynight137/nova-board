@@ -3,6 +3,7 @@
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".NovaBoardApplication"
@@ -25,6 +26,12 @@
         <provider
             android:name=".clipboard.ClipboardContentProvider"
             android:authorities="com.novaboard.ime.clipboard"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+
+        <provider
+            android:name=".gif.GifShareContentProvider"
+            android:authorities="com.novaboard.ime.gif-share"
             android:exported="false"
             android:grantUriPermissions="true" />
 

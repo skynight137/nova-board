@@ -47,8 +47,8 @@
                 android:src="@drawable/ic_hotkeys" android:contentDescription="@string/cd_hotkeys" />
             <ImageButton android:id="@+id/btnVoice" style="@style/NovaBoardToolIcon"
                 android:src="@drawable/ic_mic" android:contentDescription="@string/cd_voice" />
-            <ImageButton android:id="@+id/btnMore" style="@style/NovaBoardToolIcon"
-                android:src="@drawable/ic_more" android:contentDescription="@string/cd_more" />
+            <TextView android:id="@+id/btnGif" style="@style/NovaBoardToolText"
+                android:text="GIF" android:contentDescription="@string/cd_gif" />
         </LinearLayout>
 
         <LinearLayout
@@ -65,6 +65,8 @@
             <TextView android:id="@+id/suggestion1" style="@style/NovaBoardSuggestion" />
             <TextView android:id="@+id/suggestion2" style="@style/NovaBoardSuggestionHighlighted" />
             <TextView android:id="@+id/suggestion3" style="@style/NovaBoardSuggestion" />
+            <ImageButton android:id="@+id/btnMore" style="@style/NovaBoardToolIcon"
+                android:src="@drawable/ic_more" android:contentDescription="@string/cd_more" />
         </LinearLayout>
     </LinearLayout>
 
@@ -135,5 +137,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/kb_background"
+        android:clickable="true"
+        android:focusable="true"
         android:visibility="gone" />
 </FrameLayout>

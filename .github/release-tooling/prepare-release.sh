@@ -7,27 +7,12 @@ if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]]; then
   echo "ERROR: release version must be a semantic version" >&2
   exit 1
 fi
-version_code_for() {
-  local version="$1" base prerelease
-  base="${version%%-*}"
-  IFS=. read -r major minor patch <<<"${base}"
-  prerelease="${version##*-}"
-  if [[ "${prerelease}" == "${version}" ]]; then
-    prerelease=99
-  else
-    prerelease="${prerelease##*.}"
-    [[ "${prerelease}" =~ ^[0-9]+$ ]] || prerelease=1
-    (( prerelease = prerelease < 99 ? prerelease : 98 ))
-  fi
-  echo $((major * 10000000 + minor * 10000 + patch * 100 + prerelease))
-}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=release-config.sh
 source "${SCRIPT_DIR}/release-config.sh"
 # shellcheck source=github-repository.sh
 source "${SCRIPT_DIR}/github-repository.sh"
 ANDROID_MODULE="$(release_tooling_android_module)"
-RELEASE_JSON="$(release_tooling_release_json)"
 VERSION_FILE="$(release_tooling_version_file)"
 RELEASE_DIR="$(release_tooling_release_dir)"
 GPG_HOME=""
@@ -38,10 +23,8 @@ VERSION_BACKUP=""
 APK_DESTINATION=""
 SIGNATURE_DESTINATION=""
 SIGNATURE_DESTINATION_BACKUP=""
-MANIFEST_DESTINATION_BACKUP=""
 APK_INSTALLED=0
 SIGNATURE_INSTALLED=0
-MANIFEST_INSTALLED=0
 RELEASE_SUCCEEDED=0
 
 restore_destination() {
@@ -60,10 +43,6 @@ restore_destination() {
 cleanup() {
   if [[ "${RELEASE_SUCCEEDED}" != "1" ]]; then
     restore_destination \
-      "${RELEASE_JSON}" \
-      "${MANIFEST_DESTINATION_BACKUP}" \
-      "${MANIFEST_INSTALLED}"
-    restore_destination \
       "${SIGNATURE_DESTINATION}" \
       "${SIGNATURE_DESTINATION_BACKUP}" \
       "${SIGNATURE_INSTALLED}"
@@ -73,11 +52,8 @@ cleanup() {
   [[ -z "${GPG_HOME}" ]] || rm -rf "${GPG_HOME}"
   [[ -z "${APK_TEMP}" ]] || rm -f "${APK_TEMP}"
   [[ -z "${SIGNATURE_TEMP}" ]] || rm -f "${SIGNATURE_TEMP}"
-  [[ -z "${MANIFEST_TEMP}" ]] || rm -f "${MANIFEST_TEMP}"
   [[ -z "${SIGNATURE_DESTINATION_BACKUP}" ]] ||
     rm -f "${SIGNATURE_DESTINATION_BACKUP}"
-  [[ -z "${MANIFEST_DESTINATION_BACKUP}" ]] ||
-    rm -f "${MANIFEST_DESTINATION_BACKUP}"
 
   if [[ "${RELEASE_SUCCEEDED}" != "1" && -n "${VERSION_BACKUP}" && -f "${VERSION_BACKUP}" ]]; then
     cp "${VERSION_BACKUP}" "${VERSION_FILE}"
@@ -111,19 +87,6 @@ if [[ ! "${GPG_FINGERPRINT:-}" =~ ^[A-Fa-f0-9]{40}$ ]]; then
 fi
 
 echo "Preparing ${APK_NAME}..."
-VERSION_CODE="$(version_code_for "${VERSION}")"
-if [[ -f "${RELEASE_JSON}" ]]; then
-  PREVIOUS_VERSION_CODE="$(node -e 'const fs=require("fs"); const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8")); process.stdout.write(String(m.version_code ?? 0))' "${RELEASE_JSON}")"
-  if [[ ! "${PREVIOUS_VERSION_CODE}" =~ ^[0-9]+$ ]]; then
-    echo "ERROR: version code ${VERSION_CODE} must be greater than previous release code ${PREVIOUS_VERSION_CODE}" >&2
-    exit 1
-  fi
-  if (( VERSION_CODE <= PREVIOUS_VERSION_CODE )); then
-    VERSION_CODE=$((PREVIOUS_VERSION_CODE + 1))
-    echo "Adjusted version code to ${VERSION_CODE} to preserve monotonic Android updates"
-  fi
-fi
-
 VERSION_BACKUP="$(mktemp)"
 cp "${VERSION_FILE}" "${VERSION_BACKUP}"
 sed -i "s/^version\s*=.*/version = ${VERSION}/" "${VERSION_FILE}"
@@ -230,77 +193,17 @@ elif ! gpg --batch --no-tty --pinentry-mode loopback \
   exit 1
 fi
 
-mkdir -p "$(dirname "${RELEASE_JSON}")"
-MANIFEST_TEMP="$(mktemp "${RELEASE_JSON}.XXXXXX")"
-node - "${RELEASE_JSON}" "${MANIFEST_TEMP}" "${VERSION}" "${VERSION_CODE}" "${REPOSITORY}" "${APK_NAME}" "${APK_SHA256}" "${APK_SIZE_BYTES}" "${GPG_FINGERPRINT}" "${ANDROID_CERTIFICATE_SHA256:-}" "${ROOT_PROJECT_NAME}" <<'NODE'
-const fs = require("fs");
-
-const [
-  manifestPath,
-  outputPath,
-  version,
-  versionCode,
-  repository,
-  apkName,
-  sha256,
-  sizeBytes,
-  signatureKeyFingerprint,
-  certificateFingerprint,
-  projectName,
-] =
-  process.argv.slice(2);
-const manifest = fs.existsSync(manifestPath)
-  ? JSON.parse(fs.readFileSync(manifestPath, "utf8"))
-  : {};
-const releaseBase = `https://github.com/${repository}/releases/download/v${version}`;
-const numericSize = Number(sizeBytes);
-
-if (!Number.isSafeInteger(numericSize) || numericSize < 0) {
-  throw new Error("invalid APK size");
-}
-if (!/^[A-Fa-f0-9]{40}$/.test(signatureKeyFingerprint)) {
-  throw new Error("invalid signing key fingerprint");
-}
-
-manifest.created_at = new Date().toISOString();
-manifest.version = version;
-manifest.version_code = Number(versionCode);
-const isDevelopment = version.includes("-");
-manifest.description = `${projectName} ${version} ${
-  isDevelopment ? "development" : "stable"
-} release.`;
-manifest.download_url = `${releaseBase}/${apkName}`;
-manifest.signature_download_url = `${releaseBase}/${apkName}.asc`;
-manifest.signature_key_fingerprint = signatureKeyFingerprint.toUpperCase();
-if (certificateFingerprint) manifest.certificate_sha256 = certificateFingerprint.replace(/:/g, "").toUpperCase();
-manifest.sha256 = sha256;
-manifest.size_bytes = numericSize;
-
-fs.writeFileSync(outputPath, `${JSON.stringify(manifest, null, 2)}\n`);
-NODE
-RELEASE_JSON="${MANIFEST_TEMP}" bash "${SCRIPT_DIR}/validate-release-manifest.sh" "${VERSION}"
-
 SIGNATURE_DESTINATION="${APK_DESTINATION}.asc"
 if [[ -e "${SIGNATURE_DESTINATION}" ]]; then
   SIGNATURE_DESTINATION_BACKUP="$(mktemp)"
   cp -p "${SIGNATURE_DESTINATION}" "${SIGNATURE_DESTINATION_BACKUP}"
 fi
-if [[ -e "${RELEASE_JSON}" ]]; then
-  MANIFEST_DESTINATION_BACKUP="$(mktemp)"
-  cp -p "${RELEASE_JSON}" "${MANIFEST_DESTINATION_BACKUP}"
-fi
-
 mv "${APK_TEMP}" "${APK_DESTINATION}"
 APK_TEMP=""
 APK_INSTALLED=1
 mv "${SIGNATURE_TEMP}" "${SIGNATURE_DESTINATION}"
 SIGNATURE_TEMP=""
 SIGNATURE_INSTALLED=1
-mv "${MANIFEST_TEMP}" "${RELEASE_JSON}"
-MANIFEST_TEMP=""
-MANIFEST_INSTALLED=1
 rm -f "${APK_SOURCE}"
 RELEASE_SUCCEEDED=1
-echo "Updated ${RELEASE_JSON} for ${REPOSITORY} v${VERSION}"
-
 echo "Release v${VERSION} prepared successfully."

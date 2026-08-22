@@ -17,6 +17,8 @@ grep -Fq './gradlew assembleDebug' "${pr_workflow}" ||
   fail "pull-request workflow must build the unsigned debug APK"
 grep -Fq 'branches:' "${ROOT_DIR}/.github/workflows/release.yml" ||
   fail "release workflow branch policy is missing"
+grep -Fq 'issues: read' "${WORKFLOW}" ||
+  fail "release workflow must allow semantic-release to read repository issues"
 
 validation_line="$(grep -n -- "- name: Validate release inputs" "${WORKFLOW}" | cut -d: -f1)"
 keystore_line="$(grep -n -- "- name: Setup keystore" "${WORKFLOW}" | cut -d: -f1)"
@@ -73,30 +75,9 @@ grep -Fq 'sdkmanager "platform-tools" "build-tools;35.0.0"' "${WORKFLOW}" ||
 grep -Fq 'build-tools/35.0.0' "${WORKFLOW}" ||
   fail "release workflow does not add apksigner to PATH"
 
-manifest_validation_line="$(grep -n -- "- name: Validate release manifest" "${WORKFLOW}" | cut -d: -f1 || true)"
 release_action_line="$(grep -n -- "cycjimmy/semantic-release-action@" "${WORKFLOW}" | cut -d: -f1 || true)"
-[[ -n "${manifest_validation_line}" && -n "${release_action_line}" ]] ||
-  fail "release workflow must validate the release manifest before semantic-release"
-[[ "${manifest_validation_line}" -lt "${release_action_line}" ]] ||
-  fail "release manifest validation must run before semantic-release"
-
-manifest_validation_block="$(
-  awk '
-    /- name: Validate release manifest/ { capture = 1; next }
-    capture && /^      - name:/ { exit }
-    capture { print }
-  ' "${WORKFLOW}"
-)"
-grep -Fq 'bash .github/release-tooling/validate-release-manifest.sh' \
-  <<<"${manifest_validation_block}" ||
-  fail "release workflow does not use the shared release manifest validator"
-grep -Fq 'RELEASE_JSON="$(release_tooling_release_json)"' <<<"${manifest_validation_block}" ||
-  fail "release workflow does not support a first release without a manifest"
-
-grep -Fq '.github/release-tooling/validate-release-manifest.sh' "${WORKFLOW}" ||
-  fail "release workflow does not use the global manifest validator"
-grep -Fq '.github/release-tooling/test-release-manifest.sh' "${WORKFLOW}" ||
-  fail "release workflow does not use the global manifest tests"
+[[ -n "${release_action_line}" ]] ||
+  fail "release workflow must invoke semantic-release"
 grep -Fq '.github/release-tooling/test-release-config.sh' "${WORKFLOW}" ||
   fail "release workflow does not use the global release configuration tests"
 grep -Fq '.github/release-tooling/test-release-artifacts.sh' "${WORKFLOW}" ||

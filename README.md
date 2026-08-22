@@ -5,9 +5,58 @@ Kotlin and native Android Views. It provides a full keyboard, suggestion strip,
 clipboard history, emoji, hotkeys, themes, cursor controls, and on-device voice
 input without a third-party keyboard SDK.
 
+## Project stack
+
+- **Platform:** Android application targeting API 26+
+- **Language and build:** Kotlin with Gradle Kotlin DSL
+- **UI:** Native Android Views with view binding
+- **Application IDs:** `com.novaboard.ime` and debug ID
+  `com.novaboard.ime.debug`
+- **Input service:** `NovaBoardService` implements Android's input method
+  service and owns keyboard state
+- **Settings:** `MainActivity` exposes keyboard enable and input-method switch
+  actions
+- **Updates:** Manual APK installation from GitHub Releases
+- **Testing:** JVM tests under `app/src/test/java`
+- **Dependency source of truth:** `gradle/libs.versions.toml`
+- **Build configuration:** `settings.gradle.kts` and `app/build.gradle.kts`
+
+## Project structure
+
+```text
+NovaBoard/
+├── app/
+│   ├── src/main/
+│   │   ├── AndroidManifest.xml
+│   │   ├── java/com/novaboard/ime/
+│   │   │   ├── NovaBoardService.kt
+│   │   │   ├── settings/MainActivity.kt
+│   │   │   ├── view/KeyboardView.kt
+│   │   │   ├── model/KeyboardModel.kt
+│   │   │   └── clipboard, emoji, hotkeys, suggestion, and theme packages
+│   │   └── res/
+│   │       ├── drawable*/
+│   │       ├── layout/
+│   │       ├── mipmap*/
+│   │       ├── values/
+│   │       └── xml/method.xml
+│   ├── gradle.properties
+│   ├── build.gradle.kts
+│   └── proguard-rules.pro
+├── .github/
+├── docs/
+├── gradle/libs.versions.toml
+├── scripts/
+├── build.gradle.kts
+├── settings.gradle.kts
+├── package.json
+└── README.md
+```
+
+
 ## Features
 
-- SwiftKey-inspired toolbar layout with a prediction bar always visible directly
+- SwiftKey-inspired toolbar and keycap styling with a prediction bar always visible directly
   above the number row
 - Expandable tools row: the up chevron opens clipboard, hotkeys,
   voice, and overflow tools above the prediction bar; the down chevron collapses
@@ -24,6 +73,9 @@ input without a third-party keyboard SDK.
 - Clipboard stays open after paste so history, search, and pin controls remain
   available
 - Scrollable, compact emoji picker with padded, uncropped emoji cells
+- KLIPY-powered GIF panel opened from the toolbar or tools menu, with trending
+  GIFs, keyword search, direct rich-content insertion into compatible editors,
+  and direct-link fallback for editors that reject rich content
 - System, light, and dark themes
 - Voice typing through Android's on-device `SpeechRecognizer`
 - Optional gesture typing across letter keys with bounded path recognition
@@ -43,6 +95,9 @@ input without a third-party keyboard SDK.
 - Cut/copy/paste/select-all actions are reserved for the tools-row expansion.
 - Image clipboard paste depends on the target editor accepting Android
   `InputContentInfo`; unsupported editors show a clear message.
+- GIF insertion uses Android rich content when supported and pastes the GIF URL
+  when the target editor rejects rich content. Conversation and prompt fields
+  use the URL path directly to avoid editor lifecycle incompatibilities.
 - The suggestion dictionary is a small seed list intended to be replaceable by
   a larger frequency list or on-device language model.
 - The launcher icon is a placeholder vector monogram.
@@ -107,9 +162,9 @@ main ──> stable release (automatic push or manual dispatch)
 ```
 
 The pipeline calculates the next version, updates `app/gradle.properties`,
-builds and signs `NovaBoard-<version>.apk`, and publishes the APK, detached
-signature, and release metadata to GitHub. The release page is opened manually
-from the app; there is no automatic updater.
+builds and signs `NovaBoard-<version>.apk`, and publishes the APK and detached
+signature to GitHub. The release page is opened manually from the app; there is
+no automatic updater.
 
 See [docs/releasing.md](docs/releasing.md) for signing and release details.
 The release workflow serializes publication. A `dev` run publishes a

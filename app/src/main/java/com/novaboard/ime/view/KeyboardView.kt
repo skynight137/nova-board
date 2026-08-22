@@ -86,11 +86,19 @@ constructor(
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = themeColor(R.color.kb_key_pressed)
         }
+    private val keyBorderPaint =
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = themeColor(R.color.kb_key_border)
+            style = Paint.Style.STROKE
+            strokeWidth = resources.displayMetrics.density
+        }
     private val textPaint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = themeColor(R.color.kb_key_text)
             textSize = 20 * resources.displayMetrics.scaledDensity
             textAlign = Paint.Align.CENTER
+            typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.NORMAL)
+            isFakeBoldText = true
         }
 
     private fun themeColor(resId: Int) = resources.getColor(resId, context.theme)
@@ -253,13 +261,26 @@ constructor(
                 hit.key.type != KeyType.CHAR &&
                     hit.key.type != KeyType.COMMA &&
                     hit.key.type != KeyType.PERIOD
+            val isKeycap = hit.key.type == KeyType.CHAR || hit.key.type == KeyType.SPACE
+            val isPressed = hit == pressedHit || pointerHits.values.any { it === hit }
             val paint =
                 when {
-                    hit == pressedHit || pointerHits.values.any { it === hit } -> pressedPaint
+                    isPressed -> pressedPaint
                     isSpecial -> specialKeyPaint
                     else -> keyPaint
                 }
-            canvas.drawRoundRect(hit.rect, 8f, 8f, paint)
+            val radius = 7 * resources.displayMetrics.density
+            // Action keys keep their full touch targets but stay visually open like SwiftKey.
+            if (isKeycap || isPressed) {
+                canvas.drawRoundRect(hit.rect, radius, radius, paint)
+                keyBorderPaint.color =
+                    if (isPressed) {
+                        themeColor(R.color.kb_key_border_pressed)
+                    } else {
+                        themeColor(R.color.kb_key_border)
+                    }
+                canvas.drawRoundRect(hit.rect, radius, radius, keyBorderPaint)
+            }
 
             val label = displayLabel(hit.key)
             if (label.isNotEmpty()) {

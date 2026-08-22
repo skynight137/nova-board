@@ -31,13 +31,43 @@ args = "bash scripts/setup.sh"
 outputType = "console"
 
 [[workflows.workflow]]
-name = "Pull (dev) - rebase"
+name = "Pull (dev) - rebase continue"
 mode = "sequential"
 author = 45095703
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "git pull origin dev --rebase"
+args = "git pull origin dev --rebase continue"
+
+[[workflows.workflow]]
+name = "Opencode"
+mode = "sequential"
+author = 47571172
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "if ! source .local/env.sh 2>/dev/null || ! command -v opencode >/dev/null 2>&1; then bash scripts/setup.sh --oc && source .local/env.sh; fi; exec opencode web --port 8000"
+
+[[workflows.workflow]]
+name = "Setup Android Tools"
+mode = "sequential"
+author = 47591184
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash scripts/setup.sh --android-tools"
+
+[[workflows.workflow]]
+name = "React Native Preview"
+mode = "sequential"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run preview:rn"
+
+[workflows.workflow.metadata]
+outputType = "webview"
 
 [userenv.shared]
 NODE_ENV = "production"
@@ -54,6 +84,25 @@ UV_PROJECT_ENVIRONMENT = ".venv"
 [[ports]]
 localPort = 80
 externalPort = 80
+exposeLocalhost = true
 
+[[ports]]
+localPort = 5173
+externalPort = 5173
 
+[[ports]]
+localPort = 5174
+externalPort = 3000
 
+[[ports]]
+localPort = 5175
+externalPort = 3001
+
+[[ports]]
+localPort = 8000
+externalPort = 8000
+exposeLocalhost = true
+
+[[ports]]
+localPort = 8080
+externalPort = 8080

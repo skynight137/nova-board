@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - dev
   workflow_dispatch:
 
 concurrency:
@@ -16,9 +15,9 @@ jobs:
     name: Release
     env:
       ANDROID_MODULE: ${{ vars.ANDROID_MODULE || 'app' }}
-      RELEASE_JSON: ${{ vars.RELEASE_JSON || 'app-release.json' }}
     permissions:
       contents: write
+      issues: read
       id-token: write
       attestations: write
     runs-on: ubuntu-latest
@@ -111,23 +110,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate release manifest
-        run: |
-          source .github/release-tooling/release-config.sh
-          RELEASE_JSON="$(release_tooling_release_json)"
-          if [[ -f "${RELEASE_JSON}" ]]; then
-            RELEASE_JSON="${RELEASE_JSON}" bash .github/release-tooling/validate-release-manifest.sh
-          else
-            echo "No previous release manifest; the first release will create ${RELEASE_JSON}"
-          fi
-
       - name: Verify release scripts
         run: |
           bash -n .github/release-tooling/*.sh
           bash .github/release-tooling/test-github-repository.sh
           bash .github/release-tooling/test-release-config.sh
           bash .github/release-tooling/test-release-workflow.sh
-          bash .github/release-tooling/test-release-manifest.sh
           bash .github/release-tooling/test-release-artifacts.sh
           bash .github/release-tooling/test-release-keystore.sh
 

@@ -24,12 +24,7 @@ module.exports = {
         releaseRules: [{ type: "build", scope: "Needs bump", release: "patch" }],
       },
     ],
-    [
-      "@semantic-release/release-notes-generator",
-      {
-        preset: "conventionalcommits",
-      },
-    ],
+    "@semantic-release/release-notes-generator",
     [
       "@semantic-release/changelog",
       {
@@ -41,8 +36,6 @@ module.exports = {
       {
         prepareCmd:
           "chmod +x .github/release-tooling/prepare-release.sh && .github/release-tooling/prepare-release.sh ${nextRelease.version}",
-        successCmd:
-          "chmod +x .github/release-tooling/publish-release-json.sh && .github/release-tooling/publish-release-json.sh ${nextRelease.version}",
       },
     ],
     [

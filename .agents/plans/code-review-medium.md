@@ -122,17 +122,6 @@ reproducibility.
 Prefer trusted remote repositories for CI, add dependency verification
 metadata, and document any intentional local-development override.
 
-## MD-011 — Validate release manifest URLs against the configured repository
-
-**Severity:** Medium  
-**Status:** Open  
-**Files:** `.github/release-tooling/validate-release-manifest.sh:39-43`,
-`.github/workflows/release.yml:96-104`
-
-Manifest validation checks only that `download_url` uses HTTPS. It should also
-require the configured GitHub repository, expected release tag, and expected
-asset path, then verify the published digest/signature where available.
-
 ## MD-012 — Make release toolchains reproducible
 
 **Severity:** Medium  
@@ -150,7 +139,7 @@ validated dependency metadata.
 **Status:** Open  
 **Files:** `app/src/main/java/com/novaboard/ime/NovaBoardService.kt` (1,049
 lines), `app/src/main/java/com/novaboard/ime/settings/MainActivity.kt` (908
-lines), `replit.md:105-115`
+lines), `README.md`
 
 These classes combine lifecycle, editor/session state, clipboard, overlays,
 prediction, voice, settings pages, and preview behavior. Extract focused

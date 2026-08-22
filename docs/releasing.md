@@ -7,10 +7,10 @@ embedding this application's identity. The APK name, keystore subject, and
 release description are derived from `rootProject.name`, so each clone keeps
 its own identity without changing the shared tooling.
 
-NovaBoard remains the owner of its app-specific result: the default published
-manifest is `app-release.json`, its Android package IDs live in the Android
-module, and the app's **Check for updates** action opens its configured GitHub
-Releases page rather than fetching that manifest.
+NovaBoard's Android package IDs live in the Android module, and the app's
+**Check for updates** action opens its configured GitHub Releases page. Users
+choose an APK and install it manually; no release manifest is downloaded or
+parsed by the app.
 The `dev` branch publishes prereleases, while releases from `main` publish
 stable versions:
 
@@ -41,14 +41,13 @@ Optional clone settings are read from the environment and default to the
 repository template layout:
 
 - `ANDROID_MODULE` — Android Gradle module directory; defaults to `app`
-- `RELEASE_JSON` — release metadata path; defaults to `app-release.json`
 - `KEYSTORE_DNAME` — optional certificate subject; when omitted, the keystore
   generator derives `CN` and `O` from `rootProject.name`
 
 The shared scripts expose these validated paths through the
 `release_tooling_*` shell namespace. Do not duplicate module, release
-directory, keystore, manifest, or root-project-name parsing in a clone's own
-scripts. Configure the environment values above instead.
+directory, keystore, or root-project-name parsing in a clone's own scripts.
+Configure the environment values above instead.
 
 For GitHub Actions, set these as optional repository variables with the same
 names. If they are omitted, the workflow uses the defaults.
@@ -74,8 +73,7 @@ job before any release build or signing step begins.
 
 The app uses a deliberately simple update flow: **Open release page** opens
 GitHub Releases, where the user chooses an APK and follows Android's installer
-prompts. Release automation still publishes the APK, detached signature, and
-metadata for release tooling and distribution records.
+prompts. Release automation publishes the APK and detached signature.
 
 The Android certificate check is intentionally retained even though users
 install APKs manually from GitHub Releases. A GitHub download does not prove
@@ -262,66 +260,24 @@ Semantic-release:
 3. Runs `.github/release-tooling/prepare-release.sh`.
 4. Builds and signs `<ProjectName>-<version>.apk`.
 5. Creates the matching Git tag and GitHub release.
-6. Publishes `${RELEASE_JSON:-app-release.json}` with the release URLs.
-
-The workflow validates `${RELEASE_JSON:-app-release.json}` as JSON and checks its required
-version, download URL, SHA-256, and detached-signature fingerprint fields before
-semantic-release starts. This keeps unresolved merge-conflict markers or
-incomplete metadata from reaching the release build.
-
 Release preparation fails closed unless the build output contains exactly one
-universal `<ProjectName>-release.apk`. The APK, detached signature, and release
-manifest are staged in temporary files; the final paths are replaced only after
-the digest, size, signature, and metadata checks succeed. A failed preparation
-restores the previous `${ANDROID_MODULE:-app}/gradle.properties` version and leaves the previous
-manifest untouched.
+universal `<ProjectName>-release.apk`. The APK and detached signature are staged
+in temporary files; final paths are replaced only after digest, size, signature,
+and certificate checks succeed. A failed preparation restores the previous
+`${ANDROID_MODULE:-app}/gradle.properties` version.
 
-Version codes are derived from the semantic version and prerelease number. If a
-legacy or manually published manifest contains a higher version code than that
-calculation, release preparation advances from the manifest's code instead.
-This keeps Android updates monotonic while preserving the normal semantic
-version-derived values whenever they are safe.
+Version codes are derived from the semantic version and prerelease number by the
+Android module build configuration.
 
 Do not hand-edit the release version, push a `v*` tag manually, or rerun an
 old tag to validate a workflow change. A tag checks out the exact commit that
 created it.
 
-## Release manifest
-
-The update metadata is generated at `${RELEASE_JSON:-app-release.json}` after a
-successful release. A new clone does not need to carry a placeholder manifest;
-the first release creates this app-specific file from the verified APK and
-signature.
-
-```json
-{
-  "created_at": "2026-08-12T00:00:00Z",
-  "description": "Release notes in Markdown.",
-  "download_url": "https://github.com/<owner>/<repository>/releases/download/v1.0.3/<ProjectName>-1.0.3.apk",
-  "signature_download_url": "https://github.com/<owner>/<repository>/releases/download/v1.0.3/<ProjectName>-1.0.3.apk.asc",
-  "signature_key_fingerprint": "0123456789ABCDEF0123456789ABCDEF01234567",
-  "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-  "size_bytes": 1351621,
-  "version": "1.0.3"
-}
-```
-
-`version`, `download_url`, and `sha256` are required. `sha256` must be the
-lowercase SHA-256 digest of the exact APK at `download_url`. `size_bytes` is the
-APK size advertised to the app before download. A detached signature must be
-paired with the 40-character `signature_key_fingerprint`; the signature URL and
-fingerprint are optional only when no detached signature is published.
-
-The app does not fetch or parse `${RELEASE_JSON:-app-release.json}`. It opens the GitHub Releases
-page generated from `release.repository`, and users select and install the APK
-manually. The release workflow retains `${RELEASE_JSON:-app-release.json}` as published release
-metadata for automation and distribution records.
-
-The canonical GitHub repository for the default manifest URLs is
+The canonical GitHub repository for the release page is
 `release.repository` in the root `gradle.properties` file. Release preparation
 fails before building if that setting does not match the repository selected by
 `GITHUB_REPOSITORY` or `origin`, preventing a renamed or forked checkout from
-publishing metadata to an unintended origin.
+publishing to an unintended origin.
 
 The release page URL is derived from `release.repository`, so changing the
 artifact repository requires updating that property as well.
@@ -349,8 +305,8 @@ bash .github/release-tooling/test-release-artifacts.sh
 bash .github/release-tooling/test-release-keystore.sh
 ```
 
-The clone should replace the app-owned Android package ID, repository default,
-and manifest filename only where its application configuration requires it.
+The clone should replace the app-owned Android package ID and repository default
+where its application configuration requires it.
 No shared release script should contain the original clone's name.
 
 ## Local verification
@@ -367,12 +323,6 @@ source .local/env.sh
   :"${ANDROID_MODULE:-app}":compileDebugAndroidTestKotlin \
   :"${ANDROID_MODULE:-app}":assembleDebug
 npm ci --include=dev
-if [[ -f "${RELEASE_JSON:-app-release.json}" ]]; then
-  RELEASE_JSON="${RELEASE_JSON:-app-release.json}" \
-    bash .github/release-tooling/validate-release-manifest.sh
-else
-  echo "No previous release manifest; first release will create it"
-fi
 node -e "const config = require('./.releaserc.cjs'); if (!Array.isArray(config.plugins)) process.exit(1); console.log('semantic-release config valid')"
 bash -n scripts/setup.sh .github/release-tooling/*.sh
 bash .github/release-tooling/test-github-repository.sh
@@ -400,9 +350,8 @@ test -s "${ANDROID_MODULE:-app}/build/outputs/apk/release/<ProjectName>-0.1.1.ap
 test -s "${ANDROID_MODULE:-app}/build/outputs/apk/release/<ProjectName>-0.1.1.apk.asc"
 ```
 
-If this is only a throwaway test, restore generated metadata afterward:
+If this is only a throwaway test, restore the generated version afterward:
 
 ```bash
-git restore "${ANDROID_MODULE:-app}/gradle.properties" \
-  "${RELEASE_JSON:-app-release.json}"
+git restore "${ANDROID_MODULE:-app}/gradle.properties"
 ```

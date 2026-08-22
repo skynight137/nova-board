@@ -17,7 +17,7 @@ enum class ThemeMode {
  */
 object ThemeManager {
     private const val PREFS = "novaboard_prefs"
-    private const val KEY_THEME = "theme_mode"
+    const val KEY_THEME = "theme_mode"
 
     fun get(context: Context): ThemeMode {
         val raw =
@@ -39,6 +39,25 @@ object ThemeManager {
 
     /** Call at process/service startup so the current preference takes effect immediately. */
     fun applyStored(context: Context) = apply(get(context))
+
+    /**
+     * InputMethodService is not an AppCompat activity, so AppCompatDelegate does not update its
+     * resource configuration. Create a configuration-bound context for keyboard views instead.
+     */
+    fun keyboardContext(context: Context): Context {
+        val mode = get(context)
+        if (mode == ThemeMode.SYSTEM) return context
+        val configuration = android.content.res.Configuration(context.resources.configuration)
+        val nightMask = android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        configuration.uiMode =
+            (configuration.uiMode and nightMask.inv()) or
+                when (mode) {
+                    ThemeMode.LIGHT -> android.content.res.Configuration.UI_MODE_NIGHT_NO
+                    ThemeMode.DARK -> android.content.res.Configuration.UI_MODE_NIGHT_YES
+                    ThemeMode.SYSTEM -> 0
+                }
+        return context.createConfigurationContext(configuration)
+    }
 
     private fun apply(mode: ThemeMode) {
         AppCompatDelegate.setDefaultNightMode(

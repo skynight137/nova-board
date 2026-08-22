@@ -57,9 +57,9 @@ the source field.
 
 ## Repository hygiene
 
-The working tree contained a pre-existing edit enabling
-`nextlevelbuilder/ui-ux-pro-max-skill` in `scripts/setup.sh`; it was preserved
-and not reworked as part of the feature review. Two older commit subjects,
+The setup script now installs external skills only when explicitly requested
+with `--skills`; Replit-provided skills remain available from `.local` and are
+not copied into the generated skill tree. Two older commit subjects,
 `Initialize server application entry point` and `Remove server.js`, do not use
 Conventional Commits. They are historical entries and were not rewritten
 because rewriting shared history would be destructive and unrelated to this

@@ -1,23 +1,19 @@
 - [Patch-added file endings](patch-file-newline.md) — verify terminal newlines because newly added Kotlin files can fail Spotless after compiling.
 - [Gradle verification settings](gradle-verification-resource-pressure.md) — normal commands rely on gradle.properties; use bounded retries only after daemon-loss evidence.
-- [Gradle shell environment](gradle-shell-environment.md) — source the repository environment helper before Gradle verification in a fresh shell.
 - [Workflow entrypoint names](workflow-entrypoint-names.md) — keep renamed workflow targets and documented compatibility commands synchronized.
 - [Diagnostic metadata boundary](debug-log-metadata.md) — Android platform stubs can be null in JVM tests; normalize bounded fields and redact manifest URL credentials before export.
-- [Release manifest integrity](release-manifest-integrity.md) — validate release JSON before semantic-release because backmerges can leave conflict markers that fail after the APK build.
+- [Release notes preset compatibility](release-notes-preset-compatibility.md) — use the bundled notes-generator default; the explicit conventionalcommits preset can drop all commit groups.
 - [Release fixture parsing](release-fixture-parsing.md) — keep synthetic Gradle project names at column 1 because release preparation parses exact settings lines.
 - [Strict JSON import fields](strict-json-import-fields.md) — reject malformed present values; optional JSON helpers must not silently replace them with defaults.
 - [Android instrumentation service seams](android-instrumentation-service-seams.md) — use package-visible state seams; framework lifecycle callbacks may be protected.
 - [Overlay state boundary](overlay-state-boundary.md) — service gesture state is authoritative; marker count can be zero for a runnable loaded setup.
-- [Android migration verification](android-migration-verification.md) — archived app Gradle overrides can conflict with current Java targets and debug signing.
+- [Tools overlay touch boundary](tools-overlay-touch-boundary.md) — modal IME tool panels must consume the full surface so taps cannot reach the hidden keyboard.
 - [History rewrite safety](history-rewrite.md) — preview and verify full-history message rewrites; filter-branch uses HEAD to include the root commit.
-- [NovaBoard archive migration](novaboard-migration.md) — native IME archives need current template build/plugin adaptation and APK identity verification.
 - [IME theme compatibility](ime-theme-compatibility.md) — avoid unresolved theme attributes in native keyboard button styles.
 - [Keyboard hit testing](keyboard-hit-testing.md) — retain the active key through small pointer jitter so taps are not dropped on ACTION_UP.
 - [IME overlay host](ime-overlay-host.md) — host clipboard and tool panels inside the input view instead of positioning PopupWindows from IME anchors.
 - [IME session state](ime-session-state.md) — scope editor mutations and asynchronous callbacks to the active input session.
 - [Durable clipboard storage](durable-clipboard-storage.md) — copy image bytes privately and expose them through the app-owned content provider, migrating legacy URIs on load.
-- [Conventional history rewrite](conventional-history-rewrite.md) — preview legacy subject mappings with a clean worktree before applying a commit-history rewrite.
-- [Verification before commit](verification-before-commit.md) — use fail-fast gates so failed checks never fall through to a release-style commit.
 - [Image clipboard retention](translation-and-image-clipboard-direction.md) — image retention is opt-in and disabled by default; translation UI is not part of the product.
 - [Spotless baseline](spotless-baseline.md) — repository-wide formatting currently has unrelated pre-existing Kotlin violations; avoid broad formatter churn.
 - [Symbol layout switcher alignment](symbol-layout-switcher-alignment.md) — primary and secondary symbol switchers share a row based on the number-row preference.
@@ -28,3 +24,12 @@
 - [PR release secret boundary](pr-release-secret-boundary.md) — PR validation must never expose signing or publication credentials to PR-controlled code.
 - [APK certificate formatting](apk-certificate-formatting.md) — normalize colon-separated and unseparated SHA-256 output before comparing release identities.
 - [Android certificate verification](android-certificate-verification.md) — retain the release fingerprint check because manual GitHub installation does not replace Android signing identity verification.
+- [IME theme and cursor controls](ime-theme-and-cursor-controls.md) — AppCompat night mode needs an explicit IME context, and arrow touch-up must not resend the initial move.
+- [Unicode backspace](unicode-backspace.md) — backspace counts UTF-16 units for the previous Unicode code point so emoji surrogate pairs are removed together.
+- [GIF share cache lifecycle](gif-share-cache-lifecycle.md) — retain active content-provider files until their handoff retention window expires.
+- [SDK package verification](sdk-package-verification.md) — sdkmanager package IDs can differ from compileSdk labels; verify catalog names and never suppress install failures.
+- [Skills repository aliases](skills-repository-aliases.md) — validate shorthand skill names against real GitHub repositories before passing them to the skills CLI.
+- [Scope-matched verification](scope-matched-verification.md) — validate only the toolchain affected by a change; Bash/config edits do not require unrelated Gradle builds.
+- [Native bridge session gate](native-bridge-session-gate.md) — only resetInputSession may begin bridge sessions; unavailable provider operations must fail explicitly, not fake success.
+- [Settings bridge family](settings-bridge-family.md) — settings actions use a dedicated bridge family owned by MainActivity; selected implies enabled, and preview states stay mock-driven.
+- [Emoji bridge family](emoji-bridge-family.md) — emoji list/search serve from the shared EmojiData source; the bridge only maps to EmojiPreviewItem responses.

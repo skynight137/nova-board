@@ -39,6 +39,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "RELEASE_PAGE_URL", "\"$releasePageUrl\"")
         buildConfigField("String", "RELEASE_CHANNEL", "\"$releaseChannel\"")
+        val klipyApiKey =
+            System.getenv("KLIPY_API_KEY")
+                ?: providers.gradleProperty("KLIPY_API_KEY").orElse("").get()
+        buildConfigField("String", "KLIPY_API_KEY", "\"${klipyApiKey.replace("\\", "\\\\").replace("\"", "\\\"")}\"")
         val releaseSigningPublicKey =
             providers.gradleProperty("releaseSigningPublicKeyB64").orElse("").get().trim()
         val releaseSigningKeyFingerprint =

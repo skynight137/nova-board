@@ -97,6 +97,11 @@ These behaviors were manually confirmed in the active keyboard:
 - [✓] Prediction bar remains visible above the number row
 - [✓] Expandable tools row
 - [✓] Clipboard panel
+- [✓] KLIPY GIF panel with trending results and keyword search
+- [✓] Direct GIF insertion through Android rich-content input
+- [✓] GIF URL fallback for editors that reject rich-content insertion
+- [✓] Direct GIF URL path for conversation and prompt editors
+- [✓] Previously inserted GIF attachments remain available during share retention
 - [✓] Hotkeys panel
 - [✓] Voice panel
 - [✓] Emoji panel

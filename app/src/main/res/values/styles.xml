@@ -10,6 +10,18 @@
         <item name="android:tint">@color/kb_toolbar_icon</item>
     </style>
 
+    <style name="NovaBoardToolText">
+        <item name="android:layout_width">@dimen/nb_touch_target_min</item>
+        <item name="android:layout_height">@dimen/nb_touch_target_min</item>
+        <item name="android:minWidth">@dimen/nb_touch_target_min</item>
+        <item name="android:minHeight">@dimen/nb_touch_target_min</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:textColor">@color/kb_toolbar_icon</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
     <style name="NovaBoardSuggestion">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_weight">1</item>

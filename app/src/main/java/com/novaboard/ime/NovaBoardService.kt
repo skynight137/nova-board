@@ -27,20 +27,49 @@ import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import java.io.File
+import java.io.FileOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.UUID
+import java.util.concurrent.Executors
 import com.novaboard.ime.clipboard.ClipType
 import com.novaboard.ime.clipboard.ClipboardHistoryManager
 import com.novaboard.ime.clipboard.ClipboardItem
 import com.novaboard.ime.clipboard.ClipboardPanel
+import com.novaboard.ime.clipboard.filterClipboardItems
+import com.novaboard.ime.bridge.AndroidNativeBridge
+import com.novaboard.ime.bridge.BridgeErrorCode
+import com.novaboard.ime.bridge.BridgeResult
+import com.novaboard.ime.bridge.ClipboardOperation
+import com.novaboard.ime.bridge.EmojiOperation
+import com.novaboard.ime.bridge.EmojiPreviewItem
+import com.novaboard.ime.bridge.GifOperation
+import com.novaboard.ime.bridge.GifPreviewItem
+import com.novaboard.ime.bridge.InputSessionId
+import com.novaboard.ime.bridge.NativeBridge
+import com.novaboard.ime.bridge.NativeBridgeResponse
+import com.novaboard.ime.bridge.SessionGate
+import com.novaboard.ime.bridge.VoiceOperation
+import com.novaboard.ime.bridge.VoiceStateValue
+import com.novaboard.ime.bridge.bridgeError
+import com.novaboard.ime.bridge.gifSearchError
+import com.novaboard.ime.bridge.toPreviewItem
 import com.novaboard.ime.editing.AutocorrectState
 import com.novaboard.ime.editing.RepeatController
 import com.novaboard.ime.editing.RepeatToken
 import com.novaboard.ime.editing.acceptsInputSessionResult
 import com.novaboard.ime.editing.canUndoAutocorrect
 import com.novaboard.ime.editing.previousWordDeletionCount
+import com.novaboard.ime.editing.previousCodePointDeletionCount
 import com.novaboard.ime.editing.shouldResetTrackedTyping
 import com.novaboard.ime.editor.isConversationEditorInputType
 import com.novaboard.ime.emoji.EmojiData
 import com.novaboard.ime.emoji.EmojiPanel
+import com.novaboard.ime.gif.GifClient
+import com.novaboard.ime.gif.GifItem
+import com.novaboard.ime.gif.GifPanel
+import com.novaboard.ime.gif.supportsGifContent
 import com.novaboard.ime.hotkeys.HotkeyController
 import com.novaboard.ime.model.Key
 import com.novaboard.ime.model.KeyType
@@ -70,23 +99,40 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private lateinit var emojiPanelContainer: android.widget.FrameLayout
     private lateinit var overlayPanelContainer: android.widget.FrameLayout
     private lateinit var incognitoBanner: TextView
+    private var keyboardContext: Context? = null
 
     private lateinit var clipboardHistory: ClipboardHistoryManager
     private val suggestionEngine = SuggestionEngine()
     private val hotkeyController = HotkeyController { currentInputConnection }
     private var clipboardPanel: ClipboardPanel? = null
     private var emojiPanel: EmojiPanel? = null
+    private var gifPanel: GifPanel? = null
     private var toolsMenuView: View? = null
     private var lastSpaceTime = 0L
     private var lastAutocorrectState: AutocorrectState? = null
     private var speechRecognizer: SpeechRecognizer? = null
     private var listening = false
     private var inputSession = 0L
+    private val bridgeSessionGate = SessionGate()
+    private val gifBridgeClient by lazy { GifClient() }
+    private val nativeBridge: NativeBridge by lazy {
+        AndroidNativeBridge(
+            context = this,
+            connectionProvider = { currentInputConnection },
+            sessionGate = bridgeSessionGate,
+            clipboardOperations = { operation, complete -> complete(handleClipboardOperation(operation)) },
+            gifOperations = ::handleGifOperation,
+            voiceOperations = { operation, complete -> complete(handleVoiceOperation(operation)) },
+            emojiOperations = { operation, complete -> complete(handleEmojiOperation(operation)) },
+        )
+    }
     private var voiceRecognizerGeneration = 0L
     private var selectionStart = -1
     private var selectionEnd = -1
     private val cursorRepeatHandler = Handler(Looper.getMainLooper())
     private val suggestionRefreshHandler = Handler(Looper.getMainLooper())
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val gifShareExecutor = Executors.newSingleThreadExecutor()
     private val suggestionRefreshRunnable = Runnable { refreshSuggestions() }
     private var cursorRepeatRunnable: Runnable? = null
     private val cursorRepeatController =
@@ -109,6 +155,13 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             }
             if (key == KeyboardPreferences.INCOGNITO_MODE && ::clipboardHistory.isInitialized) {
                 clipboardHistory.setCaptureEnabled(!KeyboardPreferences.isIncognitoMode(this))
+            }
+            if (key == ThemeManager.KEY_THEME && ::keyboardView.isInitialized) {
+                keyboardView.post {
+                    keyboardContext = ThemeManager.keyboardContext(this)
+                    setInputView(onCreateInputView())
+                }
+                return@OnSharedPreferenceChangeListener
             }
             if (::keyboardView.isInitialized) {
                 keyboardView.post { applyKeyboardPreferences() }
@@ -133,8 +186,10 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     override fun onDestroy() {
         resetInputSession()
         emojiPanel?.dismiss()
+        gifPanel?.dismiss()
         clipboardHistory.stop()
         speechRecognizer?.destroy()
+        gifShareExecutor.shutdownNow()
         getSharedPreferences("novaboard_prefs", MODE_PRIVATE)
             .unregisterOnSharedPreferenceChangeListener(preferenceListener)
         AppLog.i("NovaBoardService", "Input method service destroyed")
@@ -142,7 +197,9 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     }
 
     override fun onCreateInputView(): View {
-        val root = LayoutInflater.from(this).inflate(R.layout.keyboard_container, null)
+        val themedContext = ThemeManager.keyboardContext(this)
+        keyboardContext = themedContext
+        val root = LayoutInflater.from(themedContext).inflate(R.layout.keyboard_container, null)
 
         keyboardView = root.findViewById(R.id.keyboardView)
         toolsBar = root.findViewById(R.id.toolsBar)
@@ -178,12 +235,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
-        stopCursorRepeat()
-        if (::keyboardView.isInitialized) keyboardView.cancelInteractions()
-        inputSession++
-        selectionStart = -1
-        selectionEnd = -1
-        resetTypingState()
+        resetInputSession()
         applyKeyboardPreferences()
         keyboardView.setShiftState(false)
         scheduleSuggestionsRefresh()
@@ -241,12 +293,15 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private fun resetInputSession() {
         stopCursorRepeat()
         inputSession++
+        bridgeSessionGate.begin(InputSessionId(inputSession))
         if (::keyboardView.isInitialized) keyboardView.cancelInteractions()
         stopVoiceInput()
         clipboardPanel?.dismiss()
         clipboardPanel = null
         emojiPanel?.dismiss()
         emojiPanel = null
+        gifPanel?.dismiss()
+        gifPanel = null
         dismissToolsMenu()
         if (::overlayPanelContainer.isInitialized) {
             overlayPanelContainer.removeAllViews()
@@ -323,35 +378,77 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         root.findViewById<ImageButton>(R.id.btnClipboard).setOnClickListener { openClipboard(root) }
         root.findViewById<ImageButton>(R.id.btnHotkeys).setOnClickListener { toggleHotkeys() }
         root.findViewById<ImageButton>(R.id.btnVoice).setOnClickListener { toggleVoiceInput() }
+        root.findViewById<TextView>(R.id.btnGif).setOnClickListener { openGif() }
         root.findViewById<ImageButton>(R.id.btnMore).setOnClickListener {
-            showToolsMenu(root)
+            showToolsMenu(it)
         }
     }
 
     private fun showToolsMenu(anchor: View) {
         dismissToolsMenu()
+        val themedContext = keyboardContext ?: this
         val menu =
-            LinearLayout(this).apply {
+            LinearLayout(themedContext).apply {
                 orientation = LinearLayout.VERTICAL
-                setBackgroundColor(getColor(R.color.kb_key_bg_special))
+                setBackgroundColor(themedContext.getColor(R.color.kb_key_bg_special))
                 setPadding(8, 6, 8, 8)
             }
+        val anchorLocation = IntArray(2)
+        val overlayLocation = IntArray(2)
+        anchor.getLocationInWindow(anchorLocation)
+        overlayPanelContainer.getLocationInWindow(overlayLocation)
+        val headerTop =
+            (anchorLocation[1] - overlayLocation[1] - (6 * resources.displayMetrics.density).toInt())
+                .coerceAtLeast(0)
         menu.addView(
-            TextView(this).apply {
+            View(themedContext),
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                headerTop,
+            ),
+        )
+        val header =
+            LinearLayout(themedContext).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                minimumHeight = (56 * resources.displayMetrics.density).toInt()
+            }
+        header.addView(
+            TextView(themedContext).apply {
                 text = getString(R.string.tool_menu_title)
                 textSize = 16f
-                setTextColor(getColor(R.color.kb_key_text))
+                setTextColor(themedContext.getColor(R.color.kb_key_text))
                 gravity = Gravity.CENTER
-                setPadding(8, 10, 8, 10)
+            },
+            LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                1f,
+            ),
+        )
+        header.addView(
+            ImageButton(themedContext).apply {
+                setImageResource(R.drawable.ic_close)
+                setColorFilter(themedContext.getColor(R.color.kb_toolbar_icon))
+                background = null
+                contentDescription = getString(R.string.cd_close_tools)
+                setPadding(8, 8, 8, 8)
                 setOnClickListener { dismissToolsMenu() }
             },
+            LinearLayout.LayoutParams(
+                (52 * resources.displayMetrics.density).toInt(),
+                ViewGroup.LayoutParams.MATCH_PARENT,
+            ),
+        )
+        menu.addView(
+            header,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
             ),
         )
         val grid =
-            GridLayout(this).apply {
+            GridLayout(themedContext).apply {
                 columnCount = 4
                 alignmentMode = GridLayout.ALIGN_BOUNDS
                 useDefaultMargins = false
@@ -363,13 +460,14 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                     ToolMenuItem("hotkeys", getString(R.string.cd_hotkeys)),
                     ToolMenuItem("voice", getString(R.string.cd_voice)),
                     ToolMenuItem("emoji", getString(R.string.cd_emoji)),
+                    ToolMenuItem("gif", getString(R.string.cd_gif)),
                     ToolMenuItem("settings", getString(R.string.tool_settings)),
                     ToolMenuItem("incognito", getString(R.string.tool_incognito)),
                 ),
             )
         items.forEach { item ->
             val cell =
-                LinearLayout(this).apply {
+                LinearLayout(themedContext).apply {
                     orientation = LinearLayout.VERTICAL
                     gravity = Gravity.CENTER
                     isFocusable = true
@@ -379,10 +477,10 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                     setPadding(4, 10, 4, 10)
                 }
             cell.addView(
-                TextView(this).apply {
+                TextView(themedContext).apply {
                     text = toolGlyph(item.id)
                     textSize = 25f
-                    setTextColor(getColor(R.color.kb_key_text))
+                    setTextColor(themedContext.getColor(R.color.kb_key_text))
                     gravity = Gravity.CENTER
                 },
                 LinearLayout.LayoutParams(
@@ -391,10 +489,10 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 ),
             )
             cell.addView(
-                TextView(this).apply {
+                TextView(themedContext).apply {
                     text = item.label
                     textSize = 13f
-                    setTextColor(getColor(R.color.kb_key_text))
+                    setTextColor(themedContext.getColor(R.color.kb_key_text))
                     gravity = Gravity.CENTER
                     maxLines = 1
                     ellipsize = android.text.TextUtils.TruncateAt.END
@@ -411,6 +509,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                     "hotkeys" -> toggleHotkeys()
                     "voice" -> toggleVoiceInput()
                     "emoji" -> onEmoji()
+                    "gif" -> openGif()
                     "settings" ->
                         startActivity(
                             Intent(this@NovaBoardService, MainActivity::class.java)
@@ -452,6 +551,13 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         )
         overlayPanelContainer.visibility = View.VISIBLE
         toolsMenuView = menu
+        menu.alpha = 0f
+        menu.translationY = (6 * resources.displayMetrics.density)
+        menu.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(160L)
+            .start()
     }
 
     private fun dismissToolsMenu() {
@@ -494,6 +600,267 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 },
             )
         clipboardPanel?.show(overlayPanelContainer)
+    }
+
+    private fun openGif() {
+        dismissToolsMenu()
+        clipboardPanel?.dismiss()
+        emojiPanel?.dismiss()
+        gifPanel?.dismiss()
+        val session = inputSession
+        gifPanel =
+            GifPanel(
+                this,
+                onPick = { item ->
+                    if (session == inputSession) insertGif(item)
+                },
+                onClose = {
+                    gifPanel?.dismiss()
+                    gifPanel = null
+                },
+            )
+        gifPanel?.show(overlayPanelContainer)
+    }
+
+    private fun handleClipboardOperation(operation: ClipboardOperation): BridgeResult =
+        when (operation) {
+            is ClipboardOperation.List ->
+                BridgeResult.Success(
+                    NativeBridgeResponse.ClipboardItems(clipboardHistory.getItems().map { it.toPreviewItem() }),
+                )
+            is ClipboardOperation.Search ->
+                BridgeResult.Success(
+                    NativeBridgeResponse.ClipboardItems(
+                        filterClipboardItems(clipboardHistory.getItems(), operation.query).map { it.toPreviewItem() },
+                    ),
+                )
+            is ClipboardOperation.SetPinned -> {
+                val item =
+                    clipboardHistory.getItems().firstOrNull { it.id == operation.itemId }
+                        ?: return bridgeError(BridgeErrorCode.INVALID_REQUEST, "Unknown clipboard item")
+                if (item.pinned != operation.pinned) clipboardHistory.togglePin(item.id)
+                BridgeResult.Success(NativeBridgeResponse.Accepted)
+            }
+            is ClipboardOperation.Delete -> {
+                if (clipboardHistory.getItems().none { it.id == operation.itemId }) {
+                    return bridgeError(BridgeErrorCode.INVALID_REQUEST, "Unknown clipboard item")
+                }
+                clipboardHistory.delete(operation.itemId)
+                BridgeResult.Success(NativeBridgeResponse.Accepted)
+            }
+        }
+
+    private fun handleGifOperation(operation: GifOperation, complete: (BridgeResult) -> Unit) {
+        when (operation) {
+            is GifOperation.Search ->
+                gifShareExecutor.execute {
+                    val result =
+                        runCatching { gifBridgeClient.load(operation.query) }.fold(
+                            onSuccess = { items ->
+                                BridgeResult.Success(
+                                    NativeBridgeResponse.GifItems(
+                                        items.map { GifPreviewItem(it.slug, it.title, it.previewUrl) },
+                                    ),
+                                )
+                            },
+                            onFailure = ::gifSearchError,
+                        )
+                    mainHandler.post { complete(result) }
+                }
+            is GifOperation.Insert -> {
+                val inputConnection = currentInputConnection
+                if (inputConnection == null) {
+                    complete(
+                        bridgeError(
+                            BridgeErrorCode.EDITOR_UNAVAILABLE,
+                            "No active editor connection is available",
+                            retryable = true,
+                        ),
+                    )
+                    return
+                }
+                insertGif(
+                    GifItem(
+                        slug = operation.contentUrl,
+                        title = operation.contentUrl.substringAfterLast('/').ifBlank { "GIF" },
+                        previewUrl = "",
+                        contentUrl = operation.contentUrl,
+                    ),
+                )
+                complete(BridgeResult.Success(NativeBridgeResponse.Accepted))
+            }
+        }
+    }
+
+    private fun handleVoiceOperation(operation: VoiceOperation): BridgeResult =
+        when (operation) {
+            VoiceOperation.Start -> {
+                if (
+                    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M &&
+                    checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    bridgeError(
+                        BridgeErrorCode.PERMISSION_REQUIRED,
+                        "Microphone permission is required for voice typing",
+                    )
+                } else if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+                    bridgeError(
+                        BridgeErrorCode.RUNTIME_UNAVAILABLE,
+                        "Speech recognition isn't available on this device",
+                    )
+                } else {
+                    startVoiceInput()
+                    BridgeResult.Success(NativeBridgeResponse.VoiceState(VoiceStateValue.LISTENING))
+                }
+            }
+            VoiceOperation.Stop -> {
+                stopVoiceInput()
+                BridgeResult.Success(NativeBridgeResponse.VoiceState(VoiceStateValue.IDLE))
+            }
+        }
+
+    private fun handleEmojiOperation(operation: EmojiOperation): BridgeResult =
+        when (operation) {
+            EmojiOperation.List ->
+                BridgeResult.Success(NativeBridgeResponse.EmojiItems(EmojiData.all.map { EmojiPreviewItem(it) }))
+            is EmojiOperation.Search ->
+                BridgeResult.Success(
+                    NativeBridgeResponse.EmojiItems(
+                        EmojiData.search(operation.query).map { EmojiPreviewItem(it) },
+                    ),
+                )
+        }
+
+    private fun insertGif(item: GifItem) {
+        gifPanel?.dismiss()
+        gifPanel = null
+        val inputConnection = currentInputConnection
+        if (inputConnection == null) return
+        val editorInfo = currentInputEditorInfo
+        if (
+            isConversationEditor(editorInfo) ||
+                !supportsGifContent(editorInfo?.contentMimeTypes)
+        ) {
+            sendGifLinkFallback(item, inputConnection)
+            return
+        }
+        Toast.makeText(this, getString(R.string.gif_preparing), Toast.LENGTH_SHORT).show()
+        runCatching {
+            val session = inputSession
+            gifShareExecutor.execute {
+                runCatching { downloadGif(item) }
+                    .onSuccess { file ->
+                        mainHandler.post {
+                            if (session == inputSession) {
+                                commitGifFile(item, file)
+                            } else {
+                                file.delete()
+                            }
+                        }
+                    }
+                    .onFailure { error ->
+                        AppLog.w("NovaBoardService", "GIF download failed", error)
+                        mainHandler.post {
+                            if (session == inputSession) {
+                                Toast.makeText(
+                                        this,
+                                        getString(R.string.gif_download_failed),
+                                        Toast.LENGTH_SHORT,
+                                    )
+                                    .show()
+                            }
+                        }
+                    }
+            }
+        }.onFailure { error ->
+            AppLog.w("NovaBoardService", "GIF insertion was cancelled", error)
+        }
+    }
+
+    private fun downloadGif(item: GifItem): File {
+        val root = File(cacheDir, GIF_CACHE_DIRECTORY).apply { mkdirs() }
+        val expirationTime = System.currentTimeMillis() - GIF_RETENTION_MS
+        root.listFiles()
+            ?.filter { it.isFile && it.lastModified() < expirationTime }
+            ?.forEach(File::delete)
+        val destination = File(root, "${UUID.randomUUID()}.gif")
+        val connection = (URL(item.contentUrl).openConnection() as HttpURLConnection).apply {
+            connectTimeout = 10_000
+            readTimeout = 20_000
+            requestMethod = "GET"
+            setRequestProperty("Accept", "image/gif")
+        }
+        try {
+            check(connection.responseCode in 200..299) {
+                "GIF download returned HTTP ${connection.responseCode}"
+            }
+            check(connection.contentLengthLong <= MAX_GIF_BYTES || connection.contentLengthLong < 0) {
+                "GIF exceeds the temporary share size limit"
+            }
+            FileOutputStream(destination).use { output ->
+                connection.inputStream.use { input ->
+                    val buffer = ByteArray(DOWNLOAD_BUFFER_SIZE)
+                    var total = 0L
+                    while (true) {
+                        val count = input.read(buffer)
+                        if (count < 0) break
+                        total += count
+                        check(total <= MAX_GIF_BYTES) { "GIF exceeds the temporary share size limit" }
+                        output.write(buffer, 0, count)
+                    }
+                }
+            }
+            return destination
+        } catch (error: Exception) {
+            destination.delete()
+            throw error
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    private fun commitGifFile(item: GifItem, file: File) {
+        val gifUri = Uri.parse("content://$GIF_SHARE_AUTHORITY/${file.name}")
+        val inputConnection = currentInputConnection
+        if (inputConnection == null) {
+            file.delete()
+            return
+        }
+        val inserted =
+            runCatching {
+                    val contentInfo =
+                        InputContentInfo(
+                            gifUri,
+                            ClipDescription(item.title, arrayOf("image/gif")),
+                            null,
+                        )
+                    contentInfo.requestPermission()
+                    inputConnection.commitContent(
+                        contentInfo,
+                        InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION,
+                        null,
+                    )
+                }
+                .getOrDefault(false)
+        if (inserted) {
+            mainHandler.postDelayed({ file.delete() }, GIF_RETENTION_MS)
+        } else {
+            file.delete()
+            sendGifLinkFallback(item, inputConnection)
+        }
+    }
+
+    private fun sendGifLinkFallback(item: GifItem, inputConnection: InputConnection) {
+        val fallbackSent =
+            runCatching { inputConnection.commitText(item.contentUrl, 1) }.getOrDefault(false)
+        Toast.makeText(
+                this,
+                getString(
+                    if (fallbackSent) R.string.gif_link_fallback else R.string.gif_editor_unsupported,
+                ),
+                Toast.LENGTH_SHORT,
+            )
+            .show()
     }
 
     private fun pasteClipboardItem(item: ClipboardItem) {
@@ -556,19 +923,21 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     }
 
     private fun wireCursorButton(button: ImageButton, code: Int) {
-        button.setOnClickListener { sendDpad(code) }
+        var suppressClick = false
+        button.setOnClickListener {
+            if (!suppressClick) sendDpad(code)
+        }
         button.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 android.view.MotionEvent.ACTION_DOWN -> {
+                    suppressClick = true
                     startCursorRepeat(code)
                     true
                 }
                 android.view.MotionEvent.ACTION_UP,
                 android.view.MotionEvent.ACTION_CANCEL -> {
                     stopCursorRepeat()
-                    if (event.actionMasked == android.view.MotionEvent.ACTION_UP) {
-                        button.performClick()
-                    }
+                    suppressClick = false
                     true
                 }
                 else -> true
@@ -621,6 +990,11 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         const val CURSOR_REPEAT_INITIAL_DELAY_MS = 350L
         const val CURSOR_REPEAT_INTERVAL_MS = 70L
         const val SUGGESTION_REFRESH_DELAY_MS = 40L
+        const val GIF_CACHE_DIRECTORY = "gif-share"
+        const val GIF_SHARE_AUTHORITY = "com.novaboard.ime.gif-share"
+        const val MAX_GIF_BYTES = 15L * 1024L * 1024L
+        const val DOWNLOAD_BUFFER_SIZE = 16 * 1024
+        const val GIF_RETENTION_MS = 10 * 60 * 1000L
     }
 
     // ---- suggestions ----
@@ -825,8 +1199,14 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             scheduleSuggestionsRefresh()
             return
         }
-        ic.deleteSurroundingText(1, 0)
-        if (currentWord.isNotEmpty()) currentWord.deleteCharAt(currentWord.length - 1)
+        val textBeforeCursor = ic.getTextBeforeCursor(128, 0)?.toString().orEmpty()
+        val deletionCount = previousCodePointDeletionCount(textBeforeCursor)
+        if (deletionCount > 0) {
+            ic.deleteSurroundingText(deletionCount, 0)
+            repeat(deletionCount.coerceAtMost(currentWord.length)) {
+                currentWord.deleteCharAt(currentWord.length - 1)
+            }
+        }
         lastAutocorrectState = null
         scheduleSuggestionsRefresh()
     }
