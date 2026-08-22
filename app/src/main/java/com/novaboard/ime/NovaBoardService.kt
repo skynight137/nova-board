@@ -1,5 +1,6 @@
 package com.novaboard.ime
 
+import android.content.ClipData
 import android.content.ClipDescription
 import android.content.Context
 import android.content.pm.PackageManager
@@ -585,26 +586,30 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     }
 
     private fun insertGif(item: GifItem) {
-        val ic = currentInputConnection ?: return
-        val inserted =
-            runCatching {
-                    val info =
-                        InputContentInfo(
-                            Uri.parse(item.contentUrl),
-                            ClipDescription(item.title, arrayOf("image/gif")),
-                            null,
-                        )
-                    ic.commitContent(
-                        info,
-                        InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION,
-                        null,
-                    )
-                }
-                .getOrDefault(false)
-        if (!inserted) {
-            ic.commitText(item.contentUrl, 1)
-            Toast.makeText(this, getString(R.string.gif_inserted), Toast.LENGTH_SHORT).show()
-        }
+        val shareIntent =
+            Intent(Intent.ACTION_SEND).apply {
+                type = "image/gif"
+                val gifUri = Uri.parse(item.contentUrl)
+                putExtra(Intent.EXTRA_STREAM, gifUri)
+                putExtra(Intent.EXTRA_TEXT, item.contentUrl)
+                putExtra(Intent.EXTRA_TITLE, item.title)
+                clipData = ClipData.newRawUri(item.title, gifUri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        runCatching {
+                startActivity(
+                    Intent.createChooser(
+                        shareIntent,
+                        getString(R.string.gif_share_title),
+                    ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                )
+            }
+            .onFailure {
+                AppLog.w("NovaBoardService", "GIF share was rejected", it)
+                Toast.makeText(this, getString(R.string.gif_share_failed), Toast.LENGTH_SHORT)
+                    .show()
+            }
         gifPanel?.dismiss()
         gifPanel = null
     }
