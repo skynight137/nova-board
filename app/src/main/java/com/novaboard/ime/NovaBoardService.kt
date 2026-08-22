@@ -597,31 +597,35 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
         gifPanel?.dismiss()
         gifPanel = null
         Toast.makeText(this, getString(R.string.gif_preparing), Toast.LENGTH_SHORT).show()
-        val session = inputSession
-        gifShareExecutor.execute {
-            runCatching { downloadGif(item) }
-                .onSuccess { file ->
-                    mainHandler.post {
-                        if (session == inputSession) {
-                            commitGifFile(item, file)
-                        } else {
-                            file.delete()
+        runCatching {
+            val session = inputSession
+            gifShareExecutor.execute {
+                runCatching { downloadGif(item) }
+                    .onSuccess { file ->
+                        mainHandler.post {
+                            if (session == inputSession) {
+                                commitGifFile(item, file)
+                            } else {
+                                file.delete()
+                            }
                         }
                     }
-                }
-                .onFailure { error ->
-                    AppLog.w("NovaBoardService", "GIF download failed", error)
-                    mainHandler.post {
-                        if (session == inputSession) {
-                            Toast.makeText(
-                                    this,
-                                    getString(R.string.gif_download_failed),
-                                    Toast.LENGTH_SHORT,
-                                )
-                                .show()
+                    .onFailure { error ->
+                        AppLog.w("NovaBoardService", "GIF download failed", error)
+                        mainHandler.post {
+                            if (session == inputSession) {
+                                Toast.makeText(
+                                        this,
+                                        getString(R.string.gif_download_failed),
+                                        Toast.LENGTH_SHORT,
+                                    )
+                                    .show()
+                            }
                         }
                     }
-                }
+            }
+        }.onFailure { error ->
+            AppLog.w("NovaBoardService", "GIF insertion was cancelled", error)
         }
     }
 
@@ -688,9 +692,17 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             mainHandler.postDelayed({ file.delete() }, GIF_RETENTION_MS)
         } else {
             file.delete()
+            val fallbackSent =
+                runCatching {
+                        inputConnection.commitText(item.contentUrl, 1)
+                        true
+                    }
+                    .getOrDefault(false)
             Toast.makeText(
                     this,
-                    getString(R.string.gif_editor_unsupported),
+                    getString(
+                        if (fallbackSent) R.string.gif_link_fallback else R.string.gif_editor_unsupported,
+                    ),
                     Toast.LENGTH_SHORT,
                 )
                 .show()

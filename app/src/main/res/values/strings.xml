@@ -34,6 +34,7 @@
     <string name="gif_preparing">Preparing GIF…</string>
     <string name="gif_download_failed">Unable to prepare GIF for insertion</string>
     <string name="gif_editor_unsupported">This app does not support GIF insertion</string>
+    <string name="gif_link_fallback">GIF insertion is not supported here; pasted the GIF link instead</string>
     <string name="gif_close">Close GIF panel</string>
     <string name="cd_more">More keyboard tools</string>
     <string name="cd_close_tools">Close keyboard tools</string>

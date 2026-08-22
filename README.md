@@ -25,7 +25,8 @@ input without a third-party keyboard SDK.
   available
 - Scrollable, compact emoji picker with padded, uncropped emoji cells
 - KLIPY-powered GIF panel opened from the toolbar or tools menu, with trending
-  GIFs, keyword search, and direct rich-content insertion into compatible editors
+  GIFs, keyword search, direct rich-content insertion into compatible editors,
+  and direct-link fallback for editors that reject rich content
 - System, light, and dark themes
 - Voice typing through Android's on-device `SpeechRecognizer`
 - Optional gesture typing across letter keys with bounded path recognition
@@ -45,6 +46,8 @@ input without a third-party keyboard SDK.
 - Cut/copy/paste/select-all actions are reserved for the tools-row expansion.
 - Image clipboard paste depends on the target editor accepting Android
   `InputContentInfo`; unsupported editors show a clear message.
+- GIF insertion uses Android rich content when supported and pastes the GIF URL
+  when the target editor rejects rich content.
 - The suggestion dictionary is a small seed list intended to be replaceable by
   a larger frequency list or on-device language model.
 - The launcher icon is a placeholder vector monogram.

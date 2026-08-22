@@ -99,6 +99,7 @@ These behaviors were manually confirmed in the active keyboard:
 - [✓] Clipboard panel
 - [✓] KLIPY GIF panel with trending results and keyword search
 - [✓] Direct GIF insertion through Android rich-content input
+- [✓] GIF URL fallback for editors that reject rich-content insertion
 - [✓] Hotkeys panel
 - [✓] Voice panel
 - [✓] Emoji panel
