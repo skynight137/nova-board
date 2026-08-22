@@ -81,6 +81,12 @@ sealed interface NativeBridgeRequest {
         override val requestId: BridgeRequestId,
         val operation: KeyboardMetricsOperation,
     ) : NativeBridgeRequest
+
+    data class Settings(
+        override val sessionId: InputSessionId,
+        override val requestId: BridgeRequestId,
+        val operation: SettingsOperation,
+    ) : NativeBridgeRequest
 }
 
 sealed interface ClipboardOperation {
@@ -122,6 +128,14 @@ sealed interface KeyboardMetricsOperation {
     data object Read : KeyboardMetricsOperation
 }
 
+sealed interface SettingsOperation {
+    data object OpenImeSettings : SettingsOperation
+
+    data object ShowImePicker : SettingsOperation
+
+    data object ReadStatus : SettingsOperation
+}
+
 sealed interface NativeBridgeResponse {
     data object Accepted : NativeBridgeResponse
     data class BooleanValue(val value: Boolean) : NativeBridgeResponse
@@ -131,6 +145,16 @@ sealed interface NativeBridgeResponse {
     data class PreferenceSnapshot(val values: Map<String, Boolean>) : NativeBridgeResponse
     data class ThemeValue(val theme: ThemeValueType) : NativeBridgeResponse
     data class KeyboardMetrics(val metrics: KeyboardMetricsValue) : NativeBridgeResponse
+    data class InputMethodStatus(val status: InputMethodStatusValue) : NativeBridgeResponse
+}
+
+data class InputMethodStatusValue(
+    val enabled: Boolean,
+    val selected: Boolean,
+) {
+    init {
+        require(!selected || enabled) { "A selected input method must also be enabled" }
+    }
 }
 
 data class ClipboardPreviewItem(
@@ -207,6 +231,8 @@ typealias ClipboardOperationHandler = (ClipboardOperation, BridgeCompletion) -> 
 typealias GifOperationHandler = (GifOperation, BridgeCompletion) -> Unit
 
 typealias VoiceOperationHandler = (VoiceOperation, BridgeCompletion) -> Unit
+
+typealias SettingsOperationHandler = (SettingsOperation, BridgeCompletion) -> Unit
 
 class SessionScopedNativeBridge(
     private val sessionGate: SessionGate,

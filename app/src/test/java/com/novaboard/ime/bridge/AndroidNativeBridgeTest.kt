@@ -35,6 +35,72 @@ class AndroidNativeBridgeTest {
     }
 
     @Test
+    fun settingsFamilyWithoutHandlerStaysExplicitlyUnavailable() {
+        val bridge =
+            AndroidNativeBridge(
+                contextProvider = { error("Context is not needed for provider seams") },
+                connectionProvider = { null },
+                sessionGate = SessionGate(InputSessionId(10L)),
+            )
+        val results = mutableListOf<BridgeResult>()
+        val request =
+            NativeBridgeRequest.Settings(
+                InputSessionId(10L),
+                BridgeRequestId("settings-1"),
+                SettingsOperation.OpenImeSettings,
+            )
+
+        bridge.execute(request, results::add)
+
+        assertEquals(
+            BridgeErrorCode.RUNTIME_UNAVAILABLE,
+            (results.single() as BridgeResult.Failure).error.code,
+        )
+    }
+
+    @Test
+    fun attachedSettingsHandlerReceivesOperations() {
+        var received: SettingsOperation? = null
+        val bridge =
+            AndroidNativeBridge(
+                contextProvider = { error("Context is not needed for provider seams") },
+                connectionProvider = { null },
+                sessionGate = SessionGate(InputSessionId(11L)),
+                settingsOperations = { operation, complete ->
+                    received = operation
+                    complete(
+                        BridgeResult.Success(
+                            NativeBridgeResponse.InputMethodStatus(
+                                InputMethodStatusValue(enabled = true, selected = false),
+                            ),
+                        ),
+                    )
+                },
+            )
+        val results = mutableListOf<BridgeResult>()
+        val request =
+            NativeBridgeRequest.Settings(
+                InputSessionId(11L),
+                BridgeRequestId("settings-2"),
+                SettingsOperation.ReadStatus,
+            )
+
+        bridge.execute(request, results::add)
+
+        assertEquals(SettingsOperation.ReadStatus, received)
+        val response = (results.single() as BridgeResult.Success).response
+        assertEquals(
+            InputMethodStatusValue(enabled = true, selected = false),
+            (response as NativeBridgeResponse.InputMethodStatus).status,
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun selectedInputMethodWithoutEnabledIsRejected() {
+        InputMethodStatusValue(enabled = false, selected = true)
+    }
+
+    @Test
     fun attachedClipboardHandlerReceivesOperations() {
         var received: ClipboardOperation? = null
         val bridge =

@@ -29,6 +29,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.OnBackPressedCallback
 import com.novaboard.ime.R
 import com.novaboard.ime.BuildConfig
+import com.novaboard.ime.bridge.AndroidNativeBridge
+import com.novaboard.ime.bridge.BridgeResult
+import com.novaboard.ime.bridge.InputMethodStatusValue
+import com.novaboard.ime.bridge.InputSessionId
+import com.novaboard.ime.bridge.NativeBridge
+import com.novaboard.ime.bridge.NativeBridgeResponse
+import com.novaboard.ime.bridge.SessionGate
+import com.novaboard.ime.bridge.SettingsOperation
 import com.novaboard.ime.clipboard.ClipboardHistoryManager
 import com.novaboard.ime.emoji.EmojiPanel
 import com.novaboard.ime.model.Key
@@ -38,6 +46,15 @@ import com.novaboard.ime.util.AppLog
 import com.novaboard.ime.view.KeyboardView
 
 class MainActivity : AppCompatActivity() {
+    private val settingsSessionGate = SessionGate(InputSessionId(SETTINGS_SESSION_ID))
+    private val settingsBridge: NativeBridge by lazy {
+        AndroidNativeBridge(
+            context = this,
+            connectionProvider = { null },
+            sessionGate = settingsSessionGate,
+            settingsOperations = { operation, complete -> complete(handleSettingsOperation(operation)) },
+        )
+    }
     private val settingsPageStack = ArrayDeque<View>()
     private val requestMicrophone =
         registerForActivityResult(
@@ -910,14 +927,38 @@ class MainActivity : AppCompatActivity() {
     private fun dp(value: Int): Int =
         (value * resources.displayMetrics.density).toInt()
 
+    private fun handleSettingsOperation(operation: SettingsOperation): BridgeResult =
+        when (operation) {
+            SettingsOperation.OpenImeSettings -> {
+                startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
+                BridgeResult.Success(NativeBridgeResponse.Accepted)
+            }
+            SettingsOperation.ShowImePicker -> {
+                inputMethodManager().showInputMethodPicker()
+                BridgeResult.Success(NativeBridgeResponse.Accepted)
+            }
+            SettingsOperation.ReadStatus -> {
+                val imm = inputMethodManager()
+                val enabled = imm.enabledInputMethodList.any { it.packageName == packageName }
+                val selected = imm.currentInputMethodInfo?.packageName == packageName
+                BridgeResult.Success(
+                    NativeBridgeResponse.InputMethodStatus(InputMethodStatusValue(enabled, selected)),
+                )
+            }
+        }
+
+    private fun inputMethodManager(): InputMethodManager =
+        getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+
+    companion object {
+        const val EXTRA_REQUEST_MICROPHONE = "request_microphone"
+        private const val SETTINGS_SESSION_ID = 1L
+    }
+
     private data class PreferenceSpec(
         val titleRes: Int,
         val summaryRes: Int,
         val key: String,
         val default: Boolean,
     )
-
-    companion object {
-        const val EXTRA_REQUEST_MICROPHONE = "request_microphone"
-    }
 }
