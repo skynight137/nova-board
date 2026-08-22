@@ -34,3 +34,4 @@
 - [GIF share cache lifecycle](gif-share-cache-lifecycle.md) — retain active content-provider files until their handoff retention window expires.
 - [SDK package verification](sdk-package-verification.md) — sdkmanager package IDs can differ from compileSdk labels; verify catalog names and never suppress install failures.
 - [Skills repository aliases](skills-repository-aliases.md) — validate shorthand skill names against real GitHub repositories before passing them to the skills CLI.
+- [Scope-matched verification](scope-matched-verification.md) — validate only the toolchain affected by a change; Bash/config edits do not require unrelated Gradle builds.
