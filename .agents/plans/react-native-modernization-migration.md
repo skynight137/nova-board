@@ -2,10 +2,12 @@
 
 ## Status
 
-**Proposed — waiting for user confirmation.**
+**Phase 0 documented — device validation remains pending; implementation is
+gated at Phase 1.**
 
-No application code, build configuration, dependencies, workflows, or release
-files should be changed until this plan is approved.
+Phase 0 documentation and baseline verification are allowed. No React Native
+dependencies, production UI migration, workflows, or release changes should be
+made until the Phase 0 gate is accepted.
 
 ## Current-state correction
 
@@ -63,25 +65,26 @@ responsiveness to the system keyboard path.
 
 ## Ordered phases
 
-### Phase 0: Migration contract and baseline `[ ]`
+### Phase 0: Migration contract and baseline `[~]`
 
 Document the current behavior before changing the UI stack.
 
 Acceptance criteria:
 
-- [ ] Feature inventory covers keyboard layouts, suggestions, clipboard,
+- [x] Feature inventory covers keyboard layouts, suggestions, clipboard,
   emoji, GIFs, hotkeys, voice, cursor controls, themes, settings, privacy, and
   release behavior.
-- [ ] Each feature is classified as native platform boundary, shared domain
+- [x] Each feature is classified as native platform boundary, shared domain
   logic, React Native UI candidate, or deferred.
-- [ ] Existing JVM and instrumentation verification commands are recorded.
-- [ ] Baseline debug APK launch and IME activation are verified on a
+- [x] Existing JVM and instrumentation verification commands are recorded.
+- [~] Baseline debug APK launch and IME activation are verified on a
   representative Android target.
-- [ ] Baseline screenshots or equivalent acceptance references exist for the
+- [~] Baseline screenshots or equivalent acceptance references exist for the
   settings screen, keyboard toolbar, tools surface, clipboard panel, emoji
   panel, and GIF panel.
 
-Deliverable: migration matrix and behavior baseline in project documentation.
+Deliverable: `docs/react-native-migration-baseline.md`. Device-only items remain
+partial until a representative Android target is available.
 
 ### Phase 1: React Native preview foundation `[ ]`
 
