@@ -46,7 +46,7 @@ author = 47571172
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "if ! source .local/env.sh 2>/dev/null || ! command -v opencode >/dev/null 2>&1; then bash scripts/setup.sh --oc && source .local/env.sh; fi; exec opencode web --port 80"
+args = "if ! source .local/env.sh 2>/dev/null || ! command -v opencode >/dev/null 2>&1; then bash scripts/setup.sh --oc && source .local/env.sh; fi; exec opencode web --port 8000"
 
 [[workflows.workflow]]
 name = "Setup Android Tools"
@@ -84,6 +84,7 @@ UV_PROJECT_ENVIRONMENT = ".venv"
 [[ports]]
 localPort = 80
 externalPort = 80
+exposeLocalhost = true
 
 [[ports]]
 localPort = 5173
