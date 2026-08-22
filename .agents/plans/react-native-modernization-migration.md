@@ -158,6 +158,9 @@ Acceptance criteria:
   status; `MainActivity` owns the session-gated adapter that serves it.
 - [x] The bridge has a typed emoji family (list and search) served from the
   shared `EmojiData` source, ready for the Phase 4 emoji panel.
+- [x] The preview renders an emoji surface driven by the emoji bridge family
+  (loading, search, ready, and empty states), completing the Phase 4 panel
+  preview path with no native hosting.
 - [ ] React Native settings hosting replaces the native screen behind the same
   bridge (production hosting is not wired yet; the preview drives the mock).
 - [ ] Theme, gesture, incognito, clipboard-retention, and other existing

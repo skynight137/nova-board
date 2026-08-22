@@ -131,6 +131,6 @@ gzip) plus 0.12 kB CSS (0.13 kB gzip), produced by Vite 7.1.5. The added
 runtime dependencies are React Native 0.81.4, React Native Web 0.20.0, React
 19.1.1, React DOM 19.1.1, Vite 7.1.5, and the Vite React plugin 5.0.2.
 
-After the settings surface (loading/error/empty/theme/narrow states) the
-preview measures 297.02 kB JavaScript (93.51 kB gzip) with no new runtime
-dependencies.
+After the settings and emoji surfaces (loading/error/empty/theme/narrow
+states) the preview measures 305.26 kB JavaScript (96.39 kB gzip) with no new
+runtime dependencies.
