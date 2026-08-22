@@ -637,7 +637,10 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
 
     private fun downloadGif(item: GifItem): File {
         val root = File(cacheDir, GIF_CACHE_DIRECTORY).apply { mkdirs() }
-        root.listFiles()?.filter { it.isFile }?.forEach(File::delete)
+        val expirationTime = System.currentTimeMillis() - GIF_RETENTION_MS
+        root.listFiles()
+            ?.filter { it.isFile && it.lastModified() < expirationTime }
+            ?.forEach(File::delete)
         val destination = File(root, "${UUID.randomUUID()}.gif")
         val connection = (URL(item.contentUrl).openConnection() as HttpURLConnection).apply {
             connectTimeout = 10_000

@@ -44,7 +44,14 @@ class GifShareContentProvider : ContentProvider() {
 
     private fun fileFor(uri: Uri): File? {
         val name = uri.lastPathSegment ?: return null
-        if (name.contains('/') || name.contains('\\') || name.contains("..")) return null
+        if (
+            !name.endsWith(".gif", ignoreCase = true) ||
+                name.contains('/') ||
+                name.contains('\\') ||
+                name.contains("..")
+        ) {
+            return null
+        }
         val root = File(requireNotNull(context).cacheDir, GIF_CACHE_DIRECTORY)
         val file = File(root, name)
         return file.takeIf {

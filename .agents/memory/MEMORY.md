@@ -32,3 +32,4 @@
 - [Android certificate verification](android-certificate-verification.md) — retain the release fingerprint check because manual GitHub installation does not replace Android signing identity verification.
 - [IME theme and cursor controls](ime-theme-and-cursor-controls.md) — AppCompat night mode needs an explicit IME context, and arrow touch-up must not resend the initial move.
 - [Unicode backspace](unicode-backspace.md) — backspace counts UTF-16 units for the previous Unicode code point so emoji surrogate pairs are removed together.
+- [GIF share cache lifecycle](gif-share-cache-lifecycle.md) — retain active content-provider files until their handoff retention window expires.

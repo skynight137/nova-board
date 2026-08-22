@@ -101,6 +101,10 @@ These behaviors were manually confirmed in the active keyboard:
 - [✓] Direct GIF insertion through Android rich-content input
 - [✓] GIF URL fallback for editors that reject rich-content insertion
 - [✓] Direct GIF URL path for conversation and prompt editors
+<<<<<<< HEAD
+=======
+- [✓] Previously inserted GIF attachments remain available during share retention
+>>>>>>> b919968 (fix(gif): preserve active share attachments)
 - [✓] Hotkeys panel
 - [✓] Voice panel
 - [✓] Emoji panel
