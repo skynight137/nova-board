@@ -57,6 +57,18 @@ author = 47591184
 task = "shell.exec"
 args = "bash scripts/setup.sh --android-tools"
 
+[[workflows.workflow]]
+name = "React Native Preview"
+mode = "sequential"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run preview:rn"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [userenv.shared]
 NODE_ENV = "production"
 YARN_REGISTRY = "https://registry.yarnpkg.com/"
@@ -72,7 +84,19 @@ UV_PROJECT_ENVIRONMENT = ".venv"
 [[ports]]
 localPort = 80
 externalPort = 80
-exposeLocalhost = true
 
+[[ports]]
+localPort = 5173
+externalPort = 5173
 
+[[ports]]
+localPort = 5174
+externalPort = 3000
 
+[[ports]]
+localPort = 5175
+externalPort = 3001
+
+[[ports]]
+localPort = 8080
+externalPort = 8080

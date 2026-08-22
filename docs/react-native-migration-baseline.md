@@ -1,6 +1,6 @@
 # React Native Migration Baseline
 
-Status: Phase 0 baseline for the proposed React Native modernization.
+Status: Phase 1 preview foundation complete; device validation remains pending.
 
 ## Architecture baseline
 
@@ -96,3 +96,35 @@ screenshots. Device screenshots should be captured before Phase 3 begins.
   representative Android target for final manual verification.
 - [~] Structural acceptance references are recorded; dedicated device
   screenshots remain deferred until an Android target is available.
+
+## Phase 1 preview foundation
+
+The independent React Native preview lives under `preview/` and uses React
+Native Web through Vite. It is intentionally not included in the Android Gradle
+project, so the Android app, release APK, and native fallback remain buildable
+without a Metro server or JavaScript runtime.
+
+Run the browser preview with:
+
+```bash
+npm run preview:rn
+```
+
+The Replit workflow named `React Native Preview` runs the same command on local
+port 5174, which is exposed as port 3000 by the current Replit preview mapping.
+Build and measure its production bundle with:
+
+```bash
+npm run measure:preview:rn
+```
+
+`preview/src/main.jsx` imports `design-system/novaboard/design-tokens.json`
+directly. Android resources remain the runtime mapping of that same token
+source; this phase does not introduce bridge contracts or move production
+screens. The representative surface covers toolbar actions, suggestions,
+keyboard rows, pressed-key feedback, and light/dark theme state.
+
+The initial production preview measurement is 276.26 kB JavaScript (87.95 kB
+gzip) plus 0.12 kB CSS (0.13 kB gzip), produced by Vite 7.1.5. The added
+runtime dependencies are React Native 0.81.4, React Native Web 0.20.0, React
+19.1.1, React DOM 19.1.1, Vite 7.1.5, and the Vite React plugin 5.0.2.

@@ -2,12 +2,10 @@
 
 ## Status
 
-**Phase 0 documented — device validation remains pending; implementation is
-gated at Phase 1.**
+**Phase 1 preview foundation complete — device validation remains pending.**
 
-Phase 0 documentation and baseline verification are allowed. No React Native
-dependencies, production UI migration, workflows, or release changes should be
-made until the Phase 0 gate is accepted.
+The preview foundation is intentionally independent from the Android/IME
+workflow. No production UI migration or native bridge changes are included.
 
 ## Current-state correction
 
@@ -86,31 +84,31 @@ Acceptance criteria:
 Deliverable: `docs/react-native-migration-baseline.md`. Device-only items remain
 partial until a representative Android target is available.
 
-### Phase 1: React Native preview foundation `[ ]`
+### Phase 1: React Native preview foundation `[x]`
 
 Add the smallest React Native surface that can be previewed independently from
 the keyboard service.
 
 Acceptance criteria:
 
-- [ ] React Native uses a supported version compatible with the repository's
+- [x] React Native uses a supported version compatible with the repository's
   JDK, Android Gradle Plugin, Android SDK, and Node toolchain.
-- [ ] The native Android app still builds without requiring a running React
+- [x] The native Android app still builds without requiring a running React
   Native development server for release or offline fallback behavior.
-- [ ] A direct preview command renders a representative component in the
+- [x] A direct preview command renders a representative component in the
   Replit preview workflow or an equivalent browser-accessible preview.
-- [ ] Preview and Android runtime share tokens for colors, typography, spacing,
+- [x] Preview and Android runtime share tokens for colors, typography, spacing,
   radii, and keyboard dimensions rather than screenshot-specific constants.
-- [ ] The preview workflow is documented and does not replace the app's
+- [x] The preview workflow is documented and does not replace the app's
   Android/IME workflow.
-- [ ] Dependency and bundle-size impact is measured before broad UI migration.
+- [x] Dependency and bundle-size impact is measured before broad UI migration.
 
 Verification:
 
-- [ ] React Native preview starts successfully.
-- [ ] Native debug APK assembles.
-- [ ] Existing JVM tests pass.
-- [ ] `git diff --check` passes.
+- [x] React Native preview starts successfully.
+- [x] Native debug APK assembles.
+- [x] Existing JVM tests pass.
+- [x] `git diff --check` passes.
 
 ### Phase 2: Shared contracts and native bridge seams `[ ]`
 
