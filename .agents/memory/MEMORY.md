@@ -29,3 +29,4 @@
 - [PR release secret boundary](pr-release-secret-boundary.md) — PR validation must never expose signing or publication credentials to PR-controlled code.
 - [APK certificate formatting](apk-certificate-formatting.md) — normalize colon-separated and unseparated SHA-256 output before comparing release identities.
 - [Android certificate verification](android-certificate-verification.md) — retain the release fingerprint check because manual GitHub installation does not replace Android signing identity verification.
+- [IME theme and cursor controls](ime-theme-and-cursor-controls.md) — AppCompat night mode needs an explicit IME context, and arrow touch-up must not resend the initial move.

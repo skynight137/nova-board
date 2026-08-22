@@ -70,6 +70,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     private lateinit var emojiPanelContainer: android.widget.FrameLayout
     private lateinit var overlayPanelContainer: android.widget.FrameLayout
     private lateinit var incognitoBanner: TextView
+    private var keyboardContext: Context? = null
 
     private lateinit var clipboardHistory: ClipboardHistoryManager
     private val suggestionEngine = SuggestionEngine()
@@ -110,6 +111,13 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             if (key == KeyboardPreferences.INCOGNITO_MODE && ::clipboardHistory.isInitialized) {
                 clipboardHistory.setCaptureEnabled(!KeyboardPreferences.isIncognitoMode(this))
             }
+            if (key == ThemeManager.KEY_THEME && ::keyboardView.isInitialized) {
+                keyboardView.post {
+                    keyboardContext = ThemeManager.keyboardContext(this)
+                    setInputView(onCreateInputView())
+                }
+                return@OnSharedPreferenceChangeListener
+            }
             if (::keyboardView.isInitialized) {
                 keyboardView.post { applyKeyboardPreferences() }
             }
@@ -142,7 +150,9 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     }
 
     override fun onCreateInputView(): View {
-        val root = LayoutInflater.from(this).inflate(R.layout.keyboard_container, null)
+        val themedContext = ThemeManager.keyboardContext(this)
+        keyboardContext = themedContext
+        val root = LayoutInflater.from(themedContext).inflate(R.layout.keyboard_container, null)
 
         keyboardView = root.findViewById(R.id.keyboardView)
         toolsBar = root.findViewById(R.id.toolsBar)
@@ -330,17 +340,18 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
 
     private fun showToolsMenu(anchor: View) {
         dismissToolsMenu()
+        val themedContext = keyboardContext ?: this
         val menu =
-            LinearLayout(this).apply {
+            LinearLayout(themedContext).apply {
                 orientation = LinearLayout.VERTICAL
-                setBackgroundColor(getColor(R.color.kb_key_bg_special))
+                setBackgroundColor(themedContext.getColor(R.color.kb_key_bg_special))
                 setPadding(8, 6, 8, 8)
             }
         menu.addView(
-            TextView(this).apply {
+            TextView(themedContext).apply {
                 text = getString(R.string.tool_menu_title)
                 textSize = 16f
-                setTextColor(getColor(R.color.kb_key_text))
+                setTextColor(themedContext.getColor(R.color.kb_key_text))
                 gravity = Gravity.CENTER
                 setPadding(8, 10, 8, 10)
                 setOnClickListener { dismissToolsMenu() }
@@ -351,7 +362,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             ),
         )
         val grid =
-            GridLayout(this).apply {
+            GridLayout(themedContext).apply {
                 columnCount = 4
                 alignmentMode = GridLayout.ALIGN_BOUNDS
                 useDefaultMargins = false
@@ -369,7 +380,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
             )
         items.forEach { item ->
             val cell =
-                LinearLayout(this).apply {
+                LinearLayout(themedContext).apply {
                     orientation = LinearLayout.VERTICAL
                     gravity = Gravity.CENTER
                     isFocusable = true
@@ -379,10 +390,10 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                     setPadding(4, 10, 4, 10)
                 }
             cell.addView(
-                TextView(this).apply {
+                TextView(themedContext).apply {
                     text = toolGlyph(item.id)
                     textSize = 25f
-                    setTextColor(getColor(R.color.kb_key_text))
+                    setTextColor(themedContext.getColor(R.color.kb_key_text))
                     gravity = Gravity.CENTER
                 },
                 LinearLayout.LayoutParams(
@@ -391,10 +402,10 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
                 ),
             )
             cell.addView(
-                TextView(this).apply {
+                TextView(themedContext).apply {
                     text = item.label
                     textSize = 13f
-                    setTextColor(getColor(R.color.kb_key_text))
+                    setTextColor(themedContext.getColor(R.color.kb_key_text))
                     gravity = Gravity.CENTER
                     maxLines = 1
                     ellipsize = android.text.TextUtils.TruncateAt.END
@@ -556,19 +567,21 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
     }
 
     private fun wireCursorButton(button: ImageButton, code: Int) {
-        button.setOnClickListener { sendDpad(code) }
+        var suppressClick = false
+        button.setOnClickListener {
+            if (!suppressClick) sendDpad(code)
+        }
         button.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 android.view.MotionEvent.ACTION_DOWN -> {
+                    suppressClick = true
                     startCursorRepeat(code)
                     true
                 }
                 android.view.MotionEvent.ACTION_UP,
                 android.view.MotionEvent.ACTION_CANCEL -> {
                     stopCursorRepeat()
-                    if (event.actionMasked == android.view.MotionEvent.ACTION_UP) {
-                        button.performClick()
-                    }
+                    suppressClick = false
                     true
                 }
                 else -> true
