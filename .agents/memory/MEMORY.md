@@ -4,6 +4,7 @@
 - [Workflow entrypoint names](workflow-entrypoint-names.md) — keep renamed workflow targets and documented compatibility commands synchronized.
 - [Diagnostic metadata boundary](debug-log-metadata.md) — Android platform stubs can be null in JVM tests; normalize bounded fields and redact manifest URL credentials before export.
 - [Release manifest integrity](release-manifest-integrity.md) — validate release JSON before semantic-release because backmerges can leave conflict markers that fail after the APK build.
+- [Release notes preset compatibility](release-notes-preset-compatibility.md) — use the bundled notes-generator default; the explicit conventionalcommits preset can drop all commit groups.
 - [Release fixture parsing](release-fixture-parsing.md) — keep synthetic Gradle project names at column 1 because release preparation parses exact settings lines.
 - [Strict JSON import fields](strict-json-import-fields.md) — reject malformed present values; optional JSON helpers must not silently replace them with defaults.
 - [Android instrumentation service seams](android-instrumentation-service-seams.md) — use package-visible state seams; framework lifecycle callbacks may be protected.

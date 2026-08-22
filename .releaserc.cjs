@@ -24,12 +24,7 @@ module.exports = {
         releaseRules: [{ type: "build", scope: "Needs bump", release: "patch" }],
       },
     ],
-    [
-      "@semantic-release/release-notes-generator",
-      {
-        preset: "conventionalcommits",
-      },
-    ],
+    "@semantic-release/release-notes-generator",
     [
       "@semantic-release/changelog",
       {
