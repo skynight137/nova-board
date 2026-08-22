@@ -15,6 +15,7 @@ JAVA_HOME_DIR="$TOOLSCHAIN/java"
 GRADLE_USER_HOME="$WORKSPACE/.gradle"   # Gradle cache dir — binary comes from gradlew
 ENV_FILE="$TOOLSCHAIN/env.sh"
 SKILL_ROOT="$WORKSPACE/.agents/skills"
+OPENCODE_BIN_DIR="${HOME:-$WORKSPACE}/.opencode/bin"
 INSTALL_ANDROID_TOOLS=false
 INSTALL_OPENCODE=false
 SKILL_REPOS=()
@@ -71,10 +72,10 @@ Examples:
   bash scripts/setup.sh --oc
 
 After installing Android tools, load the generated environment:
-  source /home/runner/workspace/.local/env.sh
+  source .local/env.sh
 
 For OpenCode, ensure its local binary directory is on PATH:
-  PATH=/home/runner/.opencode/bin:$PATH
+  PATH="$HOME/.opencode/bin:$PATH"
 USAGE
 }
 
@@ -133,7 +134,8 @@ install_skill_repo() {
     source="mattpocock/skills"
   fi
   local owner="${source%%/*}"
-  local stage="$SKILL_STAGE/$owner"
+  local repository_name="${source##*/}"
+  local stage="$SKILL_STAGE/$owner/$repository_name"
 
   step "Installing skills from $source"
   mkdir -p "$stage"
@@ -148,7 +150,8 @@ install_skill_repo() {
   assert_non_empty_tree "$stage/.agents/skills" "$source installer"
 
   mkdir -p "$SKILL_ROOT/$owner"
-  rsync -a --delete "$stage/.agents/skills/" "$SKILL_ROOT/$owner/"
+  # Do not delete here: several repositories from one owner may be selected.
+  rsync -a "$stage/.agents/skills/" "$SKILL_ROOT/$owner/"
   assert_non_empty_tree "$SKILL_ROOT/$owner" "$source synchronization"
   ok "Synchronized $source → .agents/skills/$owner"
 }
@@ -182,12 +185,24 @@ accept_licenses() {
 
   # Also formally accept via sdkmanager in case hashes differ for this SDK version
   echo "  Running sdkmanager --licenses (auto-accepting all)..."
+  local log_file
+  local -a pipeline_status
+  log_file="$(mktemp)"
+  set +e
   yes | ANDROID_HOME="$SDK" \
         JAVA_HOME="$JAVA_HOME_DIR" \
         JAVA_TOOL_OPTIONS="-XX:-UsePerfData" \
         "$SDK/cmdline-tools/bin/sdkmanager" \
-          --sdk_root="$SDK" --licenses 2>&1 \
-        | grep -v "^$" | grep -v "^-" | grep -v "^Terms" | tail -5 || true
+          --sdk_root="$SDK" --licenses >"$log_file" 2>&1
+  pipeline_status=("${PIPESTATUS[@]}")
+  set -e
+  if (( pipeline_status[1] != 0 )); then
+    cat "$log_file" >&2
+    rm -f "$log_file"
+    die "sdkmanager license acceptance failed"
+  fi
+  grep -v "^$" "$log_file" | grep -v "^-" | grep -v "^Terms" | tail -5 || true
+  rm -f "$log_file"
   ok "Licenses accepted"
 }
 
@@ -215,6 +230,10 @@ install_cmdline_tools() {
 install_java() {
   if [[ -x "$JAVA_HOME_DIR/bin/java" ]]; then
     INSTALLED_JAVA=$("$JAVA_HOME_DIR/bin/java" -version 2>&1 | head -1)
+    INSTALLED_JAVA_MAJOR="$("$JAVA_HOME_DIR/bin/java" -version 2>&1 |
+      sed -n 's/.*version "\([0-9][0-9]*\).*/\1/p')"
+    [[ "$INSTALLED_JAVA_MAJOR" == "$JAVA_MAJOR" ]] ||
+      die "Java at $JAVA_HOME_DIR is major version ${INSTALLED_JAVA_MAJOR:-unknown}; expected $JAVA_MAJOR"
     skip "Java — $INSTALLED_JAVA"
     return
   fi
@@ -338,10 +357,10 @@ EOF
 install_opencode() {
   step "Installing OpenCode"
   need_cmd curl
-  PATH="/home/runner/.opencode/bin:$PATH" curl -fsSL https://opencode.ai/install | bash
-  [[ -x "/home/runner/.opencode/bin/opencode" ]] ||
-    die "OpenCode installation did not create /home/runner/.opencode/bin/opencode"
-  ok "OpenCode installed → /home/runner/.opencode/bin/opencode"
+  PATH="$OPENCODE_BIN_DIR:$PATH" curl -fsSL https://opencode.ai/install | bash
+  [[ -x "$OPENCODE_BIN_DIR/opencode" ]] ||
+    die "OpenCode installation did not create $OPENCODE_BIN_DIR/opencode"
+  ok "OpenCode installed → $OPENCODE_BIN_DIR/opencode"
 }
 
 main() {
@@ -366,7 +385,7 @@ cat <<SUMMARY
 
   Selected options completed.
   Android tools: source $ENV_FILE
-  OpenCode:      export PATH=/home/runner/.opencode/bin:\$PATH
+  OpenCode:      export PATH=$OPENCODE_BIN_DIR:\$PATH
 
   To generate or replace the release keystore
   (ANDROID_MODULE/keystore.jks; defaults to app/keystore.jks)
