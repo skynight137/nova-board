@@ -1,3 +1,16 @@
+# [1.1.0-dev.6](https://github.com/skynight137/nova-board/compare/v1.1.0-dev.5...v1.1.0-dev.6) (2026-08-22)
+
+
+### Bug Fixes
+
+* **gif:** avoid rich content on unsupported editors ([956cd26](https://github.com/skynight137/nova-board/commit/956cd26f15b9ecdbadfc5f9131cdf591b403e4e7))
+* **gif:** close panel workers and grant content access ([1ab0069](https://github.com/skynight137/nova-board/commit/1ab006945cc7e823b2d955b726270e32503ac6f8))
+* **gif:** match clipboard panel layout ([144efb6](https://github.com/skynight137/nova-board/commit/144efb64da2a097c7bbe34620f5c9c8b402303cc))
+* **gif:** preserve active share attachments ([236169f](https://github.com/skynight137/nova-board/commit/236169ffade32893a08521651ec2fb9edd4db1ac))
+* **gif:** route prompt editors to direct links ([f1fba0f](https://github.com/skynight137/nova-board/commit/f1fba0f82b828a4b856701865efc0f02a3ac78f4))
+* **ime:** reset overlays on new input view ([957b36a](https://github.com/skynight137/nova-board/commit/957b36a104d9a8f29f6f16bd265f54708c59680d))
+* **release:** remove obsolete update manifest ([ed2f3e3](https://github.com/skynight137/nova-board/commit/ed2f3e3a0d14d82308df7732ee43a3cce9bee904))
+
 # [1.1.0-dev.5](https://github.com/skynight137/nova-board/compare/v1.1.0-dev.4...v1.1.0-dev.5) (2026-08-22)
 
 
