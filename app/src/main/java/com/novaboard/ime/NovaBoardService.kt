@@ -203,12 +203,7 @@ class NovaBoardService : InputMethodService(), KeyboardView.OnKeyListener {
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
-        stopCursorRepeat()
-        if (::keyboardView.isInitialized) keyboardView.cancelInteractions()
-        inputSession++
-        selectionStart = -1
-        selectionEnd = -1
-        resetTypingState()
+        resetInputSession()
         applyKeyboardPreferences()
         keyboardView.setShiftState(false)
         scheduleSuggestionsRefresh()
